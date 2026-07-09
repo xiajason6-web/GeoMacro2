@@ -30,10 +30,29 @@ RAW_DIR = REPO_ROOT / "data" / "raw" / "fx"
 USER_AGENT = "ChinaTechFlowsTracker/0.1 (research; contact: jx3@williams.edu)"
 
 SINCE = "2023-07"
-API_URL = (
-    "https://data-api.ecb.europa.eu/service/data/EXR/M.CNY.EUR.SP00.A"
-    f"?startPeriod={SINCE}&format=jsondata"
-)
+
+# Two monthly-average series: CNY per EUR (for Eurostat data) and USD per EUR
+# (to cross USD trade values into CNY: cny_per_usd = cny_per_eur / usd_per_eur).
+SERIES = [
+    {
+        "metric": "fx_cny_per_eur_monthly_avg",
+        "unit": "CNY_per_EUR",
+        "title": "ECB CNY per EUR monthly average",
+        "url": (
+            "https://data-api.ecb.europa.eu/service/data/EXR/M.CNY.EUR.SP00.A"
+            f"?startPeriod={SINCE}&format=jsondata"
+        ),
+    },
+    {
+        "metric": "fx_usd_per_eur_monthly_avg",
+        "unit": "USD_per_EUR",
+        "title": "ECB USD per EUR monthly average",
+        "url": (
+            "https://data-api.ecb.europa.eu/service/data/EXR/M.USD.EUR.SP00.A"
+            f"?startPeriod={SINCE}&format=jsondata"
+        ),
+    },
+]
 
 SOURCE = {
     "name": "ECB reference rates",
@@ -62,6 +81,56 @@ def parse_ecb_response(payload):
     ]
 
 
+def collect_series(conn, source_id, entity_id, series):
+    resp = requests.get(series["url"], headers={"User-Agent": USER_AGENT}, timeout=120)
+    resp.raise_for_status()
+    sha = hashlib.sha256(resp.content).hexdigest()
+    existing = conn.execute(
+        "SELECT id FROM documents WHERE sha256 = ?", (sha,)
+    ).fetchone()
+    if existing:
+        print(f"{series['metric']}: unchanged since last fetch")
+        return
+
+    RAW_DIR.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d")
+    slug = series["metric"].replace("fx_", "").replace("_monthly_avg", "")
+    raw_path = RAW_DIR / f"{stamp}_ecb_{slug}.json"
+    if raw_path.exists():
+        raw_path = raw_path.with_name(f"{raw_path.stem}_{sha[:8]}.json")
+    raw_path.write_bytes(resp.content)
+    retrieved_at = datetime.datetime.now(datetime.timezone.utc).strftime(
+        "%Y-%m-%dT%H:%M:%SZ"
+    )
+    doc_id = conn.execute(
+        "INSERT INTO documents"
+        " (source_id, url, retrieved_at, raw_path, sha256, doc_date, title, language)"
+        " VALUES (?, ?, ?, ?, ?, NULL, ?, 'en')",
+        (
+            source_id,
+            series["url"],
+            retrieved_at,
+            str(raw_path.relative_to(REPO_ROOT)),
+            sha,
+            series["title"],
+        ),
+    ).lastrowid
+
+    rows = parse_ecb_response(json.loads(resp.content))
+    for period, rate in rows:
+        conn.execute(
+            "INSERT OR IGNORE INTO metrics"
+            " (entity_id, metric_name, period, value, unit, currency, document_id,"
+            "  extraction_confidence, notes)"
+            " VALUES (?, ?, ?, ?, ?, NULL, ?, 1.0, 'ECB reference rate, monthly average')",
+            (entity_id, series["metric"], period, rate, series["unit"], doc_id),
+        )
+    print(
+        f"{series['metric']}: {len(rows)} months"
+        f" ({rows[0][0]} .. {rows[-1][0]}), document id={doc_id}"
+    )
+
+
 def main():
     conn = connect()
     conn.execute(
@@ -72,54 +141,16 @@ def main():
     source_id = conn.execute(
         "SELECT id FROM sources WHERE name = ?", (SOURCE["name"],)
     ).fetchone()[0]
-    entity_id = conn.execute(
+    entity_row = conn.execute(
         "SELECT id FROM entities WHERE name_en = 'China'"
     ).fetchone()
-    if entity_id is None:
+    if entity_row is None:
         print("China entity missing — run collectors/mirror_trade.py first")
         return 1
-    entity_id = entity_id[0]
 
-    resp = requests.get(API_URL, headers={"User-Agent": USER_AGENT}, timeout=120)
-    resp.raise_for_status()
-    sha = hashlib.sha256(resp.content).hexdigest()
-    existing = conn.execute(
-        "SELECT id FROM documents WHERE sha256 = ?", (sha,)
-    ).fetchone()
-    if existing:
-        print("unchanged since last fetch")
-        conn.close()
-        return 0
-
-    RAW_DIR.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d")
-    raw_path = RAW_DIR / f"{stamp}_ecb_cny_eur_monthly.json"
-    if raw_path.exists():
-        raw_path = raw_path.with_name(f"{raw_path.stem}_{sha[:8]}.json")
-    raw_path.write_bytes(resp.content)
-    retrieved_at = datetime.datetime.now(datetime.timezone.utc).strftime(
-        "%Y-%m-%dT%H:%M:%SZ"
-    )
-    cur = conn.execute(
-        "INSERT INTO documents"
-        " (source_id, url, retrieved_at, raw_path, sha256, doc_date, title, language)"
-        " VALUES (?, ?, ?, ?, ?, NULL, 'ECB CNY per EUR monthly average', 'en')",
-        (source_id, API_URL, retrieved_at, str(raw_path.relative_to(REPO_ROOT)), sha),
-    )
-    doc_id = cur.lastrowid
-
-    rows = parse_ecb_response(json.loads(resp.content))
-    for period, rate in rows:
-        conn.execute(
-            "INSERT OR IGNORE INTO metrics"
-            " (entity_id, metric_name, period, value, unit, currency, document_id,"
-            "  extraction_confidence, notes)"
-            " VALUES (?, 'fx_cny_per_eur_monthly_avg', ?, ?, 'CNY_per_EUR', NULL, ?, 1.0,"
-            "  'ECB reference rate, monthly average')",
-            (entity_id, period, rate, doc_id),
-        )
+    for series in SERIES:
+        collect_series(conn, source_id, entity_row[0], series)
     conn.commit()
-    print(f"{len(rows)} months ({rows[0][0]} .. {rows[-1][0]}), document id={doc_id}")
     conn.close()
     return 0
 
