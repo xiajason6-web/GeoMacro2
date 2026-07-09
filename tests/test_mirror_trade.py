@@ -1,0 +1,94 @@
+"""Phase 1 fixture tests for the mirror-trade collector.
+
+Fixture: tests/fixtures/eurostat_nl_hs8486.json is a real Eurostat Comext API
+response (Netherlands exports of HS 8486 to China, monthly, retrieved
+2026-07-09). Known-good values below were read from that response.
+"""
+
+import json
+import sqlite3
+import sys
+from pathlib import Path
+
+import pytest
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "collectors"))
+
+import mirror_trade  # noqa: E402
+
+FIXTURE = Path(__file__).parent / "fixtures" / "eurostat_nl_hs8486.json"
+
+
+@pytest.fixture
+def payload():
+    return json.loads(FIXTURE.read_text())
+
+
+@pytest.fixture
+def db():
+    conn = sqlite3.connect(":memory:")
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.executescript((ROOT / "db" / "schema.sql").read_text())
+    yield conn
+    conn.close()
+
+
+# ---- parsing ----------------------------------------------------------------
+
+def test_parse_returns_all_populated_months(payload):
+    rows = mirror_trade.parse_eurostat_response(payload)
+    assert len(rows) == 34
+    assert rows[0] == ("2023-07", 451701097.0)   # known-good first month
+    assert rows[-1] == ("2026-04", 61123357.0)   # known-good last month
+
+
+def test_parse_skips_future_months_without_data(payload):
+    # The API's time index includes 2026-05..2026-12 with no values yet;
+    # inventing zeros for them would corrupt every downstream series.
+    rows = mirror_trade.parse_eurostat_response(payload)
+    periods = [p for p, _ in rows]
+    assert "2026-05" not in periods
+    assert "2026-12" not in periods
+    assert periods == sorted(periods)  # chronological
+
+
+# ---- storage ----------------------------------------------------------------
+
+def test_ingest_raw_dedupes_identical_bytes(db, tmp_path, monkeypatch):
+    monkeypatch.setattr(mirror_trade, "RAW_DIR", tmp_path / "raw")
+    monkeypatch.setattr(mirror_trade, "REPO_ROOT", tmp_path)
+    source_id = mirror_trade.ensure_source(db, mirror_trade.EUROSTAT_SOURCE)
+    content = FIXTURE.read_bytes()
+    doc1, new1 = mirror_trade.ingest_raw(db, source_id, "https://x", content, "t")
+    doc2, new2 = mirror_trade.ingest_raw(db, source_id, "https://x", content, "t")
+    assert new1 is True
+    assert new2 is False
+    assert doc1 == doc2  # same bytes -> same document row
+
+
+def test_write_metrics_rows_link_to_document(db, tmp_path, monkeypatch, payload):
+    monkeypatch.setattr(mirror_trade, "RAW_DIR", tmp_path / "raw")
+    monkeypatch.setattr(mirror_trade, "REPO_ROOT", tmp_path)
+    source_id = mirror_trade.ensure_source(db, mirror_trade.EUROSTAT_SOURCE)
+    entity_id = mirror_trade.ensure_china_entity(db)
+    doc_id, _ = mirror_trade.ingest_raw(
+        db, source_id, "https://x", FIXTURE.read_bytes(), "t"
+    )
+    rows = mirror_trade.parse_eurostat_response(payload)
+    mirror_trade.write_metrics(
+        db, entity_id, "mirror_exports_nl_hs8486_eur", rows, "EUR", "EUR", doc_id, "note"
+    )
+    count, = db.execute("SELECT COUNT(*) FROM metrics").fetchone()
+    assert count == 34
+    # every row is traceable to the raw document
+    orphans, = db.execute(
+        "SELECT COUNT(*) FROM metrics WHERE document_id != ?", (doc_id,)
+    ).fetchone()
+    assert orphans == 0
+    # re-writing the same document's rows is a no-op (UNIQUE guard)
+    mirror_trade.write_metrics(
+        db, entity_id, "mirror_exports_nl_hs8486_eur", rows, "EUR", "EUR", doc_id, "note"
+    )
+    count2, = db.execute("SELECT COUNT(*) FROM metrics").fetchone()
+    assert count2 == 34
