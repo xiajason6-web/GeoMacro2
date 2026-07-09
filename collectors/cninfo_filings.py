@@ -46,6 +46,20 @@ PERIODS = [
     ("2026Q1", "category_yjdbg_szsh", "2026-04-01~2026-06-30", "一季度报告"),
 ]
 
+# Half-year and annual report SUMMARIES (摘要) — short documents that carry
+# the headline revenue table. Full half-year/annual reports are hundreds of
+# pages and are deliberately not collected. Q2 and Q4 are later DERIVED from
+# these by subtraction (analysis/derive_quarters.py).
+# (period tag, sort key for first_period gate, category, window, title keyword)
+SUMMARY_PERIODS = [
+    ("2023H1", "2023Q2", "category_bndbg_szsh", "2023-07-01~2023-09-30", "半年度报告摘要"),
+    ("2023",   "2023Q4", "category_ndbg_szsh",  "2024-01-01~2024-06-30", "年度报告摘要"),
+    ("2024H1", "2024Q2", "category_bndbg_szsh", "2024-07-01~2024-09-30", "半年度报告摘要"),
+    ("2024",   "2024Q4", "category_ndbg_szsh",  "2025-01-01~2025-06-30", "年度报告摘要"),
+    ("2025H1", "2025Q2", "category_bndbg_szsh", "2025-07-01~2025-09-30", "半年度报告摘要"),
+    ("2025",   "2025Q4", "category_ndbg_szsh",  "2026-01-01~2026-06-30", "年度报告摘要"),
+]
+
 SOURCE = {
     "name": "cninfo",
     "url": "https://www.cninfo.com.cn",
@@ -132,9 +146,16 @@ def find_report(session, code, column, org_id, category, se_date, keyword):
         timeout=30,
     )
     resp.raise_for_status()
+    want_summary = "摘要" in keyword
     for ann in resp.json().get("announcements") or []:
         title = ann.get("announcementTitle", "")
-        if "摘要" in title or "英文" in title:
+        if "英文" in title:
+            continue
+        if not want_summary and "摘要" in title:
+            continue
+        # '半年度报告摘要' contains '年度报告摘要' as a substring — when we want
+        # the ANNUAL summary, explicitly reject half-year titles.
+        if keyword == "年度报告摘要" and "半年度" in title:
             continue
         if keyword in title:
             return ann
@@ -182,16 +203,24 @@ def main():
     session.headers["User-Agent"] = USER_AGENT
     org_ids = {}
 
+    all_periods = [(tag, tag, cat, se, kw) for tag, cat, se, kw in PERIODS] + [
+        (tag, sort_key, cat, se, kw) for tag, sort_key, cat, se, kw in SUMMARY_PERIODS
+    ]
     for company in COMPANIES:
         ensure_entity(conn, company)
-        for period_tag, category, se_date, keyword in PERIODS:
-            if period_tag < company["first_period"]:
+        for period_tag, sort_key, category, se_date, keyword in all_periods:
+            if sort_key < company["first_period"]:
                 continue
             year = period_tag[:4]
             # Cache: skip if we already hold this company/period filing.
+            # Annual summaries need the doubled 年 ('2023年年度报告摘要') so the
+            # pattern can't accidentally match a half-year summary title.
+            if keyword == "年度报告摘要":
+                pattern = f"%{company['name_zh']}%{year}年年度报告摘要%"
+            else:
+                pattern = f"%{company['name_zh']}%{year}年%{keyword}%"
             have = conn.execute(
-                "SELECT 1 FROM documents WHERE title LIKE ?",
-                (f"%{company['name_zh']}%{year}年%{keyword}%",),
+                "SELECT 1 FROM documents WHERE title LIKE ?", (pattern,)
             ).fetchone()
             if have:
                 print(f"{company['name_en']} {period_tag}: already have")

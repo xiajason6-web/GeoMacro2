@@ -1,13 +1,14 @@
 quarter,imports_cny,n_import_series,domestic_cny,n_companies,ratio,coverage
-2023Q1,,,7016741780.88,6.0,,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
-2023Q3,52377341051.14557,3.0,10632052623.74,6.0,0.16873758028206115,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
-2023Q4,57053802172.20981,3.0,,,,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
-2024Q1,54100562610.2414,3.0,9781825547.83,6.0,0.1531224149545838,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
-2024Q2,57078489209.78248,3.0,,,,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
-2024Q3,58916450450.921,3.0,6009198115.5,5.0,0.09255507258202281,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
-2024Q4,52519936743.97775,3.0,,,,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
-2025Q1,42889921922.58271,3.0,13581691242.43,6.0,0.2405047506389389,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
-2025Q2,46271768415.76579,3.0,,,,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
-2025Q3,50959294935.23535,3.0,19934239518.42,6.0,0.28118557879846495,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
-2025Q4,50987179469.25096,3.0,,,,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
-2026Q1,28896584948.69211,3.0,17358726995.82,6.0,0.37528072487422715,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
+2023Q1,,,7016741780.88,6,,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
+2023Q2,,,8479891324.349999,6,,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
+2023Q3,52377341051.14557,3.0,10632052623.74,6,0.16873758028206115,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
+2023Q4,57053802172.20981,3.0,13032563687.25,6,0.18595005644012783,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
+2024Q1,54100562610.2414,3.0,9781825547.83,6,0.1531224149545838,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
+2024Q2,57078489209.78248,3.0,11861706854.550001,6,0.17205792167288136,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
+2024Q3,58916450450.921,3.0,14027061870.389997,6,0.19230033520461404,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
+2024Q4,52519936743.97775,3.0,18113668792.449997,6,0.2564454788182697,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
+2025Q1,42889921922.58271,3.0,13581691242.43,6,0.2405047506389389,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
+2025Q2,46271768415.76579,3.0,15398605189.2,6,0.24969210155652571,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
+2025Q3,50959294935.23535,3.0,19934239518.42,6,0.28118557879846495,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
+2025Q4,50987179469.25096,3.0,22725195848.010002,6,0.30829553043433844,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only
+2026Q1,28896584948.69211,3.0,17358726995.82,6,0.37528072487422715,imports: EU27 + Japan + US (major exporters covered; KR/TW/SG not yet); revenue: listed cos only

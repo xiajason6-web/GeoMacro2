@@ -108,6 +108,53 @@ China,fx_usd_per_eur_monthly_avg,2026-03,1.1558318181818181,USD_per_EUR,,1.0,htt
 China,fx_usd_per_eur_monthly_avg,2026-04,1.1706400000000001,USD_per_EUR,,1.0,https://data-api.ecb.europa.eu/service/data/EXR/M.USD.EUR.SP00.A?startPeriod=2023-07&format=jsondata,2026-07-09T17:06:49Z
 China,fx_usd_per_eur_monthly_avg,2026-05,1.16732,USD_per_EUR,,1.0,https://data-api.ecb.europa.eu/service/data/EXR/M.USD.EUR.SP00.A?startPeriod=2023-07&format=jsondata,2026-07-09T17:06:49Z
 China,fx_usd_per_eur_monthly_avg,2026-06,1.1518,USD_per_EUR,,1.0,https://data-api.ecb.europa.eu/service/data/EXR/M.USD.EUR.SP00.A?startPeriod=2023-07&format=jsondata,2026-07-09T17:06:49Z
+Naura,fy_revenue_cny,2023,22079458092.37,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-04-30/1219908929.PDF,2026-07-09T17:54:58Z
+AMEC,fy_revenue_cny,2023,6263513581.37,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-03-19/1219329916.PDF,2026-07-09T17:55:18Z
+ACM Shanghai,fy_revenue_cny,2023,3888342742.05,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-02-29/1219209593.PDF,2026-07-09T17:55:45Z
+Piotech,fy_revenue_cny,2023,2704974035.48,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-04-30/1219919656.PDF,2026-07-09T17:56:05Z
+Kingsemi,fy_revenue_cny,2023,1716969907.58,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-04-27/1219882819.PDF,2026-07-09T17:56:31Z
+Hwatsing,fy_revenue_cny,2023,2507991057.37,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-04-27/1219884009.PDF,2026-07-09T17:56:54Z
+SMIC,fy_revenue_cny,2023,45250425000.0,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-03-29/1219447110.PDF,2026-07-09T17:57:18Z
+Hua Hong,fy_revenue_cny,2023,16231874037.72,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-03-29/1219453557.PDF,2026-07-09T17:57:37Z
+Naura,fy_revenue_cny,2024,29838069162.26,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-04-26/1223309251.PDF,2026-07-09T17:55:04Z
+AMEC,fy_revenue_cny,2024,9065165097.69,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-04-18/1223127190.PDF,2026-07-09T17:55:30Z
+ACM Shanghai,fy_revenue_cny,2024,5617740375.66,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-02-27/1222651574.PDF,2026-07-09T17:55:51Z
+Piotech,fy_revenue_cny,2024,4103453853.41,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-04-25/1223286842.PDF,2026-07-09T17:56:12Z
+Kingsemi,fy_revenue_cny,2024,1753605965.73,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-04-26/1223330359.PDF,2026-07-09T17:56:39Z
+Hwatsing,fy_revenue_cny,2024,3406228610.47,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-04-29/1223387637.PDF,2026-07-09T17:57:01Z
+SMIC,fy_revenue_cny,2024,57795570000.0,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-03-28/1222924319.PDF,2026-07-09T17:57:26Z
+Hua Hong,fy_revenue_cny,2024,14388307712.89,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-03-28/1222929545.PDF,2026-07-09T17:57:48Z
+Naura,fy_revenue_cny,2025,39353112419.78,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2026-04-18/1225122917.PDF,2026-07-09T17:55:09Z
+AMEC,fy_revenue_cny,2025,12384638268.11,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2026-03-31/1225062430.PDF,2026-07-09T17:55:38Z
+ACM Shanghai,fy_revenue_cny,2025,6786170247.76,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2026-02-27/1224986457.PDF,2026-07-09T17:55:56Z
+Piotech,fy_revenue_cny,2025,6519094874.63,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2026-04-28/1225222254.PDF,2026-07-09T17:56:23Z
+Kingsemi,fy_revenue_cny,2025,1948488261.73,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2026-04-18/1225120168.PDF,2026-07-09T17:56:46Z
+Hwatsing,fy_revenue_cny,2025,4648227726.05,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2026-04-23/1225156991.PDF,2026-07-09T17:57:08Z
+SMIC,fy_revenue_cny,2025,67323192000.0,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2026-03-27/1225037116.PDF,2026-07-09T17:57:30Z
+Hua Hong,fy_revenue_cny,2025,17291450660.78,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2026-03-27/1225039260.PDF,2026-07-09T17:57:57Z
+Naura,h1_revenue_cny,2023H1,8426590087.53,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2023-08-30/1217693134.PDF,2026-07-09T17:54:55Z
+AMEC,h1_revenue_cny,2023H1,2526501011.91,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2023-08-25/1217637235.PDF,2026-07-09T17:55:12Z
+ACM Shanghai,h1_revenue_cny,2023H1,1609805866.85,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2023-08-05/1217466939.PDF,2026-07-09T17:55:42Z
+Piotech,h1_revenue_cny,2023H1,1003709264.02,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2023-08-29/1217679927.PDF,2026-07-09T17:55:59Z
+Kingsemi,h1_revenue_cny,2023H1,695601945.85,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2023-08-29/1217679919.PDF,2026-07-09T17:56:27Z
+Hwatsing,h1_revenue_cny,2023H1,1234424929.07,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2023-08-29/1217677169.PDF,2026-07-09T17:56:50Z
+SMIC,h1_revenue_cny,2023H1,21317790000.0,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2023-08-26/1217654783.PDF,2026-07-09T17:57:13Z
+Naura,h1_revenue_cny,2024H1,12334907204.28,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-08-28/1221004518.PDF,2026-07-09T17:55:01Z
+AMEC,h1_revenue_cny,2024H1,3447712750.84,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-08-23/1220950835.PDF,2026-07-09T17:55:23Z
+ACM Shanghai,h1_revenue_cny,2024H1,2403896730.5,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-08-08/1220815772.PDF,2026-07-09T17:55:48Z
+Piotech,h1_revenue_cny,2024H1,1266890685.67,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-08-28/1221001360.PDF,2026-07-09T17:56:08Z
+Kingsemi,h1_revenue_cny,2024H1,693606110.41,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-08-30/1221055073.PDF,2026-07-09T17:56:34Z
+Hwatsing,h1_revenue_cny,2024H1,1496518920.68,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-08-17/1220891923.PDF,2026-07-09T17:56:56Z
+SMIC,h1_revenue_cny,2024H1,26269310000.0,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-08-30/1221050803.PDF,2026-07-09T17:57:21Z
+Hua Hong,h1_revenue_cny,2024H1,6732158761.1,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-08-30/1221057356.PDF,2026-07-09T17:57:43Z
+Naura,h1_revenue_cny,2025H1,16141546184.74,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-08-29/1224615657.PDF,2026-07-09T17:55:07Z
+AMEC,h1_revenue_cny,2025H1,4960601270.04,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-08-29/1224606010.PDF,2026-07-09T17:55:33Z
+ACM Shanghai,h1_revenue_cny,2025H1,3265291841.84,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-08-07/1224414818.PDF,2026-07-09T17:55:53Z
+Piotech,h1_revenue_cny,2025H1,1954146173.65,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-08-26/1224571854.PDF,2026-07-09T17:56:16Z
+Kingsemi,h1_revenue_cny,2025H1,709118885.62,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-08-29/1224610437.PDF,2026-07-09T17:56:42Z
+Hwatsing,h1_revenue_cny,2025H1,1949592075.74,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-08-29/1224611389.PDF,2026-07-09T17:57:03Z
+SMIC,h1_revenue_cny,2025H1,32348049000.0,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-08-29/1224608544.PDF,2026-07-09T17:57:28Z
+Hua Hong,h1_revenue_cny,2025H1,8017656907.53,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-08-29/1224609532.PDF,2026-07-09T17:57:54Z
 China,mirror_exports_de_hs8486_eur,2023-07,55840139.0,EUR,EUR,1.0,https://ec.europa.eu/eurostat/api/comext/dissemination/statistics/1.0/data/DS-045409?format=JSON&freq=M&reporter=DE&partner=CN&product=8486&flow=2&indicators=VALUE_IN_EUROS&sinceTimePeriod=2023-07,2026-07-09T16:19:11Z
 China,mirror_exports_de_hs8486_eur,2023-08,54428352.0,EUR,EUR,1.0,https://ec.europa.eu/eurostat/api/comext/dissemination/statistics/1.0/data/DS-045409?format=JSON&freq=M&reporter=DE&partner=CN&product=8486&flow=2&indicators=VALUE_IN_EUROS&sinceTimePeriod=2023-07,2026-07-09T16:19:11Z
 China,mirror_exports_de_hs8486_eur,2023-09,63985070.0,EUR,EUR,1.0,https://ec.europa.eu/eurostat/api/comext/dissemination/statistics/1.0/data/DS-045409?format=JSON&freq=M&reporter=DE&partner=CN&product=8486&flow=2&indicators=VALUE_IN_EUROS&sinceTimePeriod=2023-07,2026-07-09T16:19:11Z
@@ -483,6 +530,13 @@ Piotech,quarterly_revenue_cny,2023Q1,402375404.96,CNY,CNY,0.98,https://static.cn
 Kingsemi,quarterly_revenue_cny,2023Q1,288217307.17,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2023-04-26/1216581909.PDF,2026-07-09T16:59:26Z
 Hwatsing,quarterly_revenue_cny,2023Q1,616162771.86,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2023-04-25/1216564923.PDF,2026-07-09T16:59:48Z
 SMIC,quarterly_revenue_cny,2023Q1,10208898000.0,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2023-05-12/1216801173.PDF,2026-07-09T17:00:05Z
+Naura,quarterly_revenue_cny,2023Q2,4555457133.74,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2023-08-30/1217693134.PDF,2026-07-09T17:54:55Z
+AMEC,quarterly_revenue_cny,2023Q2,1303432609.1599998,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2023-08-25/1217637235.PDF,2026-07-09T17:55:12Z
+ACM Shanghai,quarterly_revenue_cny,2023Q2,994020926.4999999,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2023-08-05/1217466939.PDF,2026-07-09T17:55:42Z
+Piotech,quarterly_revenue_cny,2023Q2,601333859.06,CNY,CNY,0.98,https://static.cninfo.com.cn/finalpage/2023-08-29/1217679927.PDF,2026-07-09T17:55:59Z
+Kingsemi,quarterly_revenue_cny,2023Q2,407384638.68,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2023-08-29/1217679919.PDF,2026-07-09T17:56:27Z
+Hwatsing,quarterly_revenue_cny,2023Q2,618262157.2099999,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2023-08-29/1217677169.PDF,2026-07-09T17:56:50Z
+SMIC,quarterly_revenue_cny,2023Q2,11108892000.0,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2023-08-26/1217654783.PDF,2026-07-09T17:57:13Z
 Naura,quarterly_revenue_cny,2023Q3,6161772205.34,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2023-10-31/1218199156.PDF,2026-07-09T16:58:05Z
 AMEC,quarterly_revenue_cny,2023Q3,1514765467.27,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2023-10-27/1218169256.PDF,2026-07-09T16:58:28Z
 ACM Shanghai,quarterly_revenue_cny,2023Q3,1139989834.05,CNY,CNY,0.92,https://static.cninfo.com.cn/finalpage/2023-10-28/1218187610.PDF,2026-07-09T16:58:57Z
@@ -491,6 +545,13 @@ Kingsemi,quarterly_revenue_cny,2023Q3,510879088.06,CNY,CNY,0.99,https://static.c
 Hwatsing,quarterly_revenue_cny,2023Q3,605848285.42,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2023-10-31/1218204743.PDF,2026-07-09T16:59:52Z
 SMIC,quarterly_revenue_cny,2023Q3,11780454000.0,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2023-11-10/1218293552.PDF,2026-07-09T17:00:10Z
 Hua Hong,quarterly_revenue_cny,2023Q3,4108654270.64,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2023-11-10/1218304596.PDF,2026-07-09T17:00:25Z
+Naura,quarterly_revenue_cny,2023Q4,7491095799.5,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-04-30/1219908929.PDF,2026-07-09T17:54:58Z
+AMEC,quarterly_revenue_cny,2023Q4,2222247102.19,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-03-19/1219329916.PDF,2026-07-09T17:55:18Z
+ACM Shanghai,quarterly_revenue_cny,2023Q4,1138547041.1500003,CNY,CNY,0.92,https://static.cninfo.com.cn/finalpage/2024-02-29/1219209593.PDF,2026-07-09T17:55:45Z
+Piotech,quarterly_revenue_cny,2023Q4,1002467027.86,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-04-30/1219919656.PDF,2026-07-09T17:56:05Z
+Kingsemi,quarterly_revenue_cny,2023Q4,510488873.6699999,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-04-27/1219882819.PDF,2026-07-09T17:56:31Z
+Hwatsing,quarterly_revenue_cny,2023Q4,667717842.88,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-04-27/1219884009.PDF,2026-07-09T17:56:54Z
+SMIC,quarterly_revenue_cny,2023Q4,12152181000.0,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-03-29/1219447110.PDF,2026-07-09T17:57:18Z
 Naura,quarterly_revenue_cny,2024Q1,5859163380.59,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-04-30/1219908881.PDF,2026-07-09T16:58:09Z
 AMEC,quarterly_revenue_cny,2024Q1,1605024097.68,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-04-26/1219837692.PDF,2026-07-09T16:58:36Z
 ACM Shanghai,quarterly_revenue_cny,2024Q1,921388511.56,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-04-27/1219883416.PDF,2026-07-09T16:58:59Z
@@ -499,6 +560,15 @@ Kingsemi,quarterly_revenue_cny,2024Q1,244210948.51,CNY,CNY,0.99,https://static.c
 Hwatsing,quarterly_revenue_cny,2024Q1,680248921.74,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-04-27/1219884017.PDF,2026-07-09T16:59:54Z
 SMIC,quarterly_revenue_cny,2024Q1,12593782000.0,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-05-10/1220022807.PDF,2026-07-09T17:00:15Z
 Hua Hong,quarterly_revenue_cny,2024Q1,3297290706.1,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-05-10/1220020535.PDF,2026-07-09T17:00:29Z
+Naura,quarterly_revenue_cny,2024Q2,6475743823.690001,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-08-28/1221004518.PDF,2026-07-09T17:55:01Z
+AMEC,quarterly_revenue_cny,2024Q2,1842688653.16,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-08-23/1220950835.PDF,2026-07-09T17:55:23Z
+ACM Shanghai,quarterly_revenue_cny,2024Q2,1482508218.94,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-08-08/1220815772.PDF,2026-07-09T17:55:48Z
+Piotech,quarterly_revenue_cny,2024Q2,795100997.9200001,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-08-28/1221001360.PDF,2026-07-09T17:56:08Z
+Kingsemi,quarterly_revenue_cny,2024Q2,449395161.9,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-08-30/1221055073.PDF,2026-07-09T17:56:34Z
+Hwatsing,quarterly_revenue_cny,2024Q2,816269998.94,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-08-17/1220891923.PDF,2026-07-09T17:56:56Z
+SMIC,quarterly_revenue_cny,2024Q2,13675528000.0,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-08-30/1221050803.PDF,2026-07-09T17:57:21Z
+Hua Hong,quarterly_revenue_cny,2024Q2,3434868055.0000005,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-08-30/1221057356.PDF,2026-07-09T17:57:43Z
+Naura,quarterly_revenue_cny,2024Q3,8017863754.8899975,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-10-30/1221555085.PDF,2026-07-09T16:58:12Z
 AMEC,quarterly_revenue_cny,2024Q3,2059481848.62,CNY,CNY,0.98,https://static.cninfo.com.cn/finalpage/2024-10-30/1221555993.PDF,2026-07-09T16:58:43Z
 ACM Shanghai,quarterly_revenue_cny,2024Q3,1572765045.4,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-10-31/1221574542.PDF,2026-07-09T16:59:02Z
 Piotech,quarterly_revenue_cny,2024Q3,1010924149.2,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-10-29/1221542419.PDF,2026-07-09T16:59:18Z
@@ -506,6 +576,14 @@ Kingsemi,quarterly_revenue_cny,2024Q3,411002334.93,CNY,CNY,0.95,https://static.c
 Hwatsing,quarterly_revenue_cny,2024Q3,955024737.35,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-10-30/1221555447.PDF,2026-07-09T16:59:57Z
 SMIC,quarterly_revenue_cny,2024Q3,15609410000.0,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-11-08/1221649951.PDF,2026-07-09T17:00:18Z
 Hua Hong,quarterly_revenue_cny,2024Q3,3770124116.54,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2024-11-08/1221648772.PDF,2026-07-09T17:00:32Z
+Naura,quarterly_revenue_cny,2024Q4,9485298203.089998,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-04-26/1223309251.PDF,2026-07-09T17:55:04Z
+AMEC,quarterly_revenue_cny,2024Q4,3557970498.2300005,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-04-18/1223127190.PDF,2026-07-09T17:55:30Z
+ACM Shanghai,quarterly_revenue_cny,2024Q4,1641078599.7599998,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-02-27/1222651574.PDF,2026-07-09T17:55:51Z
+Piotech,quarterly_revenue_cny,2024Q4,1825639018.5399997,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-04-25/1223286842.PDF,2026-07-09T17:56:12Z
+Kingsemi,quarterly_revenue_cny,2024Q4,648997520.3900001,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-04-26/1223330359.PDF,2026-07-09T17:56:39Z
+Hwatsing,quarterly_revenue_cny,2024Q4,954684952.4399997,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-04-29/1223387637.PDF,2026-07-09T17:57:01Z
+SMIC,quarterly_revenue_cny,2024Q4,15916850000.0,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-03-28/1222924319.PDF,2026-07-09T17:57:26Z
+Hua Hong,quarterly_revenue_cny,2024Q4,3886024835.249999,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-03-28/1222929545.PDF,2026-07-09T17:57:48Z
 Naura,quarterly_revenue_cny,2025Q1,8206029208.83,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-04-26/1223309242.PDF,2026-07-09T16:58:16Z
 AMEC,quarterly_revenue_cny,2025Q1,2173278385.62,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-04-25/1223281418.PDF,2026-07-09T16:58:46Z
 ACM Shanghai,quarterly_revenue_cny,2025Q1,1305866199.58,CNY,CNY,0.98,https://static.cninfo.com.cn/finalpage/2025-04-30/1223423928.PDF,2026-07-09T16:59:04Z
@@ -514,6 +592,14 @@ Kingsemi,quarterly_revenue_cny,2025Q1,275316424.15,CNY,CNY,0.95,https://static.c
 Hwatsing,quarterly_revenue_cny,2025Q1,912498331.19,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-04-29/1223387665.PDF,2026-07-09T16:59:59Z
 SMIC,quarterly_revenue_cny,2025Q1,16301085000.0,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-05-09/1223496514.PDF,2026-07-09T17:00:20Z
 Hua Hong,quarterly_revenue_cny,2025Q1,3912539839.26,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-05-09/1223494524.PDF,2026-07-09T17:00:34Z
+Naura,quarterly_revenue_cny,2025Q2,7935516975.91,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-08-29/1224615657.PDF,2026-07-09T17:55:07Z
+AMEC,quarterly_revenue_cny,2025Q2,2787322884.42,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-08-29/1224606010.PDF,2026-07-09T17:55:33Z
+ACM Shanghai,quarterly_revenue_cny,2025Q2,1959425642.2600002,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-08-07/1224414818.PDF,2026-07-09T17:55:53Z
+Piotech,quarterly_revenue_cny,2025Q2,1245443480.5900002,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-08-26/1224571854.PDF,2026-07-09T17:56:16Z
+Kingsemi,quarterly_revenue_cny,2025Q2,433802461.47,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-08-29/1224610437.PDF,2026-07-09T17:56:42Z
+Hwatsing,quarterly_revenue_cny,2025Q2,1037093744.55,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-08-29/1224611389.PDF,2026-07-09T17:57:03Z
+SMIC,quarterly_revenue_cny,2025Q2,16046964000.0,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-08-29/1224608544.PDF,2026-07-09T17:57:28Z
+Hua Hong,quarterly_revenue_cny,2025Q2,4105117068.2699995,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-08-29/1224609532.PDF,2026-07-09T17:57:54Z
 Naura,quarterly_revenue_cny,2025Q3,11159833472.07,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-10-31/1224774311.PDF,2026-07-09T16:58:18Z
 AMEC,quarterly_revenue_cny,2025Q3,3101963845.38,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-10-30/1224763575.PDF,2026-07-09T16:58:49Z
 ACM Shanghai,quarterly_revenue_cny,2025Q3,1881127938.23,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-10-30/1224763095.PDF,2026-07-09T16:59:06Z
@@ -522,6 +608,14 @@ Kingsemi,quarterly_revenue_cny,2025Q3,281147583.44,CNY,CNY,0.99,https://static.c
 Hwatsing,quarterly_revenue_cny,2025Q3,1244203445.71,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-10-31/1224774938.PDF,2026-07-09T17:00:01Z
 SMIC,quarterly_revenue_cny,2025Q3,17162367000.0,CNY,CNY,0.98,https://static.cninfo.com.cn/finalpage/2025-11-14/1224804086.PDF,2026-07-09T17:00:22Z
 Hua Hong,quarterly_revenue_cny,2025Q3,4565736161.09,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2025-11-07/1224790453.PDF,2026-07-09T17:00:36Z
+Naura,quarterly_revenue_cny,2025Q4,12051732762.970001,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2026-04-18/1225122917.PDF,2026-07-09T17:55:09Z
+AMEC,quarterly_revenue_cny,2025Q4,4322073152.690001,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2026-03-31/1225062430.PDF,2026-07-09T17:55:38Z
+ACM Shanghai,quarterly_revenue_cny,2025Q4,1639750467.69,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2026-02-27/1224986457.PDF,2026-07-09T17:55:56Z
+Piotech,quarterly_revenue_cny,2025Q4,2298985467.3899994,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2026-04-28/1225222254.PDF,2026-07-09T17:56:23Z
+Kingsemi,quarterly_revenue_cny,2025Q4,958221792.6700001,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2026-04-18/1225120168.PDF,2026-07-09T17:56:46Z
+Hwatsing,quarterly_revenue_cny,2025Q4,1454432204.6000004,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2026-04-23/1225156991.PDF,2026-07-09T17:57:08Z
+SMIC,quarterly_revenue_cny,2025Q4,17812776000.0,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2026-03-27/1225037116.PDF,2026-07-09T17:57:30Z
+Hua Hong,quarterly_revenue_cny,2025Q4,4708057592.16,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2026-03-27/1225039260.PDF,2026-07-09T17:57:57Z
 Naura,quarterly_revenue_cny,2026Q1,10322863908.82,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2026-04-30/1225259650.PDF,2026-07-09T16:31:06Z
 AMEC,quarterly_revenue_cny,2026Q1,2914986518.73,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2026-04-28/1225215453.PDF,2026-07-09T16:31:09Z
 ACM Shanghai,quarterly_revenue_cny,2026Q1,1476441483.04,CNY,CNY,0.98,https://static.cninfo.com.cn/finalpage/2026-04-28/1225214466.PDF,2026-07-09T16:31:13Z
@@ -530,3 +624,4 @@ Kingsemi,quarterly_revenue_cny,2026Q1,330586511.36,CNY,CNY,0.99,https://static.c
 Hwatsing,quarterly_revenue_cny,2026Q1,1201416794.91,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2026-04-23/1225157053.PDF,2026-07-09T16:31:23Z
 SMIC,quarterly_revenue_cny,2026Q1,17617218000.0,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2026-05-15/1225307101.PDF,2026-07-09T16:31:27Z
 Hua Hong,quarterly_revenue_cny,2026Q1,4625372637.73,CNY,CNY,0.98,https://static.cninfo.com.cn/finalpage/2026-05-15/1225306129.PDF,2026-07-09T16:31:30Z
+Naura,ytd9m_revenue_cny,2024YTD9M,20352770959.17,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2024-10-30/1221555085.PDF,2026-07-09T16:58:12Z
