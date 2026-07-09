@@ -1,18 +1,20 @@
 """Collector: quarterly reports of listed Chinese semicap & foundry companies.
 
-What this does: for each company in COMPANIES, queries cninfo (巨潮资讯网 —
-the official disclosure platform for Chinese listed companies) for its
-2026 Q1 quarterly report (一季度报告), downloads the PDF to data/raw/cninfo/,
-and records it in `sources`/`documents` (language 'zh') plus the company in
-`entities`. The reports are short (~10 pages) and disclose quarterly revenue
-— the input for the Phase 3 indigenization ratio.
+What this does: for each company in COMPANIES and each period in PERIODS
+(Q1 and Q3 reports, 2023-2026 — the short filings that fit the extraction
+pipeline), queries cninfo (巨潮资讯网, the official disclosure platform),
+downloads the report PDF to data/raw/cninfo/, and records it in
+`sources`/`documents` (language 'zh') plus the company in `entities`.
 
-SMEE (上海微电子) is NOT here: it is unlisted and files nothing on cninfo.
-Its numbers can only come from trade press or tenders in later phases.
+Q2 and Q4 are NOT collected: they live inside half-year and annual reports
+(large documents) — deriving them by subtraction is proposed in
+analysis/methodology.md and waits for approval.
 
-How you'd know it broke: prints one line per company — either "ingested" with
-the filing title, "already have", or "NO FILING FOUND" (which also lands in
-review_queue so the gap is tracked in the database).
+SMEE (上海微电子) is not here: unlisted, files nothing on cninfo.
+
+How you'd know it broke: prints one line per company/period — "ingested",
+"already have", or "no filing (pre-listing?)" for gaps, which also land in
+review_queue exactly once so they're tracked in the database.
 """
 
 import datetime
@@ -33,10 +35,16 @@ SEARCH_API = "https://www.cninfo.com.cn/new/information/topSearch/query"
 QUERY_API = "https://www.cninfo.com.cn/new/hisAnnouncement/query"
 STATIC_HOST = "https://static.cninfo.com.cn/"
 
-# Q1 2026 reports are published April-June 2026.
-CATEGORY = "category_yjdbg_szsh"  # 一季度报告
-SE_DATE = "2026-04-01~2026-06-30"
-PERIOD_TAG = "2026Q1"
+# (period tag, cninfo category, publication window, title keyword)
+PERIODS = [
+    ("2023Q1", "category_yjdbg_szsh", "2023-04-01~2023-06-30", "一季度报告"),
+    ("2023Q3", "category_sjdbg_szsh", "2023-10-01~2023-12-31", "三季度报告"),
+    ("2024Q1", "category_yjdbg_szsh", "2024-04-01~2024-06-30", "一季度报告"),
+    ("2024Q3", "category_sjdbg_szsh", "2024-10-01~2024-12-31", "三季度报告"),
+    ("2025Q1", "category_yjdbg_szsh", "2025-04-01~2025-06-30", "一季度报告"),
+    ("2025Q3", "category_sjdbg_szsh", "2025-10-01~2025-12-31", "三季度报告"),
+    ("2026Q1", "category_yjdbg_szsh", "2026-04-01~2026-06-30", "一季度报告"),
+]
 
 SOURCE = {
     "name": "cninfo",
@@ -46,15 +54,17 @@ SOURCE = {
 }
 
 # column: 'szse' = Shenzhen-listed, 'sse' = Shanghai-listed (incl. STAR board)
+# first_period: first quarter the company reports as a listed company.
 COMPANIES = [
-    {"code": "002371", "column": "szse", "name_en": "Naura",        "name_zh": "北方华创", "layer": "equipment"},
-    {"code": "688012", "column": "sse",  "name_en": "AMEC",         "name_zh": "中微公司", "layer": "equipment"},
-    {"code": "688082", "column": "sse",  "name_en": "ACM Shanghai", "name_zh": "盛美上海", "layer": "equipment"},
-    {"code": "688072", "column": "sse",  "name_en": "Piotech",      "name_zh": "拓荆科技", "layer": "equipment"},
-    {"code": "688037", "column": "sse",  "name_en": "Kingsemi",     "name_zh": "芯源微",   "layer": "equipment"},
-    {"code": "688120", "column": "sse",  "name_en": "Hwatsing",     "name_zh": "华海清科", "layer": "equipment"},
-    {"code": "688981", "column": "sse",  "name_en": "SMIC",         "name_zh": "中芯国际", "layer": "foundry"},
-    {"code": "688347", "column": "sse",  "name_en": "Hua Hong",     "name_zh": "华虹公司", "layer": "foundry"},
+    {"code": "002371", "column": "szse", "name_en": "Naura",        "name_zh": "北方华创", "layer": "equipment", "first_period": "2023Q1"},
+    {"code": "688012", "column": "sse",  "name_en": "AMEC",         "name_zh": "中微公司", "layer": "equipment", "first_period": "2023Q1"},
+    {"code": "688082", "column": "sse",  "name_en": "ACM Shanghai", "name_zh": "盛美上海", "layer": "equipment", "first_period": "2023Q1"},
+    {"code": "688072", "column": "sse",  "name_en": "Piotech",      "name_zh": "拓荆科技", "layer": "equipment", "first_period": "2023Q1"},
+    {"code": "688037", "column": "sse",  "name_en": "Kingsemi",     "name_zh": "芯源微",   "layer": "equipment", "first_period": "2023Q1"},
+    {"code": "688120", "column": "sse",  "name_en": "Hwatsing",     "name_zh": "华海清科", "layer": "equipment", "first_period": "2023Q1"},
+    {"code": "688981", "column": "sse",  "name_en": "SMIC",         "name_zh": "中芯国际", "layer": "foundry",   "first_period": "2023Q1"},
+    # Hua Hong's A-share listed 2023-08: first quarterly report is Q3 2023.
+    {"code": "688347", "column": "sse",  "name_en": "Hua Hong",     "name_zh": "华虹公司", "layer": "foundry",   "first_period": "2023Q3"},
 ]
 
 
@@ -102,8 +112,8 @@ def resolve_org_id(session, code):
     raise LookupError(f"cninfo search found no orgId for {code}")
 
 
-def find_quarterly_report(session, code, column, org_id):
-    """Return the announcement dict for the Q1 report, or None."""
+def find_report(session, code, column, org_id, category, se_date, keyword):
+    """Return the announcement dict for the report, or None."""
     resp = session.post(
         QUERY_API,
         data={
@@ -115,25 +125,23 @@ def find_quarterly_report(session, code, column, org_id):
             "stock": f"{code},{org_id}",
             "searchkey": "",
             "secid": "",
-            "category": CATEGORY,
+            "category": category,
             "trade": "",
-            "seDate": SE_DATE,
+            "seDate": se_date,
         },
         timeout=30,
     )
     resp.raise_for_status()
-    announcements = resp.json().get("announcements") or []
-    for ann in announcements:
+    for ann in resp.json().get("announcements") or []:
         title = ann.get("announcementTitle", "")
-        # Skip corrections/summaries; take the report itself.
         if "摘要" in title or "英文" in title:
             continue
-        if "一季度报告" in title or "第一季度报告" in title:
+        if keyword in title:
             return ann
     return None
 
 
-def ingest_pdf(conn, source_id, company, ann, content):
+def ingest_pdf(conn, source_id, company, period_tag, ann, content):
     sha = hashlib.sha256(content).hexdigest()
     existing = conn.execute(
         "SELECT id FROM documents WHERE sha256 = ?", (sha,)
@@ -142,7 +150,8 @@ def ingest_pdf(conn, source_id, company, ann, content):
         return existing[0], False
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     ann_date = ann["adjunctUrl"].split("/")[1]  # finalpage/YYYY-MM-DD/xxx.PDF
-    raw_path = RAW_DIR / f"{ann_date}_{company['code']}_{company['name_en'].lower().replace(' ', '_')}_q1_2026.pdf"
+    slug = company["name_en"].lower().replace(" ", "_")
+    raw_path = RAW_DIR / f"{ann_date}_{company['code']}_{slug}_{period_tag.lower()}.pdf"
     if raw_path.exists():
         raw_path = raw_path.with_name(f"{raw_path.stem}_{sha[:8]}.pdf")
     raw_path.write_bytes(content)
@@ -171,43 +180,57 @@ def main():
     source_id = ensure_source(conn)
     session = requests.Session()
     session.headers["User-Agent"] = USER_AGENT
+    org_ids = {}
 
     for company in COMPANIES:
         ensure_entity(conn, company)
-        # Cache: skip if we already hold this company's Q1 2026 filing.
-        have = conn.execute(
-            "SELECT 1 FROM documents WHERE title LIKE ? AND doc_date >= '2026-04-01'",
-            (f"%{company['name_zh']}%一季度报告%",),
-        ).fetchone()
-        if have:
-            print(f"{company['name_en']}: already have Q1 2026 filing")
-            continue
+        for period_tag, category, se_date, keyword in PERIODS:
+            if period_tag < company["first_period"]:
+                continue
+            year = period_tag[:4]
+            # Cache: skip if we already hold this company/period filing.
+            have = conn.execute(
+                "SELECT 1 FROM documents WHERE title LIKE ?",
+                (f"%{company['name_zh']}%{year}年%{keyword}%",),
+            ).fetchone()
+            if have:
+                print(f"{company['name_en']} {period_tag}: already have")
+                continue
 
-        org_id = resolve_org_id(session, company["code"])
-        ann = find_quarterly_report(session, company["code"], company["column"], org_id)
-        if ann is None:
-            reason = (
-                f"cninfo: no Q1 2026 quarterly report found for"
-                f" {company['name_en']} ({company['code']}) in {SE_DATE}"
+            if company["code"] not in org_ids:
+                org_ids[company["code"]] = resolve_org_id(session, company["code"])
+            ann = find_report(
+                session, company["code"], company["column"],
+                org_ids[company["code"]], category, se_date, keyword,
             )
-            print(f"{company['name_en']}: NO FILING FOUND — flagged for review")
-            conn.execute(
-                "INSERT INTO review_queue (item_type, item_id, reason) VALUES ('collector', NULL, ?)",
-                (reason,),
+            if ann is None:
+                reason = (
+                    f"cninfo: no {period_tag} report found for"
+                    f" {company['name_en']} ({company['code']}) in {se_date}"
+                )
+                already_flagged = conn.execute(
+                    "SELECT 1 FROM review_queue WHERE reason = ?", (reason,)
+                ).fetchone()
+                if not already_flagged:
+                    conn.execute(
+                        "INSERT INTO review_queue (item_type, item_id, reason)"
+                        " VALUES ('collector', NULL, ?)",
+                        (reason,),
+                    )
+                print(f"{company['name_en']} {period_tag}: no filing — flagged for review")
+                continue
+
+            pdf = session.get(STATIC_HOST + ann["adjunctUrl"], timeout=120)
+            pdf.raise_for_status()
+            doc_id, is_new = ingest_pdf(conn, source_id, company, period_tag, ann, pdf.content)
+            status = "ingested" if is_new else "identical bytes already stored"
+            print(
+                f"{company['name_en']} {period_tag}: {status} —"
+                f" {ann['announcementTitle']} ({len(pdf.content)} bytes, document id={doc_id})"
             )
-            continue
+            time.sleep(1)  # rule 7: polite pacing
+        conn.commit()
 
-        pdf = session.get(STATIC_HOST + ann["adjunctUrl"], timeout=120)
-        pdf.raise_for_status()
-        doc_id, is_new = ingest_pdf(conn, source_id, company, ann, pdf.content)
-        status = "ingested" if is_new else "identical bytes already stored"
-        print(
-            f"{company['name_en']}: {status} — {ann['announcementTitle']}"
-            f" ({len(pdf.content)} bytes, document id={doc_id})"
-        )
-        time.sleep(1)  # rule 7: polite pacing
-
-    conn.commit()
     conn.close()
 
 
