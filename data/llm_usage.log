@@ -55,3 +55,5 @@
 2026-07-09T17:32:09Z model=claude-haiku-4-5 input_tokens=32972 output_tokens=229 note=extract_filing_revenue doc_id=63
 2026-07-09T17:32:16Z model=claude-haiku-4-5 input_tokens=33117 output_tokens=288 note=extract_filing_revenue doc_id=64
 2026-07-09T17:34:38Z model=claude-haiku-4-5 input_tokens=34390 output_tokens=89 note=extract_earnings_region doc_id=1
+2026-07-09T17:46:58Z model=claude-haiku-4-5 input_tokens=5118 output_tokens=615 note=translate_classify_policy n=11
+2026-07-09T17:48:25Z model=claude-sonnet-5 input_tokens=2062 output_tokens=3148 note=red_team
