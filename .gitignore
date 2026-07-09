@@ -1,0 +1,9 @@
+# Secrets — never committed (rule 9)
+.env
+
+# Python cruft
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
