@@ -52,6 +52,15 @@ SERIES = [
             f"?startPeriod={SINCE}&format=jsondata"
         ),
     },
+    {
+        "metric": "fx_jpy_per_eur_monthly_avg",
+        "unit": "JPY_per_EUR",
+        "title": "ECB JPY per EUR monthly average",
+        "url": (
+            "https://data-api.ecb.europa.eu/service/data/EXR/M.JPY.EUR.SP00.A"
+            f"?startPeriod={SINCE}&format=jsondata"
+        ),
+    },
 ]
 
 SOURCE = {

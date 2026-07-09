@@ -31,13 +31,19 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = REPO_ROOT / "db" / "tracker.sqlite"
 OUT_PATH = REPO_ROOT / "data" / "exports" / "indigenization_ratio.csv"
 
-# Denominator import series: EU27 aggregate ONLY. The NL and DE series are
-# subsets of EU27 — adding them would double-count. US and Japan series get
-# appended here once their collectors exist.
-IMPORT_METRICS_EUR = ["mirror_exports_eu27_hs8486_eur"]
-IMPORT_COVERAGE = "EU27 only (US, Japan pending)"
+# Denominator import series with their reporting currency. The NL and DE
+# series are subsets of EU27 — adding them would double-count. The US series
+# joins once its collector exists.
+IMPORT_SERIES = {
+    "mirror_exports_eu27_hs8486_eur": "EUR",
+    "mirror_exports_jp_hs8486_jpy": "JPY",
+}
+IMPORT_COVERAGE = "EU27 + Japan (US pending)"
 
-FX_METRIC = "fx_cny_per_eur_monthly_avg"
+# Monthly CNY per unit of each currency, derived from ECB EUR crosses:
+# cny_per_X = cny_per_eur / X_per_eur.
+FX_CNY_EUR = "fx_cny_per_eur_monthly_avg"
+FX_CROSSES = {"USD": "fx_usd_per_eur_monthly_avg", "JPY": "fx_jpy_per_eur_monthly_avg"}
 REVENUE_METRIC = "quarterly_revenue_cny"
 
 
@@ -64,38 +70,55 @@ def load_metrics(conn):
     )
 
 
-def quarterly_imports_cny(df):
-    """Sum monthly EUR imports per quarter (complete quarters only) and
-    convert with the quarterly-average FX rate. Returns DataFrame indexed by
-    quarter with columns imports_eur, fx_cny_per_eur, imports_cny."""
-    imports = df[df.metric_name.isin(IMPORT_METRICS_EUR)].copy()
-    fx = df[df.metric_name == FX_METRIC].copy()
-    if imports.empty or fx.empty:
-        return pd.DataFrame(
-            columns=["imports_eur", "fx_cny_per_eur", "imports_cny"]
-        )
+def monthly_cny_rates(df):
+    """Monthly CNY-per-unit rate for each import currency.
 
+    Returns a DataFrame indexed by month period with one column per currency
+    in {'EUR', 'JPY', 'USD'} (crosses only where their series exist)."""
+    cny_eur = (
+        df[df.metric_name == FX_CNY_EUR].set_index("period").value.rename("EUR")
+    )
+    rates = {"EUR": cny_eur}
+    for currency, metric in FX_CROSSES.items():
+        cross = df[df.metric_name == metric].set_index("period").value
+        if not cross.empty:
+            rates[currency] = (cny_eur / cross).rename(currency)
+    return pd.DataFrame(rates)
+
+
+def quarterly_imports_cny(df):
+    """Convert each import series to CNY at monthly rates, then sum per
+    quarter. A quarter counts only when every import series has all 3 months
+    — otherwise a partially reported quarter would look like a collapse.
+
+    Returns DataFrame indexed by quarter: imports_cny, n_import_series."""
+    imports = df[df.metric_name.isin(IMPORT_SERIES)].copy()
+    if imports.empty:
+        return pd.DataFrame(columns=["imports_cny", "n_import_series"])
+    rates = monthly_cny_rates(df)
+
+    imports["currency"] = imports.metric_name.map(IMPORT_SERIES)
+    imports["rate"] = imports.apply(
+        lambda r: rates[r.currency].get(r.period) if r.currency in rates else None,
+        axis=1,
+    )
+    imports = imports.dropna(subset=["rate"])
+    imports["value_cny"] = imports.value * imports.rate
     imports["quarter"] = imports.period.map(month_to_quarter)
-    # A quarter is complete only when all 3 months are present for every
-    # import series — otherwise a partially reported quarter would look like
-    # a collapse in imports.
+
     month_counts = imports.groupby(["quarter", "metric_name"]).period.nunique()
-    complete = month_counts.groupby("quarter").min() == 3
+    series_counts = imports.groupby("quarter").metric_name.nunique()
+    complete = (month_counts.groupby("quarter").min() == 3) & (
+        series_counts == len(IMPORT_SERIES)
+    )
     complete_quarters = complete[complete].index
 
-    eur = (
+    grouped = (
         imports[imports.quarter.isin(complete_quarters)]
         .groupby("quarter")
-        .value.sum()
-        .rename("imports_eur")
+        .agg(imports_cny=("value_cny", "sum"), n_import_series=("metric_name", "nunique"))
     )
-
-    fx["quarter"] = fx.period.map(month_to_quarter)
-    rate = fx.groupby("quarter").value.mean().rename("fx_cny_per_eur")
-
-    out = pd.concat([eur, rate], axis=1).dropna()
-    out["imports_cny"] = out.imports_eur * out.fx_cny_per_eur
-    return out
+    return grouped
 
 
 def quarterly_domestic_cny(df):

@@ -1,12 +1,12 @@
-quarter,imports_eur,fx_cny_per_eur,imports_cny,domestic_cny,n_companies,ratio,coverage
-2023Q3,2843043889.0,7.884832298136668,22416924281.00728,,,,"imports: EU27 only (US, Japan pending); revenue: listed cos only"
-2023Q4,2681500943.0,7.771896810207333,20840348625.469654,,,,"imports: EU27 only (US, Japan pending); revenue: listed cos only"
-2024Q1,2617746210.0,7.8049582106782,20431399775.21124,,,,"imports: EU27 only (US, Japan pending); revenue: listed cos only"
-2024Q2,2862265614.0,7.797169018759,22317568768.940006,,,,"imports: EU27 only (US, Japan pending); revenue: listed cos only"
-2024Q3,3212311444.0,7.869878972959434,25280502287.732555,,,,"imports: EU27 only (US, Japan pending); revenue: listed cos only"
-2024Q4,2737351347.0,7.673032991718434,21003787195.455894,,,,"imports: EU27 only (US, Japan pending); revenue: listed cos only"
-2025Q1,2130925115.0,7.6554192857142995,16313125221.783962,,,,"imports: EU27 only (US, Japan pending); revenue: listed cos only"
-2025Q2,2097045756.0,8.19663373015873,17188715977.315815,,,,"imports: EU27 only (US, Japan pending); revenue: listed cos only"
-2025Q3,2621538368.0,8.359387703118136,21914455596.711586,,,,"imports: EU27 only (US, Japan pending); revenue: listed cos only"
-2025Q4,3325660124.0,8.248337229123534,27431166212.200787,,,,"imports: EU27 only (US, Japan pending); revenue: listed cos only"
-2026Q1,1181528885.0,8.106353751803752,9577891109.784254,,,,"imports: EU27 only (US, Japan pending); revenue: listed cos only"
+quarter,imports_cny,n_import_series,domestic_cny,n_companies,ratio,coverage
+2023Q3,43358359909.9679,2,,,,imports: EU27 + Japan (US pending); revenue: listed cos only
+2023Q4,46230982399.430305,2,,,,imports: EU27 + Japan (US pending); revenue: listed cos only
+2024Q1,45645628406.10953,2,,,,imports: EU27 + Japan (US pending); revenue: listed cos only
+2024Q2,48804075778.77999,2,,,,imports: EU27 + Japan (US pending); revenue: listed cos only
+2024Q3,51230518717.016556,2,,,,imports: EU27 + Japan (US pending); revenue: listed cos only
+2024Q4,46836282740.53751,2,,,,imports: EU27 + Japan (US pending); revenue: listed cos only
+2025Q1,37964643913.11457,2,,,,imports: EU27 + Japan (US pending); revenue: listed cos only
+2025Q2,40929112947.08864,2,,,,imports: EU27 + Japan (US pending); revenue: listed cos only
+2025Q3,47177075836.08177,2,,,,imports: EU27 + Japan (US pending); revenue: listed cos only
+2025Q4,48757574905.39804,2,,,,imports: EU27 + Japan (US pending); revenue: listed cos only
+2026Q1,27347090917.77789,2,,,,imports: EU27 + Japan (US pending); revenue: listed cos only

@@ -38,9 +38,12 @@ belongs in the digest, not in the number.
   manufacture), measured as *mirror data* — partner countries' reported
   exports to China. Mirror data is used because China Customs' portal is not
   automatable (HTTP 412 anti-bot; recorded in review_queue).
-- Currently: EU27 exports (Eurostat Comext DS-045409, monthly, EUR).
-- Conversion to CNY: ECB monthly-average CNY/EUR reference rate, averaged
-  over the quarter.
+- Currently: EU27 exports (Eurostat Comext DS-045409, monthly, EUR) plus
+  Japan exports (e-Stat 普通貿易統計 品別国別表, monthly, JPY — note e-Stat
+  zero-fills unpublished months; the parser drops all-zero months rather
+  than record phantom zero trade).
+- Conversion to CNY: ECB monthly-average reference rates (CNY/EUR directly;
+  JPY and USD via EUR crosses), applied month by month.
 - Complete quarters only: a quarter missing any month is excluded rather
   than reported low.
 
@@ -48,7 +51,7 @@ belongs in the digest, not in the number.
 
 | Bias | Direction on ratio | Planned fix |
 |---|---|---|
-| **US and Japan exports missing** (together larger than EU) | **ratio badly overstated** | US Census (CENSUS_API_KEY) and Japan e-Stat (ESTAT_APP_ID) collectors — free keys |
+| **US exports missing** | **ratio overstated** | US Census collector — key obtained, awaiting activation |
 | Mirror data measures exports FOB at partner border, not arrivals CIF China | slightly understates imports | acceptable; note in publication |
 | HS 8486 includes flat-panel-display tools | mixed, small | acceptable at HS4; HS6 split later if needed |
 | Domestic revenue counted in CNY of sale vs imports at customs value | small | acceptable |

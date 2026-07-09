@@ -92,3 +92,20 @@ def test_write_metrics_rows_link_to_document(db, tmp_path, monkeypatch, payload)
     )
     count2, = db.execute("SELECT COUNT(*) FROM metrics").fetchone()
     assert count2 == 34
+
+
+# ---- Japan (e-Stat) parsing ---------------------------------------------------
+
+ESTAT_FIXTURE = Path(__file__).parent / "fixtures" / "estat_jp_hs8486_2026.json"
+
+
+def test_estat_parse_drops_zero_filled_unpublished_months():
+    payload = json.loads(ESTAT_FIXTURE.read_text())
+    rows = mirror_trade.parse_estat_response(payload)
+    periods = [p for p, _ in rows]
+    # Table published Jan-May 2026; Jun-Dec are zero-filled by e-Stat and
+    # must NOT appear as real zeros.
+    assert periods == ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05"]
+    # Known-good: Jan 2026 = 101,449,288 thousand yen summed across the five
+    # HS-9 sub-codes, converted to yen.
+    assert rows[0] == ("2026-01", 101_449_288_000)
