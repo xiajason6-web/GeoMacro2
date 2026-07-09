@@ -44,7 +44,7 @@ def main():
     fig.update_layout(
         title=(
             "China WFE indigenization ratio — WORKING SERIES"
-            "<br><sub>Import coverage: EU27 + Japan (US pending) — ratio overstated</sub>"
+            "<br><sub>Imports: EU27 + Japan + US · Revenue: listed cos, total revenue — see methodology</sub>"
         ),
         barmode="group",
         yaxis=dict(title="bn CNY"),

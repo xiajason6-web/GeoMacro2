@@ -47,7 +47,7 @@ SOURCE = {
 
 
 def connect(db_path=DB_PATH):
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path, timeout=60)
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 

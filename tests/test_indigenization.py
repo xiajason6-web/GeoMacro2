@@ -8,9 +8,10 @@ exclusion, double-count guard), these fail.
 Hand-computed expectations for the seeded Q1 2026:
   EUR imports: 100+200+300 = 600 EUR at 8.0 CNY/EUR          =  4,800 CNY
   JPY imports: 20k+20k+20k = 60,000 JPY at 8.0/16.0 = 0.5    = 30,000 CNY
-  imports total                                              = 34,800 CNY
+  USD imports: 100+100+100 = 300 USD at 8.0/2.0 = 4.0        =  1,200 CNY
+  imports total                                              = 36,000 CNY
   domestic equipment revenue                                  = 12,000 CNY
-  ratio = 12,000 / 46,800                                     = 0.256410...
+  ratio = 12,000 / 48,000                                     = 0.25
 """
 
 import sqlite3
@@ -60,8 +61,10 @@ def seed_complete_quarter(conn):
     for month, eur_value in [("2026-01", 100), ("2026-02", 200), ("2026-03", 300)]:
         add_metric(conn, "China", "mirror_exports_eu27_hs8486_eur", month, eur_value)
         add_metric(conn, "China", "mirror_exports_jp_hs8486_jpy", month, 20_000)
+        add_metric(conn, "China", "mirror_exports_us_hs8486_usd", month, 100)
         add_metric(conn, "China", "fx_cny_per_eur_monthly_avg", month, 8.0)
         add_metric(conn, "China", "fx_jpy_per_eur_monthly_avg", month, 16.0)
+        add_metric(conn, "China", "fx_usd_per_eur_monthly_avg", month, 2.0)
     add_metric(conn, "EquipCo", "quarterly_revenue_cny", "2026Q1", 12_000)
 
 
@@ -69,10 +72,10 @@ def test_ratio_arithmetic(db):
     seed_complete_quarter(db)
     out = ir.compute_ratio(db)
     row = out.loc["2026Q1"]
-    assert row.imports_cny == pytest.approx(34_800)  # 4,800 EUR-leg + 30,000 JPY-leg
-    assert row.n_import_series == 2
+    assert row.imports_cny == pytest.approx(36_000)  # EUR 4,800 + JPY 30,000 + USD 1,200
+    assert row.n_import_series == 3
     assert row.domestic_cny == 12_000
-    assert row.ratio == pytest.approx(12_000 / 46_800)
+    assert row.ratio == pytest.approx(0.25)
 
 
 def test_incomplete_quarter_excluded(db):
@@ -80,8 +83,10 @@ def test_incomplete_quarter_excluded(db):
     # Q2 2026: both series present but only one month each -> excluded
     add_metric(db, "China", "mirror_exports_eu27_hs8486_eur", "2026-04", 999)
     add_metric(db, "China", "mirror_exports_jp_hs8486_jpy", "2026-04", 999)
+    add_metric(db, "China", "mirror_exports_us_hs8486_usd", "2026-04", 999)
     add_metric(db, "China", "fx_cny_per_eur_monthly_avg", "2026-04", 8.0)
     add_metric(db, "China", "fx_jpy_per_eur_monthly_avg", "2026-04", 16.0)
+    add_metric(db, "China", "fx_usd_per_eur_monthly_avg", "2026-04", 2.0)
     out = ir.compute_ratio(db)
     assert "2026Q2" not in out.dropna(subset=["imports_cny"]).index
 
@@ -110,7 +115,7 @@ def test_nl_de_series_not_double_counted(db):
     for month in ("2026-01", "2026-02", "2026-03"):
         add_metric(db, "China", "mirror_exports_nl_hs8486_eur", month, 5_000)
     out = ir.compute_ratio(db)
-    assert out.loc["2026Q1"].imports_cny == pytest.approx(34_800)
+    assert out.loc["2026Q1"].imports_cny == pytest.approx(36_000)
 
 
 def test_month_to_quarter():

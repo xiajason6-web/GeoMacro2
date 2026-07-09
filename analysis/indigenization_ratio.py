@@ -37,8 +37,9 @@ OUT_PATH = REPO_ROOT / "data" / "exports" / "indigenization_ratio.csv"
 IMPORT_SERIES = {
     "mirror_exports_eu27_hs8486_eur": "EUR",
     "mirror_exports_jp_hs8486_jpy": "JPY",
+    "mirror_exports_us_hs8486_usd": "USD",
 }
-IMPORT_COVERAGE = "EU27 + Japan (US pending)"
+IMPORT_COVERAGE = "EU27 + Japan + US (major exporters covered; KR/TW/SG not yet)"
 
 # Monthly CNY per unit of each currency, derived from ECB EUR crosses:
 # cny_per_X = cny_per_eur / X_per_eur.
@@ -153,9 +154,10 @@ def main():
     out.to_csv(OUT_PATH, index_label="quarter")
 
     print("=" * 72)
-    print("China WFE indigenization ratio — WORKING SERIES, NOT PUBLISHABLE YET")
-    print(f"  import coverage:  {IMPORT_COVERAGE} -> ratio currently OVERSTATED")
+    print("China WFE indigenization ratio — WORKING SERIES")
+    print(f"  import coverage:  {IMPORT_COVERAGE}")
     print("  revenue coverage: listed equipment cos, total revenue (see methodology)")
+    print("  residual biases -> ratio somewhat overstated; see analysis/methodology.md")
     print("=" * 72)
     if out.empty:
         print("no data yet — run the collectors and the filing extraction first")

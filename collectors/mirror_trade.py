@@ -83,6 +83,20 @@ ESTAT_SERIES = [
     {"product": "8542", "metric": "mirror_exports_jp_hs8542_jpy"},
 ]
 
+CENSUS_SOURCE = {
+    "name": "US Census International Trade",
+    "url": "https://www.census.gov/foreign-trade/",
+    "type": "trade_stats",
+    "language": "en",
+}
+CENSUS_API = "https://api.census.gov/data/timeseries/intltrade/exports/hs"
+CENSUS_CHINA = "5700"
+CENSUS_YEARS = ["2023", "2024", "2025", "2026"]
+CENSUS_SERIES = [
+    {"product": "8486", "metric": "mirror_exports_us_hs8486_usd"},
+    {"product": "8542", "metric": "mirror_exports_us_hs8542_usd"},
+]
+
 CHINA_ENTITY = {
     "name_en": "China",
     "name_zh": "中国",
@@ -94,7 +108,7 @@ CHINA_ENTITY = {
 
 
 def connect(db_path=DB_PATH):
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path, timeout=60)
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
@@ -319,15 +333,62 @@ def collect_japan(conn):
     conn.commit()
 
 
+def parse_census_response(payload):
+    """Census JSON (array of arrays, header first) -> [(period, value_usd)].
+
+    Header names the columns; we locate ALL_VAL_MO and time by name rather
+    than position so a column reorder can't silently misread values.
+    """
+    header, rows = payload[0], payload[1:]
+    val_idx = header.index("ALL_VAL_MO")
+    time_idx = header.index("time")
+    return sorted((r[time_idx], float(r[val_idx])) for r in rows)
+
+
 def collect_us_census(conn):
-    if not os.environ.get("CENSUS_API_KEY"):
+    key = os.environ.get("CENSUS_API_KEY")
+    if not key:
         print(
             "US Census: skipped — no CENSUS_API_KEY in .env. Free signup:"
             " https://api.census.gov/data/key_signup.html"
         )
         return
-    # Implemented once a key exists so the first run can save a real fixture.
-    print("US Census: key found but collector not yet implemented — next session.")
+    source_id = ensure_source(conn, CENSUS_SOURCE)
+    entity_id = ensure_china_entity(conn)
+    for series in CENSUS_SERIES:
+        for year in CENSUS_YEARS:
+            url = (
+                f"{CENSUS_API}?get=ALL_VAL_MO&E_COMMODITY={series['product']}"
+                f"&COMM_LVL=HS4&CTY_CODE={CENSUS_CHINA}&time={year}&key={key}"
+            )
+            resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=120)
+            resp.raise_for_status()
+            title = f"census_us_hs{series['product']}_exports_to_cn_{year}"
+            # Rule 9: the stored URL must not contain the API key.
+            public_url = url.replace(f"key={key}", "key=REDACTED")
+            doc_id, is_new = ingest_raw(conn, source_id, public_url, resp.content, title)
+            rows = parse_census_response(resp.json())
+            if is_new:
+                note = (
+                    f"US exports to China, HS {series['product']}, monthly value"
+                    " in USD (US Census timeseries/intltrade, mirror of China"
+                    " imports)"
+                )
+                write_metrics(
+                    conn, entity_id, series["metric"], rows, "USD", "USD", doc_id, note
+                )
+                span = f"{rows[0][0]} .. {rows[-1][0]}" if rows else "-"
+                print(
+                    f"{series['metric']} [{year}]: {len(rows)} months ({span}),"
+                    f" document id={doc_id}"
+                )
+            else:
+                print(
+                    f"{series['metric']} [{year}]: unchanged since last fetch"
+                    f" ({len(rows)} months)"
+                )
+            time.sleep(1)  # rule 7
+    conn.commit()
 
 
 def main():
