@@ -1,0 +1,54 @@
+# Weekly digest draft: red-team memo + digest assembly, committed to the
+# repo and opened as a GitHub issue for Jason to review and edit.
+# The system never publishes — the issue IS the review step.
+name: weekly-digest
+
+on:
+  schedule:
+    - cron: "0 7 * * 1"    # Mondays 07:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: pipeline
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Red team memo (1 LLM call)
+        run: python review/red_team.py
+
+      - name: Assemble digest draft
+        run: python review/weekly_digest.py
+
+      - name: Commit drafts
+        run: |
+          git config user.name "pipeline-bot"
+          git config user.email "actions@github.com"
+          git add data/exports/
+          git diff --cached --quiet || git commit -m "weekly digest draft: $(date -u +%F)"
+          git push
+
+      - name: Open review issue with the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "Weekly digest draft — $(date -u +%F) (review & edit)" \
+            --body-file "data/exports/digest_$(date -u +%F).md"

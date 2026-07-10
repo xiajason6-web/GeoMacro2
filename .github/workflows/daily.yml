@@ -1,0 +1,118 @@
+# Daily pipeline: collect -> extract -> derive -> analyze -> commit new data.
+# Every collector is allowed to fail individually (a blocked source must not
+# stop the others); any failure opens a GitHub issue at the end. Secrets
+# needed (Settings -> Secrets and variables -> Actions):
+#   ANTHROPIC_API_KEY, CENSUS_API_KEY, ESTAT_APP_ID
+name: daily-pipeline
+
+on:
+  schedule:
+    - cron: "0 22 * * *"   # 22:00 UTC = 06:00 Beijing, before US market open
+  workflow_dispatch: {}     # manual "Run workflow" button
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: pipeline
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+      ESTAT_APP_ID: ${{ secrets.ESTAT_APP_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Collect - mirror trade (Eurostat, Japan, US)
+        id: mirror
+        continue-on-error: true
+        run: python collectors/mirror_trade.py
+
+      - name: Collect - FX rates (ECB)
+        id: fx
+        continue-on-error: true
+        run: python collectors/fx_rates.py
+
+      - name: Collect - cninfo filings
+        id: cninfo
+        continue-on-error: true
+        run: python collectors/cninfo_filings.py
+
+      - name: Collect - BIS entity list
+        id: bis
+        continue-on-error: true
+        run: python collectors/entity_list.py
+
+      - name: Collect - gov.cn policy
+        id: policy
+        continue-on-error: true
+        run: python collectors/policy_monitor.py
+
+      - name: Extract - filing revenue (only new filings; usually a no-op)
+        id: extract_rev
+        continue-on-error: true
+        run: python extraction/extract_filing_revenue.py
+
+      - name: Extract - cumulative revenue (only new summaries)
+        id: extract_cum
+        continue-on-error: true
+        run: python extraction/extract_cumulative_revenue.py
+
+      - name: Extract - classify policy events
+        id: classify
+        continue-on-error: true
+        run: python extraction/translate_classify_policy.py
+
+      - name: Analyze - derive quarters, ratio, chart, CSV export
+        id: analyze
+        continue-on-error: true
+        run: |
+          python analysis/derive_quarters.py
+          python analysis/indigenization_ratio.py
+          python analysis/charts.py
+          python analysis/export_metrics_csv.py
+
+      - name: Tests
+        id: tests
+        continue-on-error: true
+        run: python -m pytest tests/ -q
+
+      - name: Commit new data
+        run: |
+          git config user.name "pipeline-bot"
+          git config user.email "actions@github.com"
+          git add data/ db/tracker.sqlite
+          git diff --cached --quiet || git commit -m "daily pipeline: $(date -u +%F)"
+          git push
+
+      - name: Open issue on failure
+        if: ${{ steps.mirror.outcome == 'failure' || steps.fx.outcome == 'failure' || steps.cninfo.outcome == 'failure' || steps.bis.outcome == 'failure' || steps.policy.outcome == 'failure' || steps.extract_rev.outcome == 'failure' || steps.extract_cum.outcome == 'failure' || steps.classify.outcome == 'failure' || steps.analyze.outcome == 'failure' || steps.tests.outcome == 'failure' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          FAILED=""
+          [ "${{ steps.mirror.outcome }}" = "failure" ] && FAILED="$FAILED mirror_trade"
+          [ "${{ steps.fx.outcome }}" = "failure" ] && FAILED="$FAILED fx_rates"
+          [ "${{ steps.cninfo.outcome }}" = "failure" ] && FAILED="$FAILED cninfo_filings"
+          [ "${{ steps.bis.outcome }}" = "failure" ] && FAILED="$FAILED entity_list"
+          [ "${{ steps.policy.outcome }}" = "failure" ] && FAILED="$FAILED policy_monitor"
+          [ "${{ steps.extract_rev.outcome }}" = "failure" ] && FAILED="$FAILED extract_filing_revenue"
+          [ "${{ steps.extract_cum.outcome }}" = "failure" ] && FAILED="$FAILED extract_cumulative_revenue"
+          [ "${{ steps.classify.outcome }}" = "failure" ] && FAILED="$FAILED translate_classify_policy"
+          [ "${{ steps.analyze.outcome }}" = "failure" ] && FAILED="$FAILED analysis"
+          [ "${{ steps.tests.outcome }}" = "failure" ] && FAILED="$FAILED tests"
+          gh issue create \
+            --title "Pipeline failure $(date -u +%F):$FAILED" \
+            --body "Failed steps:$FAILED — see run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
