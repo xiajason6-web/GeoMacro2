@@ -61,3 +61,4 @@
 2026-07-09T18:05:49Z model=claude-sonnet-5 input_tokens=2189 output_tokens=1745 note=red_team
 2026-07-10T22:35:34Z model=claude-haiku-4-5 input_tokens=23140 output_tokens=188 note=extract_filing_revenue doc_id=128
 2026-07-10T22:36:00Z model=claude-haiku-4-5 input_tokens=5118 output_tokens=609 note=translate_classify_policy n=11
+2026-07-11T22:58:18Z model=claude-haiku-4-5 input_tokens=5118 output_tokens=593 note=translate_classify_policy n=11
