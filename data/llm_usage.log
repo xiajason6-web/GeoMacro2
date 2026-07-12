@@ -62,5 +62,6 @@
 2026-07-10T22:35:34Z model=claude-haiku-4-5 input_tokens=23140 output_tokens=188 note=extract_filing_revenue doc_id=128
 2026-07-10T22:36:00Z model=claude-haiku-4-5 input_tokens=5118 output_tokens=609 note=translate_classify_policy n=11
 2026-07-11T04:14:26Z model=claude-haiku-4-5 input_tokens=413023 output_tokens=2727 note=extract_segment_revenue n=18
+2026-07-11T22:58:18Z model=claude-haiku-4-5 input_tokens=5118 output_tokens=593 note=translate_classify_policy n=11
 2026-07-12T06:58:37Z model=claude-haiku-4-5 input_tokens=22593 output_tokens=144 note=extract_segment_revenue n=1
 2026-07-12T06:59:49Z model=claude-haiku-4-5 input_tokens=113731 output_tokens=663 note=extract_segment_revenue n=5
