@@ -44,8 +44,8 @@ if ratio_csv.exists():
     st.header("Indigenization ratio (working series)")
     st.warning(
         "Coverage: imports = EU27 + Japan + US mirror data (KR/TW/SG missing);"
-        " revenue = 6 listed equipment makers' total revenue. Residual biases"
-        " → ratio somewhat overstated. See analysis/methodology.md."
+        " revenue = 6 listed equipment makers, scaled to each company's"
+        " disclosed semicap segment share. See analysis/methodology.md."
     )
     col1, col2 = st.columns([2, 1])
     with col1:

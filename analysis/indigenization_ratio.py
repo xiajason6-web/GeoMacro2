@@ -122,14 +122,41 @@ def quarterly_imports_cny(df):
     return grouped
 
 
+SEGMENT_SHARE_METRIC = "semicap_segment_share_pct"
+
+
+def segment_share_factor(shares, entity, year):
+    """Share factor (0-1) for entity in a given year. Falls back to the most
+    recent EARLIER disclosed year (e.g. 2026 quarters use the FY2025 share),
+    then to the earliest disclosed year, then to 1.0 (no adjustment) —
+    which keeps behavior unchanged for companies without segment data."""
+    years = shares.get(entity)
+    if not years:
+        return 1.0
+    earlier = [y for y in years if y <= year]
+    pick = max(earlier) if earlier else min(years)
+    return years[pick] / 100.0
+
+
 def quarterly_domestic_cny(df):
-    """Sum quarterly revenue across equipment makers (foundries excluded).
-    Returns DataFrame indexed by quarter with domestic_cny and n_companies."""
-    rev = df[(df.metric_name == REVENUE_METRIC) & (df.layer == "equipment")]
+    """Sum quarterly revenue across equipment makers (foundries excluded),
+    scaled to the semicap segment share disclosed in each company's annual
+    report. Returns DataFrame indexed by quarter with domestic_cny (adjusted)
+    and n_companies."""
+    rev = df[(df.metric_name == REVENUE_METRIC) & (df.layer == "equipment")].copy()
     if rev.empty:
         return pd.DataFrame(columns=["domestic_cny", "n_companies"])
+
+    shares = {}
+    for _, row in df[df.metric_name == SEGMENT_SHARE_METRIC].iterrows():
+        shares.setdefault(row.entity, {})[row.period] = row.value
+
+    rev["factor"] = rev.apply(
+        lambda r: segment_share_factor(shares, r.entity, r.period[:4]), axis=1
+    )
+    rev["adjusted"] = rev.value * rev.factor
     grouped = rev.groupby("period").agg(
-        domestic_cny=("value", "sum"), n_companies=("entity", "nunique")
+        domestic_cny=("adjusted", "sum"), n_companies=("entity", "nunique")
     )
     grouped.index.name = "quarter"
     return grouped
@@ -141,7 +168,10 @@ def compute_ratio(conn):
     domestic = quarterly_domestic_cny(df)
     out = imports.join(domestic, how="outer").sort_index()
     out["ratio"] = out.domestic_cny / (out.domestic_cny + out.imports_cny)
-    out["coverage"] = f"imports: {IMPORT_COVERAGE}; revenue: listed cos only"
+    out["coverage"] = (
+        f"imports: {IMPORT_COVERAGE};"
+        " revenue: listed cos, semicap-segment-adjusted"
+    )
     return out
 
 
@@ -156,8 +186,8 @@ def main():
     print("=" * 72)
     print("China WFE indigenization ratio — WORKING SERIES")
     print(f"  import coverage:  {IMPORT_COVERAGE}")
-    print("  revenue coverage: listed equipment cos, total revenue (see methodology)")
-    print("  residual biases -> ratio somewhat overstated; see analysis/methodology.md")
+    print("  revenue coverage: listed equipment cos, scaled to disclosed semicap")
+    print("                    segment share (annual reports); see methodology")
     print("=" * 72)
     if out.empty:
         print("no data yet — run the collectors and the filing extraction first")

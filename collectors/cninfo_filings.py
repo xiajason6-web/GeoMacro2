@@ -60,6 +60,19 @@ SUMMARY_PERIODS = [
     ("2025",   "2025Q4", "category_ndbg_szsh",  "2026-01-01~2026-06-30", "年度报告摘要"),
 ]
 
+# Full annual reports (300+ pages) exceed the extraction API's PDF limits,
+# so for segment revenue we download them, locate the 分行业 (revenue by
+# segment) pages with pypdf, and archive ONLY that excerpt as the document.
+# The excerpt is the evidence a human would check; the URL points at the
+# full filing. Years and publication windows:
+ANNUAL_FULL = [
+    ("2023", "2024-01-01~2024-06-30"),
+    ("2024", "2025-01-01~2025-06-30"),
+    ("2025", "2026-01-01~2026-06-30"),
+]
+SEGMENT_KEYWORDS = ["分行业", "营业收入构成", "主营业务分行业"]
+SLICE_MAX_PAGES = 8
+
 SOURCE = {
     "name": "cninfo",
     "url": "https://www.cninfo.com.cn",
@@ -196,6 +209,126 @@ def ingest_pdf(conn, source_id, company, period_tag, ann, content):
     return cur.lastrowid, True
 
 
+def slice_segment_pages(pdf_bytes):
+    """Find the revenue-by-segment pages in a full annual report and return
+    (sliced_pdf_bytes, first_page_1indexed, last_page_1indexed), or None if
+    no segment keyword is found. Deterministic pypdf text scan."""
+    import io
+
+    from pypdf import PdfReader, PdfWriter
+
+    reader = PdfReader(io.BytesIO(pdf_bytes))
+    # The segment table sits in the business-discussion section, never in
+    # the first few pages (table of contents) — scan pages 5..150 and score
+    # each: the table page mentions a segment split AND revenue/cost/margin
+    # column headers. Taking merely the first '分行业' mention can land on
+    # narrative text pages ahead of the actual table.
+    TABLE_HINTS = ["营业收入", "营业成本", "毛利率"]
+    hit = None
+    fallback = None
+    for i in range(4, min(len(reader.pages), 150)):
+        try:
+            text = reader.pages[i].extract_text() or ""
+        except Exception:
+            continue
+        has_split = any(kw in text for kw in SEGMENT_KEYWORDS + ["分产品"])
+        if not has_split:
+            continue
+        if fallback is None:
+            fallback = i
+        if sum(h in text for h in TABLE_HINTS) >= 2:
+            hit = i
+            break
+    if hit is None:
+        hit = fallback
+    if hit is None:
+        return None
+    first = max(0, hit - 1)
+    last = min(len(reader.pages) - 1, first + SLICE_MAX_PAGES - 1)
+    writer = PdfWriter()
+    writer.add_page(reader.pages[0])  # cover page identifies the filing
+    for i in range(first, last + 1):
+        writer.add_page(reader.pages[i])
+    out = io.BytesIO()
+    writer.write(out)
+    return out.getvalue(), first + 1, last + 1
+
+
+def collect_segment_slices(conn, source_id, session, org_ids):
+    """Download equipment makers' full annual reports, archive only the
+    segment-table excerpt as a document (title marks it 节选/excerpt)."""
+    for company in [c for c in COMPANIES if c["layer"] == "equipment"]:
+        for year, se_date in ANNUAL_FULL:
+            have = conn.execute(
+                "SELECT 1 FROM documents WHERE title LIKE ?",
+                (f"%{company['name_zh']}%{year}年年度报告%节选%",),
+            ).fetchone()
+            if have:
+                print(f"{company['name_en']} FY{year} segment excerpt: already have")
+                continue
+            if company["code"] not in org_ids:
+                org_ids[company["code"]] = resolve_org_id(session, company["code"])
+            ann = find_report(
+                session, company["code"], company["column"],
+                org_ids[company["code"]], "category_ndbg_szsh", se_date, "年度报告",
+            )
+            if ann is None:
+                print(f"{company['name_en']} FY{year}: no full annual report found")
+                continue
+            pdf = session.get(STATIC_HOST + ann["adjunctUrl"], timeout=300)
+            pdf.raise_for_status()
+            sliced = slice_segment_pages(pdf.content)
+            if sliced is None:
+                reason = (
+                    f"segment slice: no 分行业 keyword found in"
+                    f" {company['name_en']} FY{year} annual report"
+                )
+                conn.execute(
+                    "INSERT INTO review_queue (item_type, item_id, reason)"
+                    " VALUES ('collector', NULL, ?)",
+                    (reason,),
+                )
+                print(f"{company['name_en']} FY{year}: {reason}")
+                continue
+            slice_bytes, first, last = sliced
+            sha = hashlib.sha256(slice_bytes).hexdigest()
+            if conn.execute(
+                "SELECT 1 FROM documents WHERE sha256 = ?", (sha,)
+            ).fetchone():
+                continue
+            RAW_DIR.mkdir(parents=True, exist_ok=True)
+            slug = company["name_en"].lower().replace(" ", "_")
+            ann_date = ann["adjunctUrl"].split("/")[1]
+            raw_path = RAW_DIR / f"{ann_date}_{company['code']}_{slug}_fy{year}_segments_excerpt.pdf"
+            if raw_path.exists():
+                raw_path = raw_path.with_name(f"{raw_path.stem}_{sha[:8]}.pdf")
+            raw_path.write_bytes(slice_bytes)
+            retrieved_at = datetime.datetime.now(datetime.timezone.utc).strftime(
+                "%Y-%m-%dT%H:%M:%SZ"
+            )
+            conn.execute(
+                "INSERT INTO documents"
+                " (source_id, url, retrieved_at, raw_path, sha256, doc_date, title, language)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?, 'zh')",
+                (
+                    source_id,
+                    STATIC_HOST + ann["adjunctUrl"],
+                    retrieved_at,
+                    str(raw_path.relative_to(REPO_ROOT)),
+                    sha,
+                    ann_date,
+                    f"{company['name_zh']} {year}年年度报告（分行业节选 pp.{first}-{last}）",
+                ),
+            )
+            print(
+                f"{company['name_en']} FY{year}: excerpt pp.{first}-{last}"
+                f" archived ({len(slice_bytes)} bytes, full report"
+                f" {len(pdf.content)} bytes not persisted)"
+            )
+            conn.commit()
+            time.sleep(1)  # rule 7
+
+
 def main():
     conn = connect()
     source_id = ensure_source(conn)
@@ -260,6 +393,7 @@ def main():
             time.sleep(1)  # rule 7: polite pacing
         conn.commit()
 
+    collect_segment_slices(conn, source_id, session, org_ids)
     conn.close()
 
 

@@ -27,7 +27,7 @@ belongs in the digest, not in the number.
 
 | Bias | Direction | Planned fix |
 |---|---|---|
-| Total revenue includes non-semicap segments (e.g. Naura's electronic components) | overstates | extract segment revenue where disclosed (annual/half-year reports) |
+| ~~Total revenue includes non-semicap segments~~ **FIXED**: quarterly revenue is now scaled to the semicap-equipment share disclosed in each company's annual report (metric `semicap_segment_share_pct`, extracted from 分行业/分产品 tables; the share is computed in Python from extracted segment values; quarters after the last disclosed year use the most recent share) | resolved (residuals: within-year share drift; segment granularity — e.g. Naura's 电子工艺装备 line still bundles some non-semi equipment, and AMEC's FY2025 table discloses a single segment) | refresh each April when annual reports land |
 | Some revenue is export revenue, not China sales | overstates | segment/geography disclosures where available |
 | Unlisted domestic makers (SMEE, CETC tools) missing | understates | trade press / tender data (Phase 4) |
 | Only Q1 collected so far — series is one point | n/a | backfill prior quarters (see Backfill plan) |

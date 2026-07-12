@@ -123,3 +123,19 @@ def test_month_to_quarter():
     assert ir.month_to_quarter("2026-03") == "2026Q1"
     assert ir.month_to_quarter("2026-04") == "2026Q2"
     assert ir.month_to_quarter("2026-12") == "2026Q4"
+
+
+def test_segment_share_adjusts_numerator(db):
+    seed_complete_quarter(db)
+    # EquipCo disclosed FY2025 semicap share of 50% — with no FY2026 row yet,
+    # 2026 quarters fall back to the most recent earlier year.
+    add_metric(db, "EquipCo", "semicap_segment_share_pct", "2025", 50.0)
+    out = ir.compute_ratio(db)
+    assert out.loc["2026Q1"].domestic_cny == 6_000       # 12,000 * 0.5
+    assert out.loc["2026Q1"].ratio == pytest.approx(6_000 / 42_000)
+
+
+def test_no_segment_data_means_no_adjustment(db):
+    seed_complete_quarter(db)
+    out = ir.compute_ratio(db)
+    assert out.loc["2026Q1"].domestic_cny == 12_000      # factor defaults to 1.0
