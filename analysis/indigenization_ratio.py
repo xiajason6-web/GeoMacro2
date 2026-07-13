@@ -101,19 +101,22 @@ def to_usd(df, fx, period_col="period"):
     return out.dropna(subset=["value_usd"]), dropped
 
 
-def quarterly_imports_usd(df, fx):
+def quarterly_imports_usd(df, fx, series=None):
     """Per-quarter USD imports with explicit origin coverage.
 
     A series enters a quarter only when all 3 months are present (a partial
     quarter would read as an import collapse). Series absent from a quarter
-    are listed in missing_origins — the quarter is NOT dropped."""
-    imports = df[df.metric_name.isin(IMPORT_SERIES)].copy()
+    are listed in missing_origins — the quarter is NOT dropped.
+    `series` (default IMPORT_SERIES) lets reconciliation compute
+    reduced-coverage variants."""
+    series = IMPORT_SERIES if series is None else series
+    imports = df[df.metric_name.isin(series)].copy()
     if imports.empty:
         return pd.DataFrame(
             columns=["imports_usd", "coverage_origins", "missing_origins"]
         )
-    imports["origin"] = imports.metric_name.map(lambda m: IMPORT_SERIES[m][0])
-    imports["currency"] = imports.metric_name.map(lambda m: IMPORT_SERIES[m][1])
+    imports["origin"] = imports.metric_name.map(lambda m: series[m][0])
+    imports["currency"] = imports.metric_name.map(lambda m: series[m][1])
     imports, dropped = to_usd(imports, fx)
     if len(dropped):
         print(f"WARNING: {len(dropped)} import rows lacked an FX rate — excluded")
@@ -124,7 +127,7 @@ def quarterly_imports_usd(df, fx):
     imports = imports.merge(complete, on=["quarter", "origin"])
 
     rows = []
-    all_origins = [o for o, _ in IMPORT_SERIES.values()]
+    all_origins = [o for o, _ in series.values()]
     for quarter, group in imports.groupby("quarter"):
         origins = sorted(group.origin.unique())
         missing = [o for o in all_origins if o not in origins] + KNOWN_UNAVAILABLE
@@ -139,10 +142,14 @@ def quarterly_imports_usd(df, fx):
     return pd.DataFrame(rows).set_index("quarter")
 
 
-def quarterly_domestic_usd(df, fx):
+def quarterly_domestic_usd(df, fx, metric=None, entities=None):
     """Numerator: domestic semicap revenue per quarter in USD, plus company
-    count and how many company-quarters carry an ESTIMATED flag."""
-    rev = df[(df.metric_name == NUMERATOR_METRIC) & (df.layer == "equipment")].copy()
+    count and how many company-quarters carry an ESTIMATED flag.
+    `metric`/`entities` let reconciliation compute scope variants."""
+    metric = NUMERATOR_METRIC if metric is None else metric
+    rev = df[(df.metric_name == metric) & (df.layer == "equipment")].copy()
+    if entities is not None:
+        rev = rev[rev.entity.isin(entities)]
     if rev.empty:
         return pd.DataFrame(columns=["domestic_semicap_usd", "n_companies", "n_estimated"])
     rev["currency"] = "CNY"

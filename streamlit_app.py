@@ -82,6 +82,42 @@ if ratio_csv.exists():
             use_container_width=True,
         )
 
+# ---- consensus reconciliation ----------------------------------------------------
+
+st.header("vs published estimates (consensus reconciliation)")
+bench = load(
+    "SELECT source, period, value, numerator_scope, method_notes, source_url"
+    " FROM benchmarks ORDER BY period, source"
+)
+if not bench.empty and ratio_csv.exists():
+    figb = go.Figure()
+    figb.add_scatter(
+        x=ratio.quarter, y=ratio.ratio, mode="lines+markers",
+        name="This tracker (v2, quarterly)",
+    )
+    for source, grp in bench.groupby("source"):
+        figb.add_scatter(
+            x=[f"{p.rstrip('E')}Q4" for p in grp.period], y=grp.value / 100,
+            mode="markers", name=source, marker=dict(size=13, symbol="diamond"),
+            text=grp.numerator_scope,
+            hovertemplate="%{x}: %{y:.0%}<br>scope: %{text}",
+        )
+    figb.update_layout(
+        yaxis=dict(title="ratio", range=[0, 0.5], tickformat=".0%"),
+        legend=dict(orientation="h", y=-0.25), height=400, margin=dict(t=20),
+    )
+    st.plotly_chart(figb, use_container_width=True)
+    st.caption(
+        "Benchmark scopes differ from ours and from each other — the gap"
+        " decomposition (numerator scope, import coverage, currency, company"
+        " scope) is in data/exports/reconciliation.md; every benchmark row"
+        " cites an archived source page."
+    )
+    st.dataframe(
+        bench[["source", "period", "value", "numerator_scope"]],
+        hide_index=True, use_container_width=True,
+    )
+
 # ---- company revenue ------------------------------------------------------------
 
 st.header("Quarterly revenue — listed Chinese semicap & foundries")

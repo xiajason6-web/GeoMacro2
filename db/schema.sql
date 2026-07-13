@@ -85,3 +85,20 @@ CREATE TABLE fx_rates (
     document_id  INTEGER NOT NULL REFERENCES documents(id),
     PRIMARY KEY (currency, period)
 );
+
+-- Added 2026-07-13 (work order P2: consensus reconciliation). Third-party
+-- published estimates of China's equipment indigenization, seeded manually
+-- from cited reports (collectors/benchmarks.py); document_id points at the
+-- archived source page.
+CREATE TABLE benchmarks (
+    id                INTEGER PRIMARY KEY,
+    source            TEXT NOT NULL,      -- 'Bernstein', 'UBS', 'CSIS', ...
+    period            TEXT NOT NULL,      -- '2025', '2026E'
+    value             REAL NOT NULL,      -- percent, 0-100
+    numerator_scope   TEXT NOT NULL,
+    denominator_scope TEXT NOT NULL,
+    method_notes      TEXT,
+    source_url        TEXT NOT NULL,
+    document_id       INTEGER REFERENCES documents(id),
+    UNIQUE (source, period)
+);
