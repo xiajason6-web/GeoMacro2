@@ -109,3 +109,24 @@ def test_estat_parse_drops_zero_filled_unpublished_months():
     # Known-good: Jan 2026 = 101,449,288 thousand yen summed across the five
     # HS-9 sub-codes, converted to yen.
     assert rows[0] == ("2026-01", 101_449_288_000)
+
+
+# ---- dynamic reporting periods (cninfo) ---------------------------------------
+
+def test_cninfo_periods_track_the_calendar():
+    import datetime
+    import cninfo_filings as cf
+
+    # Mid-July 2026: Q1s through 2026 exist; 2026Q3's window hasn't opened;
+    # H1 2026 summaries JUST opened (July 1); FY2025 annuals open, FY2026 not.
+    today = datetime.date(2026, 7, 13)
+    tags = [p[0] for p in cf.build_periods(today)]
+    assert "2026Q1" in tags and "2026Q3" not in tags and "2023Q1" in tags
+    stags = [p[0] for p in cf.build_summary_periods(today)]
+    assert "2026H1" in stags and "2025" in stags and "2026" not in stags
+    years = [y for y, _ in cf.build_annual_full(today)]
+    assert years == ["2023", "2024", "2025"]
+
+    # Same date next year: the new seasons appear without a code change.
+    later = datetime.date(2026, 10, 2)
+    assert "2026Q3" in [p[0] for p in cf.build_periods(later)]

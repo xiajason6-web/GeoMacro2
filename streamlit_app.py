@@ -192,14 +192,21 @@ st.caption(
 
 # ---- mirror trade ---------------------------------------------------------------
 
-st.header("China equipment imports (mirror data, HS 8486)")
+st.header("China imports (mirror data)")
+hs = st.radio(
+    "Series", ["HS 8486 — chipmaking equipment", "HS 8542 — integrated circuits"],
+    horizontal=True,
+)
+code = "8486" if "8486" in hs else "8542"
 imports = load(
-    """
+    f"""
     SELECT m.metric_name, m.period, m.value FROM metrics m
     JOIN entities e ON e.id = m.entity_id AND e.name_en = 'China'
-    WHERE m.metric_name IN ('mirror_exports_eu27_hs8486_eur',
-                            'mirror_exports_jp_hs8486_jpy',
-                            'mirror_exports_us_hs8486_usd')
+    WHERE m.metric_name IN ('mirror_exports_eu27_hs{code}_eur',
+                            'mirror_exports_jp_hs{code}_jpy',
+                            'mirror_exports_us_hs{code}_usd',
+                            'mirror_exports_kr_hs{code}_usd',
+                            'mirror_exports_sg_hs{code}_usd')
       AND m.document_id = (
         SELECT MAX(m2.document_id) FROM metrics m2
         WHERE m2.entity_id = m.entity_id AND m2.metric_name = m.metric_name
@@ -208,9 +215,11 @@ imports = load(
     """
 )
 labels = {
-    "mirror_exports_eu27_hs8486_eur": "EU27 (EUR)",
-    "mirror_exports_jp_hs8486_jpy": "Japan (JPY)",
-    "mirror_exports_us_hs8486_usd": "US (USD)",
+    f"mirror_exports_eu27_hs{code}_eur": "EU27 (EUR)",
+    f"mirror_exports_jp_hs{code}_jpy": "Japan (JPY)",
+    f"mirror_exports_us_hs{code}_usd": "US (USD)",
+    f"mirror_exports_kr_hs{code}_usd": "Korea (USD)",
+    f"mirror_exports_sg_hs{code}_usd": "Singapore (USD)",
 }
 fig3 = go.Figure()
 for metric, label in labels.items():

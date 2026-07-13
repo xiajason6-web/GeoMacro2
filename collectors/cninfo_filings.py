@@ -35,41 +35,59 @@ SEARCH_API = "https://www.cninfo.com.cn/new/information/topSearch/query"
 QUERY_API = "https://www.cninfo.com.cn/new/hisAnnouncement/query"
 STATIC_HOST = "https://static.cninfo.com.cn/"
 
-# (period tag, cninfo category, publication window, title keyword)
-PERIODS = [
-    ("2023Q1", "category_yjdbg_szsh", "2023-04-01~2023-06-30", "一季度报告"),
-    ("2023Q3", "category_sjdbg_szsh", "2023-10-01~2023-12-31", "三季度报告"),
-    ("2024Q1", "category_yjdbg_szsh", "2024-04-01~2024-06-30", "一季度报告"),
-    ("2024Q3", "category_sjdbg_szsh", "2024-10-01~2024-12-31", "三季度报告"),
-    ("2025Q1", "category_yjdbg_szsh", "2025-04-01~2025-06-30", "一季度报告"),
-    ("2025Q3", "category_sjdbg_szsh", "2025-10-01~2025-12-31", "三季度报告"),
-    ("2026Q1", "category_yjdbg_szsh", "2026-04-01~2026-06-30", "一季度报告"),
-]
+# Reporting periods are GENERATED from the calendar so the nightly run
+# starts looking for each new filing season automatically (Q1 reports:
+# Apr-Jun; Q3: Oct-Dec; H1 summaries: Jul-Sep; annual summaries: Jan-Jun of
+# the following year). Hardcoded lists went stale silently — never again.
+FIRST_YEAR = 2023
 
-# Half-year and annual report SUMMARIES (摘要) — short documents that carry
-# the headline revenue table. Full half-year/annual reports are hundreds of
-# pages and are deliberately not collected. Q2 and Q4 are later DERIVED from
-# these by subtraction (analysis/derive_quarters.py).
-# (period tag, sort key for first_period gate, category, window, title keyword)
-SUMMARY_PERIODS = [
-    ("2023H1", "2023Q2", "category_bndbg_szsh", "2023-07-01~2023-09-30", "半年度报告摘要"),
-    ("2023",   "2023Q4", "category_ndbg_szsh",  "2024-01-01~2024-06-30", "年度报告摘要"),
-    ("2024H1", "2024Q2", "category_bndbg_szsh", "2024-07-01~2024-09-30", "半年度报告摘要"),
-    ("2024",   "2024Q4", "category_ndbg_szsh",  "2025-01-01~2025-06-30", "年度报告摘要"),
-    ("2025H1", "2025Q2", "category_bndbg_szsh", "2025-07-01~2025-09-30", "半年度报告摘要"),
-    ("2025",   "2025Q4", "category_ndbg_szsh",  "2026-01-01~2026-06-30", "年度报告摘要"),
-]
+
+def build_periods(today=None):
+    """[(period tag, category, window, title keyword)] for quarterly reports
+    whose publication window has opened by `today`."""
+    today = today or datetime.date.today()
+    out = []
+    for year in range(FIRST_YEAR, today.year + 1):
+        if datetime.date(year, 4, 1) <= today:
+            out.append((f"{year}Q1", "category_yjdbg_szsh",
+                        f"{year}-04-01~{year}-06-30", "一季度报告"))
+        if datetime.date(year, 10, 1) <= today:
+            out.append((f"{year}Q3", "category_sjdbg_szsh",
+                        f"{year}-10-01~{year}-12-31", "三季度报告"))
+    return out
+
+
+def build_summary_periods(today=None):
+    """[(period tag, sort key for the first_period gate, category, window,
+    title keyword)] for H1/annual SUMMARIES (摘要 — short documents carrying
+    the headline revenue table; the full reports are hundreds of pages and
+    deliberately not collected. Q2/Q4 are DERIVED by subtraction later)."""
+    today = today or datetime.date.today()
+    out = []
+    for year in range(FIRST_YEAR, today.year + 1):
+        if datetime.date(year, 7, 1) <= today:
+            out.append((f"{year}H1", f"{year}Q2", "category_bndbg_szsh",
+                        f"{year}-07-01~{year}-09-30", "半年度报告摘要"))
+        if datetime.date(year + 1, 1, 1) <= today:
+            out.append((f"{year}", f"{year}Q4", "category_ndbg_szsh",
+                        f"{year + 1}-01-01~{year + 1}-06-30", "年度报告摘要"))
+    return out
 
 # Full annual reports (300+ pages) exceed the extraction API's PDF limits,
 # so for segment revenue we download them, locate the 分行业 (revenue by
 # segment) pages with pypdf, and archive ONLY that excerpt as the document.
 # The excerpt is the evidence a human would check; the URL points at the
 # full filing. Years and publication windows:
-ANNUAL_FULL = [
-    ("2023", "2024-01-01~2024-06-30"),
-    ("2024", "2025-01-01~2025-06-30"),
-    ("2025", "2026-01-01~2026-06-30"),
-]
+def build_annual_full(today=None):
+    """[(fiscal year, publication window)] for full annual reports whose
+    publication window has opened."""
+    import datetime as _dt
+    today = today or _dt.date.today()
+    return [
+        (str(year), f"{year + 1}-01-01~{year + 1}-06-30")
+        for year in range(FIRST_YEAR, today.year + 1)
+        if _dt.date(year + 1, 1, 1) <= today
+    ]
 SEGMENT_KEYWORDS = ["分行业", "营业收入构成", "主营业务分行业"]
 SLICE_MAX_PAGES = 8
 
@@ -258,7 +276,7 @@ def collect_segment_slices(conn, source_id, session, org_ids):
     """Download equipment makers' full annual reports, archive only the
     segment-table excerpt as a document (title marks it 节选/excerpt)."""
     for company in [c for c in COMPANIES if c["layer"] == "equipment"]:
-        for year, se_date in ANNUAL_FULL:
+        for year, se_date in build_annual_full():
             have = conn.execute(
                 "SELECT 1 FROM documents WHERE title LIKE ?",
                 (f"%{company['name_zh']}%{year}年年度报告%节选%",),
@@ -336,9 +354,9 @@ def main():
     session.headers["User-Agent"] = USER_AGENT
     org_ids = {}
 
-    all_periods = [(tag, tag, cat, se, kw) for tag, cat, se, kw in PERIODS] + [
-        (tag, sort_key, cat, se, kw) for tag, sort_key, cat, se, kw in SUMMARY_PERIODS
-    ]
+    all_periods = [
+        (tag, tag, cat, se, kw) for tag, cat, se, kw in build_periods()
+    ] + list(build_summary_periods())
     for company in COMPANIES:
         ensure_entity(conn, company)
         for period_tag, sort_key, category, se_date, keyword in all_periods:

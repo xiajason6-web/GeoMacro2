@@ -296,6 +296,27 @@ def parse_estat_response(payload):
     return sorted((p, v) for p, v in monthly.items() if v > 0)
 
 
+def series_values_unchanged(conn, entity_id, metric, rows):
+    """True when every (period, value) in rows already sits in metrics with
+    the same value — used for sources whose response bytes are volatile
+    (e-Stat embeds a timestamp) so sha-dedupe never fires."""
+    if not rows:
+        return True
+    existing = dict(
+        conn.execute(
+            "SELECT period, value FROM metrics m WHERE entity_id = ?"
+            " AND metric_name = ? AND document_id = (SELECT MAX(m2.document_id)"
+            " FROM metrics m2 WHERE m2.entity_id = m.entity_id"
+            " AND m2.metric_name = m.metric_name AND m2.period = m.period)",
+            (entity_id, metric),
+        )
+    )
+    return all(
+        period in existing and abs(existing[period] - value) < 0.5
+        for period, value in rows
+    )
+
+
 def collect_japan(conn):
     app_id = os.environ.get("ESTAT_APP_ID")
     if not app_id:
@@ -323,10 +344,17 @@ def collect_japan(conn):
             )
             # Never store the appId: strip the credential before the documents
             # table (rule 9). The stored URL is reproducible with any key.
-            public_url = url.replace(f"appId={app_id}", "appId=REDACTED")
-            doc_id, is_new = ingest_raw(conn, source_id, public_url, resp.content, title)
             rows = parse_estat_response(resp.json())
             total_months += len(rows)
+            if series_values_unchanged(conn, entity_id, series["metric"], rows):
+                print(
+                    f"{series['metric']} [{table['stats_data_id']}]:"
+                    f" values unchanged ({len(rows)} months) — raw not re-archived"
+                )
+                time.sleep(1)
+                continue
+            public_url = url.replace(f"appId={app_id}", "appId=REDACTED")
+            doc_id, is_new = ingest_raw(conn, source_id, public_url, resp.content, title)
             if is_new:
                 # Each month cites exactly the raw response it came from.
                 write_metrics(
