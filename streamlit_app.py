@@ -234,17 +234,27 @@ events = load(
 )
 links = load(
     """
-    SELECT x.event_category, e.name_en AS entity, x.direction, x.confidence
+    SELECT x.event_category, e.name_en AS entity, x.direction, x.confidence,
+           x.channel_description
     FROM exposure_links x JOIN entities e ON e.id = x.entity_id
+    WHERE x.human_reviewed = 1
     """
 )
+pending_links = load(
+    "SELECT COUNT(*) AS n FROM exposure_links WHERE human_reviewed = 0"
+).n[0]
+if pending_links:
+    st.caption(f"{pending_links} exposure links pending human review are not shown.")
 for _, ev in events.iterrows():
     with st.expander(f"{ev.event_date} · [{ev.category}] {ev.summary[:110]}"):
         mapped = links[links.event_category == ev.category]
         if mapped.empty:
             st.write("No transmission mapping for this category yet.")
         else:
-            st.dataframe(mapped[["entity", "direction", "confidence"]], hide_index=True)
+            st.dataframe(
+                mapped[["entity", "direction", "confidence", "channel_description"]],
+                hide_index=True,
+            )
 
 # ---- review queue ----------------------------------------------------------------
 

@@ -98,13 +98,32 @@ def test_exposure_report_flags_unmapped_categories(db):
     report = "\n".join(exposure_map.exposure_report(db, days=7))
     assert "NO MAPPING" in report
 
+
+def test_unreviewed_links_never_publish(db):
+    exposure_map.sync_links(db)
     db.execute(
         "INSERT INTO events (event_date, category, actor, summary_en, document_id)"
         " VALUES (date('now'), 'entity_list', 'BIS', 'additions', 1)"
     )
     report = "\n".join(exposure_map.exposure_report(db, days=7))
+    assert "Naura: benefit" not in report          # gate holds
+    assert "pending human review" in report        # but the gap is visible
+
+    exposure_map.approve(db, "all")
+    report = "\n".join(exposure_map.exposure_report(db, days=7))
     assert "Naura: benefit" in report
     assert "SMIC: harm" in report
+    assert "via:" in report                        # concrete channel shown
+
+
+def test_directions_vocabulary_enforced(db):
+    import sqlite3 as sq
+    with pytest.raises(sq.IntegrityError):
+        db.execute(
+            "INSERT INTO exposure_links (event_category, channel_description,"
+            " entity_id, direction, confidence, rationale)"
+            " VALUES ('x', 'c', 1, 'buy', 'high', 'r')"
+        )
 
 
 # ---- red team validator ---------------------------------------------------------

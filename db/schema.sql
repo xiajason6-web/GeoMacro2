@@ -55,14 +55,18 @@ CREATE TABLE events (
     document_id INTEGER NOT NULL REFERENCES documents(id)
 );
 
+-- Rebuilt 2026-07-13 (work order P5): direction gains 'neutral';
+-- human_reviewed is the publication gate — nothing with 0 reaches digest
+-- or dashboard output.
 CREATE TABLE exposure_links (
     id                  INTEGER PRIMARY KEY,
     event_category      TEXT NOT NULL,      -- joins conceptually to events.category
     channel_description TEXT NOT NULL,      -- the causal channel, spelled out in prose
     entity_id           INTEGER NOT NULL REFERENCES entities(id),
-    direction           TEXT NOT NULL CHECK (direction IN ('benefit', 'harm', 'mixed')),
+    direction           TEXT NOT NULL CHECK (direction IN ('benefit', 'harm', 'mixed', 'neutral')),
     confidence          TEXT NOT NULL CHECK (confidence IN ('low', 'medium', 'high')),
-    rationale           TEXT NOT NULL
+    rationale           TEXT NOT NULL,
+    human_reviewed      INTEGER NOT NULL DEFAULT 0 CHECK (human_reviewed IN (0, 1))
 );
 
 CREATE TABLE review_queue (
