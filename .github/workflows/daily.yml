@@ -98,6 +98,7 @@ jobs:
           python analysis/indigenization_ratio.py
           python analysis/charts.py
           python analysis/export_metrics_csv.py
+          python analysis/nowcast.py
 
       - name: Tests
         id: tests

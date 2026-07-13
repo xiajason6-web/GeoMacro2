@@ -101,6 +101,22 @@ def section_events(conn, days=30):
     return lines + report
 
 
+def section_nowcast(conn):
+    lines = ["## Nowcast (ESTIMATE — not measured data)", ""]
+    rows = conn.execute(
+        "SELECT target_quarter, ratio_nowcast, ratio_low, ratio_high, made_at"
+        " FROM nowcasts WHERE made_at = (SELECT MAX(made_at) FROM nowcasts)"
+        " ORDER BY target_quarter"
+    ).fetchall()
+    if not rows:
+        return lines + ["No nowcast yet — run analysis/nowcast.py."]
+    lines.append(f"_Model estimate produced {rows[0][4]}; drivers in data/exports/nowcast.md._")
+    lines.append("")
+    for quarter, nc, low, high, _ in rows:
+        lines.append(f"- {quarter}: {nc:.1%} (band {low:.1%} – {high:.1%})")
+    return lines
+
+
 def section_red_team():
     today = datetime.date.today().isoformat()
     path = OUT_DIR / f"red_team_{today}.md"
@@ -142,6 +158,8 @@ def main():
         section_ratio(conn),
         [""],
         section_events(conn),
+        [""],
+        section_nowcast(conn),
         [""],
         section_red_team(),
         [""],

@@ -82,6 +82,48 @@ if ratio_csv.exists():
             use_container_width=True,
         )
 
+# ---- nowcast (estimate — subordinate styling by design) --------------------------
+
+nowcasts = load(
+    "SELECT target_quarter, ratio_nowcast, ratio_low, ratio_high, made_at, drivers"
+    " FROM nowcasts WHERE made_at = (SELECT MAX(made_at) FROM nowcasts)"
+    " ORDER BY target_quarter"
+)
+if not nowcasts.empty and ratio_csv.exists():
+    st.header("Nowcast — model estimate, not measured data")
+    st.info(
+        f"NOWCAST produced {nowcasts.made_at.iloc[0]}: fills unpublished months"
+        " by carry-forward scaled by the vendor China-revenue signal, and"
+        " extrapolates unreported revenue. Scenario band, not a confidence"
+        " interval. The measured series above is the record; this is a bridge."
+    )
+    fign = go.Figure()
+    fign.add_scatter(
+        x=ratio.quarter, y=ratio.ratio, mode="lines+markers",
+        name="Measured (v2)", line=dict(color="#1f77b4"),
+    )
+    fign.add_scatter(
+        x=nowcasts.target_quarter, y=nowcasts.ratio_nowcast, mode="markers",
+        name="NOWCAST (estimate)",
+        marker=dict(symbol="diamond-open", size=14, color="#999999"),
+        error_y=dict(
+            type="data", symmetric=False,
+            array=nowcasts.ratio_high - nowcasts.ratio_nowcast,
+            arrayminus=nowcasts.ratio_nowcast - nowcasts.ratio_low,
+        ),
+    )
+    fign.update_layout(
+        yaxis=dict(title="ratio", range=[0, 0.5], tickformat=".0%"),
+        legend=dict(orientation="h", y=-0.25), height=380, margin=dict(t=20),
+    )
+    st.plotly_chart(fign, use_container_width=True)
+    for _, nc in nowcasts.iterrows():
+        with st.expander(
+            f"{nc.target_quarter}: {nc.ratio_nowcast:.1%}"
+            f" [{nc.ratio_low:.1%} – {nc.ratio_high:.1%}] — drivers"
+        ):
+            st.text(nc.drivers)
+
 # ---- consensus reconciliation ----------------------------------------------------
 
 st.header("vs published estimates (consensus reconciliation)")

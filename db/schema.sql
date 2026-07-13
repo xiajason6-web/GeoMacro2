@@ -116,3 +116,20 @@ CREATE TABLE hifreq_signals (
     document_id  INTEGER NOT NULL REFERENCES documents(id),
     retrieved_at TEXT NOT NULL
 );
+
+-- Added 2026-07-13 (work order P4: nowcast). One row per (day made, target
+-- quarter): the current-quarter ESTIMATE with its band and drivers. Kept
+-- forever so the nowcast's own track record vs later actuals is visible.
+CREATE TABLE nowcasts (
+    id                  INTEGER PRIMARY KEY,
+    made_at             TEXT NOT NULL,      -- date the nowcast was produced
+    target_quarter      TEXT NOT NULL,      -- e.g. '2026Q2'
+    ratio_nowcast       REAL NOT NULL,
+    ratio_low           REAL NOT NULL,
+    ratio_high          REAL NOT NULL,
+    numerator_usd       REAL NOT NULL,
+    imports_usd         REAL NOT NULL,
+    drivers             TEXT NOT NULL,      -- human-readable driver list
+    methodology_version TEXT NOT NULL,
+    UNIQUE (made_at, target_quarter)
+);
