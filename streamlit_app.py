@@ -48,15 +48,30 @@ if ratio_csv.exists():
         " EU27, Japan, US, Korea, Singapore (Taiwan unavailable). Quarters"
         " with reduced origin coverage are marked. See analysis/methodology.md."
     )
+    # A quarter is fully covered when the only missing origin is Taiwan
+    # (which has no machine-readable source). Reduced-coverage quarters
+    # understate imports -> overstate the ratio, so they must not headline.
+    full = ratio[ratio.missing_origins.fillna("") == "Taiwan"]
+    reduced = ratio[ratio.missing_origins.fillna("") != "Taiwan"]
+
     col1, col2 = st.columns([2, 1])
     with col1:
         fig = go.Figure()
         fig.add_bar(x=ratio.quarter, y=ratio.domestic_semicap_usd / 1e9, name="Domestic semicap revenue (bn USD)")
         fig.add_bar(x=ratio.quarter, y=ratio.imports_usd / 1e9, name="Equipment imports (bn USD)")
         fig.add_scatter(
-            x=ratio.quarter, y=ratio.ratio, name="Indigenization ratio",
+            x=full.quarter, y=full.ratio, name="Ratio (full coverage)",
             yaxis="y2", mode="lines+markers",
         )
+        if not reduced.empty:
+            fig.add_scatter(
+                x=reduced.quarter, y=reduced.ratio,
+                name="Ratio (PARTIAL coverage — overstated)",
+                yaxis="y2", mode="markers",
+                marker=dict(symbol="circle-open", size=13, color="#d62728"),
+                text=reduced.missing_origins,
+                hovertemplate="%{x}: %{y:.1%}<br>missing: %{text}<extra></extra>",
+            )
         fig.update_layout(
             barmode="group",
             yaxis=dict(title="bn USD"),
@@ -67,13 +82,21 @@ if ratio_csv.exists():
         )
         st.plotly_chart(fig, use_container_width=True)
     with col2:
-        latest = ratio.iloc[-1]
-        first = ratio.iloc[0]
+        # Headline the latest FULLY-covered quarter, never a partial one.
+        headline = full.iloc[-1]
+        first = full.iloc[0]
         st.metric(
-            f"Latest ({latest.quarter})",
-            f"{latest.ratio:.1%}",
-            f"{latest.ratio - first.ratio:+.1%} vs {first.quarter}",
+            f"Latest full-coverage quarter ({headline.quarter})",
+            f"{headline.ratio:.1%}",
+            f"{headline.ratio - first.ratio:+.1%} vs {first.quarter}",
         )
+        if not reduced.empty:
+            newest = reduced.iloc[-1]
+            st.caption(
+                f"⚠️ {newest.quarter} reads {newest.ratio:.1%} but is missing"
+                f" {newest.missing_origins} on the imports side — overstated,"
+                " not comparable. The nowcast below completes it."
+            )
         st.dataframe(
             ratio[["quarter", "ratio", "coverage_origins", "n_estimated"]].assign(
                 ratio=lambda d: d.ratio.map("{:.1%}".format)
