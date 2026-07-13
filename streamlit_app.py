@@ -155,11 +155,25 @@ bench = load(
     " FROM benchmarks ORDER BY period, source"
 )
 if not bench.empty and ratio_csv.exists():
+    # Split the same way as the headline chart: only full-coverage quarters
+    # are comparable to the benchmarks. Plotting the partial 2026Q1 (36.4%,
+    # missing Korea+Singapore imports) here would show us as a false outlier
+    # above every consensus estimate.
+    b_full = ratio[ratio.missing_origins.fillna("") == "Taiwan"]
+    b_reduced = ratio[ratio.missing_origins.fillna("") != "Taiwan"]
     figb = go.Figure()
     figb.add_scatter(
-        x=ratio.quarter, y=ratio.ratio, mode="lines+markers",
-        name="This tracker (v2, quarterly)",
+        x=b_full.quarter, y=b_full.ratio, mode="lines+markers",
+        name="This tracker (v2, full coverage)",
     )
+    if not b_reduced.empty:
+        figb.add_scatter(
+            x=b_reduced.quarter, y=b_reduced.ratio, mode="markers",
+            name="This tracker (PARTIAL — not comparable)",
+            marker=dict(symbol="circle-open", size=13, color="#d62728"),
+            text=b_reduced.missing_origins,
+            hovertemplate="%{x}: %{y:.1%}<br>missing imports: %{text}<extra></extra>",
+        )
     for source, grp in bench.groupby("source"):
         figb.add_scatter(
             x=[f"{p.rstrip('E')}Q4" for p in grp.period], y=grp.value / 100,
