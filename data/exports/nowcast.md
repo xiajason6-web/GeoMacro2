@@ -2,7 +2,7 @@
 
 _Produced 2026-07-13; nowcast model nc-1.0.0. Last fully-measured quarter: 2025Q4._
 
-## 2026Q1: **25.5%** (band 24.3% – 26.8%)
+## 2026Q1: **24.8%** (band 23.7% – 26.0%)
 
 Drivers:
 - EU27: fully observed ($1.38bn)
@@ -10,10 +10,10 @@ Drivers:
 - Korea: 0/3 months observed ($0.00bn); 3 filled at carry-forward $0.33bn/mo
 - Singapore: 0/3 months observed ($0.00bn); 3 filled at carry-forward $0.88bn/mo
 - US: fully observed ($0.22bn)
-- vendor factor 0.77 (panel mean 31.7% in target window vs 41.2% in base; 3 vs 2 signals) -> applied to filled months: -0.84bn
+- vendor factor 0.85 (panel mean 31.7% in target window vs 37.5% in base; 3 vs 3 signals) -> applied to filled months: -0.56bn
 - revenue: measured/derived for 6 companies (6 with ESTIMATED share-year flags)
 
-## 2026Q2: **32.2%** (band 26.4% – 38.7%)
+## 2026Q2: **31.9%** (band 26.1% – 38.2%)
 
 Drivers:
 - EU27: 1/3 months observed ($0.17bn); 2 filled at carry-forward $0.46bn/mo
@@ -21,7 +21,7 @@ Drivers:
 - Korea: 0/3 months observed ($0.00bn); 3 filled at carry-forward $0.33bn/mo
 - Singapore: 0/3 months observed ($0.00bn); 3 filled at carry-forward $0.88bn/mo
 - US: 2/3 months observed ($0.17bn); 1 filled at carry-forward $0.07bn/mo
-- vendor factor 0.74 (panel mean 26.1% in target window vs 35.5% in base; 4 vs 5 signals) -> applied to filled months: -1.45bn
+- vendor factor 0.76 (panel mean 26.1% in target window vs 34.6% in base; 4 vs 6 signals) -> applied to filled months: -1.34bn
 - revenue: EXTRAPOLATED — same quarter last year x per-company trailing YoY growth (median g=1.35, 6 companies), CNY->USD at 0.147
 
 ## 2026Q3: **31.1%** (band 25.7% – 37.0%)
