@@ -71,18 +71,24 @@ def section_ratio(conn):
     header = rows[0].split(",")
     q_i = header.index("quarter")
     r_i = header.index("ratio")
-    n_i = header.index("n_companies")
-    lines.append("| Quarter | Ratio | Companies |")
-    lines.append("|---|---|---|")
+    c_i = header.index("coverage_origins")
+    m_i = header.index("missing_origins")
+    v_i = header.index("methodology_version")
+    lines.append("| Quarter | Ratio | Origins included | Missing |")
+    lines.append("|---|---|---|---|")
+    version = ""
     for row in rows[1:]:
         cells = row.split(",")
         if cells[r_i]:
-            note = "" if cells[n_i] in ("", "6.0") else " (partial revenue coverage)"
-            lines.append(f"| {cells[q_i]} | {float(cells[r_i]):.1%}{note} | {cells[n_i] or '-'} |")
+            version = cells[v_i]
+            lines.append(
+                f"| {cells[q_i]} | {float(cells[r_i]):.1%} | {cells[c_i]} | {cells[m_i]} |"
+            )
     lines.append("")
     lines.append(
-        "_Coverage: imports EU27+JP+US; revenue = listed cos' total revenue."
-        " Residual biases -> somewhat overstated; see analysis/methodology.md._"
+        f"_Methodology v{version} (USD): numerator = domestic semicap revenue;"
+        " quarters with missing origins are not comparable to fully-covered"
+        " ones — see analysis/methodology.md._"
     )
     return lines
 

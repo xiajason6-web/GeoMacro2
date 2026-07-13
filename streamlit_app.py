@@ -43,22 +43,23 @@ if ratio_csv.exists():
     ratio = pd.read_csv(ratio_csv).dropna(subset=["ratio"])
     st.header("Indigenization ratio (working series)")
     st.warning(
-        "Coverage: imports = EU27 + Japan + US mirror data (KR/TW/SG missing);"
-        " revenue = 6 listed equipment makers, scaled to each company's"
-        " disclosed semicap segment share. See analysis/methodology.md."
+        "Methodology v2 (USD): numerator = domestic semicap revenue (segment-"
+        " and region-adjusted from filings); denominator = mirror imports from"
+        " EU27, Japan, US, Korea, Singapore (Taiwan unavailable). Quarters"
+        " with reduced origin coverage are marked. See analysis/methodology.md."
     )
     col1, col2 = st.columns([2, 1])
     with col1:
         fig = go.Figure()
-        fig.add_bar(x=ratio.quarter, y=ratio.domestic_cny / 1e9, name="Domestic equipment revenue (bn CNY)")
-        fig.add_bar(x=ratio.quarter, y=ratio.imports_cny / 1e9, name="Equipment imports (bn CNY)")
+        fig.add_bar(x=ratio.quarter, y=ratio.domestic_semicap_usd / 1e9, name="Domestic semicap revenue (bn USD)")
+        fig.add_bar(x=ratio.quarter, y=ratio.imports_usd / 1e9, name="Equipment imports (bn USD)")
         fig.add_scatter(
             x=ratio.quarter, y=ratio.ratio, name="Indigenization ratio",
             yaxis="y2", mode="lines+markers",
         )
         fig.update_layout(
             barmode="group",
-            yaxis=dict(title="bn CNY"),
+            yaxis=dict(title="bn USD"),
             yaxis2=dict(title="ratio", overlaying="y", side="right", range=[0, 0.6]),
             legend=dict(orientation="h", y=-0.25),
             height=420,
@@ -74,7 +75,7 @@ if ratio_csv.exists():
             f"{latest.ratio - first.ratio:+.1%} vs {first.quarter}",
         )
         st.dataframe(
-            ratio[["quarter", "ratio", "n_companies"]].assign(
+            ratio[["quarter", "ratio", "coverage_origins", "n_estimated"]].assign(
                 ratio=lambda d: d.ratio.map("{:.1%}".format)
             ),
             hide_index=True,

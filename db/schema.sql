@@ -73,3 +73,15 @@ CREATE TABLE review_queue (
     status     TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'resolved', 'dismissed')),
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- Added 2026-07-12 (work order: common-currency normalization). One row per
+-- (currency, period): how many USD one unit of the currency bought that
+-- month (ECB reference-rate monthly averages; crosses derived via EUR).
+-- Every aggregation across currencies must convert through this table.
+CREATE TABLE fx_rates (
+    currency     TEXT NOT NULL,            -- 'EUR' | 'JPY' | 'CNY' | 'USD' | ...
+    period       TEXT NOT NULL,            -- 'YYYY-MM'
+    usd_per_unit REAL NOT NULL,
+    document_id  INTEGER NOT NULL REFERENCES documents(id),
+    PRIMARY KEY (currency, period)
+);

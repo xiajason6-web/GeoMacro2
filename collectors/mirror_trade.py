@@ -97,6 +97,20 @@ CENSUS_SERIES = [
     {"product": "8542", "metric": "mirror_exports_us_hs8542_usd"},
 ]
 
+# UN Comtrade public preview (keyless; hard limits: ONE period per call,
+# ~500 calls/day). Covers Korea and Singapore; Taiwan is NOT in Comtrade —
+# that gap stays explicit in the ratio's coverage field. Values are USD.
+COMTRADE_API = "https://comtradeapi.un.org/public/v1/preview/C/M/HS"
+COMTRADE_REPORTERS = [("410", "kr"), ("702", "sg")]
+COMTRADE_PRODUCTS = ["8486", "8542"]
+COMTRADE_SINCE = "2023-01"
+COMTRADE_SOURCE = {
+    "name": "UN Comtrade",
+    "url": "https://comtradeplus.un.org",
+    "type": "trade_stats",
+    "language": "en",
+}
+
 CHINA_ENTITY = {
     "name_en": "China",
     "name_zh": "中国",
@@ -391,12 +405,91 @@ def collect_us_census(conn):
     conn.commit()
 
 
+def comtrade_months():
+    """Months from COMTRADE_SINCE through two months ago (publication lag)."""
+    out = []
+    year, month = (int(x) for x in COMTRADE_SINCE.split("-"))
+    today = datetime.date.today()
+    last = (today.replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
+    last = (last - datetime.timedelta(days=1)).replace(day=1)  # two months back
+    current = datetime.date(year, month, 1)
+    while current <= last:
+        out.append(f"{current.year}-{current.month:02d}")
+        current = (current + datetime.timedelta(days=32)).replace(day=1)
+    return out
+
+
+def collect_comtrade(conn):
+    source_id = ensure_source(conn, COMTRADE_SOURCE)
+    entity_id = ensure_china_entity(conn)
+    metric_names = {
+        (code, product): f"mirror_exports_{slug}_hs{product}_usd"
+        for code, slug in COMTRADE_REPORTERS
+        for product in COMTRADE_PRODUCTS
+    }
+    have = {
+        (metric, period)
+        for metric, period in conn.execute(
+            "SELECT DISTINCT metric_name, period FROM metrics WHERE metric_name IN"
+            " (" + ",".join("?" * len(metric_names)) + ")",
+            list(metric_names.values()),
+        )
+    }
+    todo = [
+        m for m in comtrade_months()
+        if any((name, m) not in have for name in metric_names.values())
+    ]
+    if not todo:
+        print("Comtrade KR/SG: up to date")
+        return
+    print(f"Comtrade KR/SG: querying {len(todo)} months (1 call each, keyless preview)")
+    for month in todo:
+        period_param = month.replace("-", "")
+        url = (
+            f"{COMTRADE_API}?reporterCode="
+            + ",".join(code for code, _ in COMTRADE_REPORTERS)
+            + f"&period={period_param}&partnerCode=156&flowCode=X&cmdCode="
+            + ",".join(COMTRADE_PRODUCTS)
+        )
+        resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=120)
+        if resp.status_code == 429:
+            print(f"Comtrade rate limit hit at {month} — stopping; next run resumes here")
+            break
+        resp.raise_for_status()
+        payload = resp.json()
+        rows = payload.get("data") or []
+        wrote = 0
+        doc_id = None
+        for row in rows:
+            key = (str(row["reporterCode"]), str(row["cmdCode"]))
+            metric = metric_names.get(key)
+            value = float(row.get("primaryValue") or 0)
+            if metric is None or value <= 0:
+                continue  # zero/unknown = unpublished, never recorded as zero trade
+            if (metric, month) in have:
+                continue
+            if doc_id is None:
+                title = f"comtrade_kr_sg_hs8486_8542_exports_to_cn_{month}"
+                doc_id, _ = ingest_raw(conn, source_id, url, resp.content, title)
+            note = (
+                "exports to China (partner 156), USD, UN Comtrade monthly"
+                " (mirror of China imports)"
+            )
+            write_metrics(conn, entity_id, metric, [(month, value)], "USD", "USD", doc_id, note)
+            wrote += 1
+        print(f"  {month}: {wrote} series written ({len(rows)} rows returned)")
+        conn.commit()
+        time.sleep(1.5)  # rule 7 + keyless-tier politeness
+    conn.commit()
+
+
 def main():
     load_env()
     conn = connect()
     collect_eurostat(conn)
     collect_japan(conn)
     collect_us_census(conn)
+    collect_comtrade(conn)
     conn.close()
 
 

@@ -143,9 +143,12 @@ def main():
             ).lastrowid
 
         for item in results:
+            # Compare against the STORED form (title + [url] suffix) — comparing
+            # the bare title never matches and duplicates every run.
+            stored_zh = item["title"] + (f" [{item['url']}]" if item["url"] else "")
             already = conn.execute(
                 "SELECT 1 FROM events WHERE event_date = ? AND summary_zh = ?",
-                (item["date"], item["title"]),
+                (item["date"], stored_zh),
             ).fetchone()
             if already:
                 continue
@@ -154,7 +157,7 @@ def main():
                 " (event_date, category, actor, summary_en, summary_zh, document_id)"
                 " VALUES (?, 'policy_unclassified', ?, 'PENDING_TRANSLATION', ?, ?)",
                 (item["date"], item["org"] or "State Council/ministries",
-                 item["title"] + (f" [{item['url']}]" if item["url"] else ""), doc_id),
+                 stored_zh, doc_id),
             )
             new_events += 1
         time.sleep(1)  # rule 7
