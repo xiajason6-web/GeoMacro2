@@ -85,6 +85,8 @@ def connect(db_path=DB_PATH):
 
 
 def china_snippets(html, window=2500, cap=24000):
+    """window/cap are widened for 10-Ks by the caller — annual reports put
+    the geography table further from the word 'China' than 10-Qs do."""
     """HTML -> plain text -> merged windows around 'China' mentions."""
     from bs4 import BeautifulSoup
 
@@ -97,8 +99,26 @@ def china_snippets(html, window=2500, cap=24000):
             spans[-1] = (spans[-1][0], end)
         else:
             spans.append((start, end))
-    out = " [...] ".join(text[s:e] for s, e in spans)
-    return out[:cap]
+    # Prioritize spans that look like the geographic-revenue disclosure —
+    # in a 10-K, dozens of risk-factor 'China' mentions precede the note we
+    # actually need, and a naive cap fills before reaching it.
+    def looks_like_table(chunk):
+        low = chunk.lower()
+        return ("revenue" in low or "net sales" in low) and (
+            "geograph" in low or "region" in low
+        )
+
+    chunks = [text[s:e] for s, e in spans]
+    prioritized = [c for c in chunks if looks_like_table(c)] + [
+        c for c in chunks if not looks_like_table(c)
+    ]
+    out, used = [], 0
+    for chunk in prioritized:
+        if used + len(chunk) > cap:
+            continue
+        out.append(chunk)
+        used += len(chunk)
+    return " [...] ".join(out)
 
 
 def validate(data, expected_end):
@@ -215,7 +235,12 @@ def main():
         report_date = m.group(1)
         print(f"{name_en} {form} {report_date}: doc id={doc_id}")
         html = (REPO_ROOT / raw_path).read_bytes()
-        snippets = china_snippets(html.decode("utf-8", errors="ignore"))
+        wide = form == "10-K"
+        snippets = china_snippets(
+            html.decode("utf-8", errors="ignore"),
+            window=6000 if wide else 2500,
+            cap=60000 if wide else 24000,
+        )
         if not snippets:
             conn.execute(
                 "INSERT INTO review_queue (item_type, item_id, reason)"

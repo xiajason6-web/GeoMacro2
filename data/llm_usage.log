@@ -67,3 +67,5 @@
 2026-07-12T06:59:49Z model=claude-haiku-4-5 input_tokens=113731 output_tokens=663 note=extract_segment_revenue n=5
 2026-07-13T14:35:51Z model=claude-haiku-4-5 input_tokens=401599 output_tokens=2291 note=extract_domestic_share n=18
 2026-07-13T15:23:45Z model=claude-haiku-4-5 input_tokens=110337 output_tokens=2014 note=extract_vendor_china n=18
+2026-07-13T16:21:56Z model=claude-haiku-4-5 input_tokens=35778 output_tokens=298 note=extract_vendor_china n=3
+2026-07-13T16:27:21Z model=claude-haiku-4-5 input_tokens=34460 output_tokens=309 note=extract_vendor_china n=3
