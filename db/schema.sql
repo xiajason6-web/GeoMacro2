@@ -102,3 +102,17 @@ CREATE TABLE benchmarks (
     document_id       INTEGER REFERENCES documents(id),
     UNIQUE (source, period)
 );
+
+-- Added 2026-07-13 (work order P3: high-frequency inputs). Signals that
+-- update between quarterly filings; every row cites an archived document.
+CREATE TABLE hifreq_signals (
+    id           INTEGER PRIMARY KEY,
+    signal_date  TEXT NOT NULL,             -- date the signal refers to
+    signal_type  TEXT NOT NULL,             -- 'vendor_china_revenue' | 'big_fund_holding' | ...
+    entity_id    INTEGER REFERENCES entities(id),
+    value        REAL,                      -- numeric payload where applicable
+    unit         TEXT,
+    summary_en   TEXT NOT NULL,
+    document_id  INTEGER NOT NULL REFERENCES documents(id),
+    retrieved_at TEXT NOT NULL
+);

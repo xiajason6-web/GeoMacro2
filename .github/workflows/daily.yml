@@ -60,6 +60,16 @@ jobs:
         continue-on-error: true
         run: python collectors/policy_monitor.py
 
+      - name: Collect - vendor SEC filings (AMAT/LRCX/KLAC)
+        id: vendors
+        continue-on-error: true
+        run: python collectors/vendor_china_revenue.py
+
+      - name: Collect - Big Fund announcements
+        id: bigfund
+        continue-on-error: true
+        run: python collectors/big_fund.py
+
       - name: Extract - filing revenue (only new filings; usually a no-op)
         id: extract_rev
         continue-on-error: true
@@ -74,6 +84,11 @@ jobs:
         id: classify
         continue-on-error: true
         run: python extraction/translate_classify_policy.py
+
+      - name: Extract - vendor China revenue + signals
+        id: extract_vendor
+        continue-on-error: true
+        run: python extraction/extract_vendor_china.py
 
       - name: Analyze - derive quarters, ratio, chart, CSV export
         id: analyze
@@ -98,7 +113,7 @@ jobs:
           git push
 
       - name: Open issue on failure
-        if: ${{ steps.mirror.outcome == 'failure' || steps.fx.outcome == 'failure' || steps.cninfo.outcome == 'failure' || steps.bis.outcome == 'failure' || steps.policy.outcome == 'failure' || steps.extract_rev.outcome == 'failure' || steps.extract_cum.outcome == 'failure' || steps.classify.outcome == 'failure' || steps.analyze.outcome == 'failure' || steps.tests.outcome == 'failure' }}
+        if: ${{ steps.mirror.outcome == 'failure' || steps.fx.outcome == 'failure' || steps.cninfo.outcome == 'failure' || steps.bis.outcome == 'failure' || steps.policy.outcome == 'failure' || steps.extract_rev.outcome == 'failure' || steps.extract_cum.outcome == 'failure' || steps.classify.outcome == 'failure' || steps.vendors.outcome == 'failure' || steps.bigfund.outcome == 'failure' || steps.extract_vendor.outcome == 'failure' || steps.analyze.outcome == 'failure' || steps.tests.outcome == 'failure' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -111,6 +126,9 @@ jobs:
           [ "${{ steps.extract_rev.outcome }}" = "failure" ] && FAILED="$FAILED extract_filing_revenue"
           [ "${{ steps.extract_cum.outcome }}" = "failure" ] && FAILED="$FAILED extract_cumulative_revenue"
           [ "${{ steps.classify.outcome }}" = "failure" ] && FAILED="$FAILED translate_classify_policy"
+          [ "${{ steps.vendors.outcome }}" = "failure" ] && FAILED="$FAILED vendor_china_revenue"
+          [ "${{ steps.bigfund.outcome }}" = "failure" ] && FAILED="$FAILED big_fund"
+          [ "${{ steps.extract_vendor.outcome }}" = "failure" ] && FAILED="$FAILED extract_vendor_china"
           [ "${{ steps.analyze.outcome }}" = "failure" ] && FAILED="$FAILED analysis"
           [ "${{ steps.tests.outcome }}" = "failure" ] && FAILED="$FAILED tests"
           gh issue create \
