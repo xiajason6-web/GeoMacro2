@@ -18,7 +18,7 @@ Export controls (US Entity List, allied DUV/EUV limits) remove or raise the cost
 
 ## Exposure ladder
 
-_(DRAFT — pending review; business-exposure direction, not a trade call.)_
+_(reviewed; business-exposure direction, not a trade call.)_
 
 | Instrument | Venue | Exposure to rising indigenization | Conf. | Mechanism |
 |---|---|---|---|---|
