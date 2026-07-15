@@ -197,6 +197,48 @@ if not bench.empty and ratio_csv.exists():
         hide_index=True, use_container_width=True,
     )
 
+# ---- exposure ladder + surprise --------------------------------------------------
+
+st.header("Exposure ladder — theme → instruments (research, not advice)")
+st.caption(
+    "How each liquid instrument's business is exposed to rising indigenization"
+    " — direction and mechanism only. No sizing, entries, or targets. Full"
+    " reasoning and falsifiers in data/exports/trade_note.md."
+)
+ladder = load(
+    "SELECT instrument, venue, exposure_sign, confidence, mechanism"
+    " FROM instrument_exposure WHERE human_reviewed = 1"
+    " ORDER BY CASE exposure_sign WHEN 'benefit' THEN 0 WHEN 'harm' THEN 1"
+    " WHEN 'mixed' THEN 2 ELSE 3 END,"
+    " CASE confidence WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END"
+)
+pending_ladder = load(
+    "SELECT COUNT(*) AS n FROM instrument_exposure WHERE human_reviewed = 0"
+).n[0]
+if not ladder.empty:
+    st.dataframe(ladder, hide_index=True, use_container_width=True)
+if pending_ladder:
+    st.caption(f"{pending_ladder} instrument rows pending human review are not shown.")
+
+nc_rows = load(
+    "SELECT target_quarter, ratio_nowcast, ratio_low, ratio_high FROM nowcasts"
+    " WHERE made_at = (SELECT MAX(made_at) FROM nowcasts) ORDER BY target_quarter"
+)
+if not nc_rows.empty and ratio_csv.exists() and not full.empty:
+    base_q = full.index.max() if hasattr(full, "index") else None
+    baseline = float(full.iloc[-1].ratio)
+    nxt = nc_rows.iloc[0]
+    surprise_pp = (nxt.ratio_nowcast - baseline) * 100
+    st.metric(
+        f"Surprise: {nxt.target_quarter} nowcast vs persistence baseline",
+        f"{nxt.ratio_nowcast:.1%}",
+        f"{surprise_pp:+.1f} pp vs {baseline:.1%} (last full-coverage quarter)",
+    )
+    st.caption(
+        "Traders trade the delta, not the level. Estimate only; band"
+        f" {nxt.ratio_low:.1%}–{nxt.ratio_high:.1%}. See data/exports/surprise.md."
+    )
+
 # ---- company revenue ------------------------------------------------------------
 
 st.header("Quarterly revenue — listed Chinese semicap & foundries")

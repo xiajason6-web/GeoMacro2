@@ -99,6 +99,9 @@ jobs:
           python analysis/charts.py
           python analysis/export_metrics_csv.py
           python analysis/nowcast.py
+          python analysis/exposure_ladder.py
+          python analysis/surprise.py
+          python review/trade_note.py
 
       - name: Tests
         id: tests

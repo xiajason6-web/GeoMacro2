@@ -137,3 +137,20 @@ CREATE TABLE nowcasts (
     methodology_version TEXT NOT NULL,
     UNIQUE (made_at, target_quarter)
 );
+
+-- Added 2026-07-13 (exposure ladder): liquid instruments mapped to the
+-- indigenization THEME with a business-exposure sign and a concrete
+-- mechanism. Research framing only — direction + channel, never a trade
+-- call. human_reviewed gates client-facing output, like exposure_links.
+CREATE TABLE instrument_exposure (
+    id              INTEGER PRIMARY KEY,
+    instrument      TEXT NOT NULL,     -- 'ASML', 'SMH', 'USDCNH', '0981.HK'
+    venue           TEXT,              -- 'NASDAQ' | 'ETF' | 'FX' | 'HKEX'
+    instrument_type TEXT NOT NULL,     -- 'equity' | 'etf' | 'index' | 'fx'
+    exposure_sign   TEXT NOT NULL CHECK (exposure_sign IN ('benefit','harm','mixed','neutral')),
+    confidence      TEXT NOT NULL CHECK (confidence IN ('low','medium','high')),
+    mechanism       TEXT NOT NULL,     -- channel to RISING indigenization
+    our_evidence    TEXT,              -- which of our metrics supports it
+    human_reviewed  INTEGER NOT NULL DEFAULT 0 CHECK (human_reviewed IN (0,1)),
+    UNIQUE (instrument)
+);
