@@ -199,24 +199,35 @@ if not bench.empty and ratio_csv.exists():
 
 # ---- causal effect of export controls (DiD) --------------------------------------
 
-did_summary_csv = REPO_ROOT / "data" / "exports" / "did_summary.csv"
-did_es_csv = REPO_ROOT / "data" / "exports" / "did_event_study.csv"
-did_cf_csv = REPO_ROOT / "data" / "exports" / "did_counterfactual.csv"
-did_coef_csv = REPO_ROOT / "data" / "exports" / "did_coefficients.csv"
-
-if did_summary_csv.exists() and did_es_csv.exists() and did_cf_csv.exists():
-    s = pd.read_csv(did_summary_csv).iloc[0]
-    es = pd.read_csv(did_es_csv)
-    cf = pd.read_csv(did_cf_csv)
-
+exports_dir = REPO_ROOT / "data" / "exports"
+if (exports_dir / "did_summary.csv").exists() and (exports_dir / "did_event_study.csv").exists():
     st.header("Causal effect of export controls (difference-in-differences)")
+
+    # Robustness toggle: the ex-Singapore variant drops Singapore from both the
+    # control group and the counterfactual basket (US->Singapore rerouting
+    # caveat). Falls back to the full variant if the variant CSVs aren't present.
+    variants = {"Full allied control (EU27+JP+KR+SG)": ""}
+    if (exports_dir / "did_summary_ex_sg.csv").exists():
+        variants["Drop Singapore (rerouting robustness)"] = "_ex_sg"
+    choice = st.radio(
+        "Control group", list(variants), horizontal=True,
+        help="Robustness check: does the estimate survive removing Singapore,"
+             " where some 'exports' are US firms rerouting via Singapore fabs?",
+    )
+    sfx = variants[choice]
+
+    s = pd.read_csv(exports_dir / f"did_summary{sfx}.csv").iloc[0]
+    es = pd.read_csv(exports_dir / f"did_event_study{sfx}.csv")
+    cf = pd.read_csv(exports_dir / f"did_counterfactual{sfx}.csv")
+    did_coef_csv = exports_dir / f"did_coefficients{sfx}.csv"
+
     st.caption(
         "The ratio has no untreated control group, so identification moves to"
         " the denominator: US-origin imports (hit by unilateral US controls) vs"
-        " allied origins (EU27/Japan/Korea/Singapore — same fabs, same demand"
-        " cycle, not bound by the US rules). Year-month fixed effects absorb the"
-        " fab-capex cycle, so the estimate is the US deviation from the allied"
-        f" path after each control wave. Anchor: {s.anchor_quarter} (pre-control)."
+        " allied origins (same fabs, same demand cycle, not bound by the US"
+        " rules). Year-month fixed effects absorb the fab-capex cycle, so the"
+        " estimate is the US deviation from the allied path after each control"
+        f" wave. Anchor: {s.anchor_quarter} (pre-control)."
     )
 
     m1, m2, m3 = st.columns(3)

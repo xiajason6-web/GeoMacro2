@@ -137,9 +137,11 @@ def _dummies(labels):
 # --------------------------------------------------------------------------
 # Panel construction
 # --------------------------------------------------------------------------
-def load_panel(conn):
+def load_panel(conn, exclude=()):
     """Monthly origin panel of HS 8486 imports to China, converted to USD
-    through fx_rates (the same chokepoint the flagship ratio uses)."""
+    through fx_rates (the same chokepoint the flagship ratio uses). `exclude`
+    drops origins from the control group entirely — used for the ex-Singapore
+    robustness run (the US->Singapore rerouting caveat)."""
     df = ir.load_metrics(conn)
     fx = ir.load_fx(conn)
     imp = df[df.metric_name.isin(ir.IMPORT_SERIES)].copy()
@@ -153,6 +155,8 @@ def load_panel(conn):
         .value_usd.sum()
         .rename(columns={"period": "month"})
     )
+    if exclude:
+        panel = panel[~panel.origin.isin(exclude)]
     panel = panel[panel.value_usd > 0].copy()
     panel["log_imports"] = np.log(panel.value_usd)
     panel["treated"] = (panel.origin == TREATED).astype(float)
@@ -232,11 +236,12 @@ def randomization_inference(panel, true_coef, term="cumulative"):
     return effects, p_value
 
 
-def event_study(panel, baseline=ANCHOR_QUARTER):
+def event_study(panel, baseline=ANCHOR_QUARTER, basket=None):
     """Dynamic DiD on the balanced sub-panel (origins present from 2023-01,
     i.e. excluding EU27) at QUARTERLY frequency. US x quarter coefficients
     relative to `baseline`; pre-baseline coefficients test parallel trends."""
-    bal = panel[panel.origin.isin([TREATED] + COUNTERFACTUAL_BASKET)].copy()
+    basket = COUNTERFACTUAL_BASKET if basket is None else basket
+    bal = panel[panel.origin.isin([TREATED] + basket)].copy()
     bal["quarter"] = bal.month.map(ir.month_to_quarter)
     # Drop the partial tail (Korea+Singapore end 2025-12) so every retained
     # quarter has the full balanced panel and no US-only quarter makes the
@@ -291,11 +296,14 @@ def event_study(panel, baseline=ANCHOR_QUARTER):
 # --------------------------------------------------------------------------
 # The payoff: counterfactual indigenization ratio
 # --------------------------------------------------------------------------
-def counterfactual_ratio(conn, panel):
+def counterfactual_ratio(conn, panel, basket=None):
     """What would the flagship ratio be if US exports had tracked the allied
     basket instead of being suppressed by controls? Rebuild US imports on the
     allied-implied path from the anchor quarter, recompute the ratio, and
-    decompose the actual-vs-counterfactual gap."""
+    decompose the actual-vs-counterfactual gap. The ACTUAL ratio always uses
+    the full-coverage denominator; `basket` only sets which allied origins
+    imply the US counterfactual path (dropping Singapore is a robustness run)."""
+    basket = COUNTERFACTUAL_BASKET if basket is None else basket
     df = ir.load_metrics(conn)
     fx = ir.load_fx(conn)
     imports_q = ir.quarterly_imports_usd(df, fx)          # actual, full coverage
@@ -314,7 +322,7 @@ def counterfactual_ratio(conn, panel):
     wide = pq.pivot(index="quarter", columns="origin", values="value_usd").sort_index()
 
     us_anchor = wide.loc[ANCHOR_QUARTER, TREATED]
-    basket_anchor = wide.loc[ANCHOR_QUARTER, COUNTERFACTUAL_BASKET].sum()
+    basket_anchor = wide.loc[ANCHOR_QUARTER, basket].sum()
 
     rows = []
     for q in wide.index:
@@ -325,9 +333,9 @@ def counterfactual_ratio(conn, panel):
         # Require the whole allied basket present so the growth index is
         # consistent with the anchor — this also drops known partial-data
         # tails (e.g. 2026Q1, where Korea+Singapore lag ~2 months).
-        if wide.loc[q, COUNTERFACTUAL_BASKET].isna().any():
+        if wide.loc[q, basket].isna().any():
             continue
-        basket_now = wide.loc[q, COUNTERFACTUAL_BASKET].sum()
+        basket_now = wide.loc[q, basket].sum()
         us_cf = us_anchor * (basket_now / basket_anchor)   # allied-implied US
         us_actual = wide.loc[q, TREATED]
         suppressed = us_cf - us_actual                     # imports controls removed
@@ -426,7 +434,7 @@ def build_counterfactual_chart(cf):
     print("wrote data/exports/did_counterfactual.html")
 
 
-def build_markdown(did, placebo, p_value, es, cf, its):
+def build_markdown(did, placebo, p_value, es, cf, its, robustness=None):
     b0 = did["US x post_Oct2022"]
     b1 = did["US x post_Oct2023"]
     b2 = did["US x post_Dec2024"]
@@ -552,14 +560,42 @@ def build_markdown(did, placebo, p_value, es, cf, its):
             "the step signs are indicative; the DiD in §1 is the identified",
             "estimate.",
         ]
+    if robustness is not None:
+        did_x, cf_x = robustness
+        cum_x = did_x["cumulative_after_Dec2024"]
+        lat_x = cf_x.iloc[-1]
+        lines += [
+            "",
+            "## 6. Robustness — drop Singapore (rerouting caveat)",
+            "",
+            "Re-run with Singapore removed from BOTH the control group and the",
+            "counterfactual basket, since some US→Singapore flow is US firms",
+            "shipping via Singapore fabs (which would contaminate Singapore as a",
+            "control). The actual ratio is unchanged; only the control group and",
+            "the US counterfactual path move.",
+            "",
+            "| | Full (5 origins) | Ex-Singapore |",
+            "|---|---|---|",
+            f"| Cumulative US effect (log pts) | {cum['coef']:+.3f} |"
+            f" {cum_x['coef']:+.3f} |",
+            f"| Cumulative level effect | {cum['pct_effect']:+.1%} |"
+            f" {cum_x['pct_effect']:+.1%} |",
+            f"| Suppression at {lat_x.name} (pp) | {cf.iloc[-1].suppression_pp:+.1f} |"
+            f" {lat_x.suppression_pp:+.1f} |",
+            "",
+            "The headline is robust to dropping Singapore — the estimate "
+            + ("barely moves" if abs(cum_x["coef"] - cum["coef"]) < 0.15
+               else "shifts but keeps its sign and order of magnitude")
+            + ". Dashboard exposes this as a toggle (did_*_ex_sg.csv).",
+        ]
     lines += [
         "",
         "## Limits (falsifiers)",
         "",
         "- **Rerouting.** Some US→Singapore flow is US firms shipping via",
         "  Singapore fabs, which would understate the true US suppression and",
-        "  contaminate Singapore as a control. The counterfactual basket keeps",
-        "  Singapore; dropping it is a robustness check worth running.",
+        "  contaminate Singapore as a control. Dropping Singapore entirely (§6)",
+        "  barely moves the estimate, so this contamination is not load-bearing.",
         "- **Allied tightening.** The Netherlands/Japan later adopted partial",
         "  controls, making the control group imperfectly untreated and biasing",
         "  the estimate toward zero — so the true US effect is if anything",
@@ -576,11 +612,12 @@ def build_markdown(did, placebo, p_value, es, cf, its):
     return "\n".join(lines)
 
 
-def write_dashboard_csvs(did, placebo, p_value, es, cf):
+def write_dashboard_csvs(did, placebo, p_value, es, cf, suffix=""):
     """Machine-readable exports so the Streamlit dashboard can rebuild these
-    charts natively (its convention: read data, draw in-app, show caveats)."""
-    es.to_csv(OUT_DIR / "did_event_study.csv", index=False)
-    cf.reset_index().to_csv(OUT_DIR / "did_counterfactual.csv", index=False)
+    charts natively (its convention: read data, draw in-app, show caveats).
+    `suffix` distinguishes the robustness variant (e.g. '_ex_sg')."""
+    es.to_csv(OUT_DIR / f"did_event_study{suffix}.csv", index=False)
+    cf.reset_index().to_csv(OUT_DIR / f"did_counterfactual{suffix}.csv", index=False)
 
     terms = ["US x post_Oct2022", "US x post_Oct2023", "US x post_Dec2024"]
     coef_rows = [
@@ -588,7 +625,7 @@ def write_dashboard_csvs(did, placebo, p_value, es, cf):
          "hc1_se": did[t]["hc1_se"], "cluster_se": did[t]["cluster_se"]}
         for t in terms
     ]
-    pd.DataFrame(coef_rows).to_csv(OUT_DIR / "did_coefficients.csv", index=False)
+    pd.DataFrame(coef_rows).to_csv(OUT_DIR / f"did_coefficients{suffix}.csv", index=False)
 
     latest = cf.iloc[-1]
     summary = {
@@ -602,27 +639,46 @@ def write_dashboard_csvs(did, placebo, p_value, es, cf):
         "latest_suppression_pp": latest.suppression_pp,
         "anchor_quarter": ANCHOR_QUARTER,
     }
-    pd.DataFrame([summary]).to_csv(OUT_DIR / "did_summary.csv", index=False)
-    print("wrote data/exports/did_{event_study,counterfactual,coefficients,summary}.csv")
+    pd.DataFrame([summary]).to_csv(OUT_DIR / f"did_summary{suffix}.csv", index=False)
+    print(f"wrote data/exports/did_*{suffix}.csv")
+
+
+def analyze(conn, exclude=(), basket=None):
+    """Run the full DiD variant: panel -> coefficients, placebo, event study,
+    counterfactual. `exclude`/`basket` select the control group (default =
+    all allied origins; ex-Singapore is the rerouting-caveat robustness run)."""
+    panel = load_panel(conn, exclude=exclude)
+    did, _, _ = run_did(panel)
+    placebo, p_value = randomization_inference(
+        panel, did["cumulative_after_Dec2024"]["coef"]
+    )
+    es = event_study(panel, basket=basket)
+    cf = counterfactual_ratio(conn, panel, basket=basket)
+    return did, placebo, p_value, es, cf
 
 
 def main():
     conn = sqlite3.connect(DB_PATH)
-    panel = load_panel(conn)
-    did, beta, names = run_did(panel)
-    placebo, p_value = randomization_inference(
-        panel, did["cumulative_after_Dec2024"]["coef"]
-    )
-    es = event_study(panel)
-    cf = counterfactual_ratio(conn, panel)
-    its = ratio_its(conn)
-    conn.close()
-
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Headline variant: full allied control group.
+    did, placebo, p_value, es, cf = analyze(conn)
     build_event_study_chart(es)
     build_counterfactual_chart(cf)
     write_dashboard_csvs(did, placebo, p_value, es, cf)
-    md = build_markdown(did, placebo, p_value, es, cf, its)
+
+    # Robustness variant: drop Singapore (US->Singapore rerouting caveat) from
+    # both the control group and the counterfactual basket.
+    did_x, placebo_x, p_x, es_x, cf_x = analyze(
+        conn, exclude=["Singapore"], basket=["Japan", "Korea"]
+    )
+    write_dashboard_csvs(did_x, placebo_x, p_x, es_x, cf_x, suffix="_ex_sg")
+
+    its = ratio_its(conn)
+    conn.close()
+
+    md = build_markdown(did, placebo, p_value, es, cf, its,
+                        robustness=(did_x, cf_x))
     (OUT_DIR / "did_export_controls.md").write_text(md)
     print("wrote data/exports/did_export_controls.md")
     print("=" * 78)

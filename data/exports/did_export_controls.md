@@ -128,6 +128,22 @@ n = 12 quarters. Underpowered by construction —
 the step signs are indicative; the DiD in §1 is the identified
 estimate.
 
+## 6. Robustness — drop Singapore (rerouting caveat)
+
+Re-run with Singapore removed from BOTH the control group and the
+counterfactual basket, since some US→Singapore flow is US firms
+shipping via Singapore fabs (which would contaminate Singapore as a
+control). The actual ratio is unchanged; only the control group and
+the US counterfactual path move.
+
+| | Full (5 origins) | Ex-Singapore |
+|---|---|---|
+| Cumulative US effect (log pts) | -1.519 | -1.497 |
+| Cumulative level effect | -78.1% | -77.6% |
+| Suppression at 2025Q4 (pp) | +2.3 | +2.0 |
+
+The headline is robust to dropping Singapore — the estimate barely moves. Dashboard exposes this as a toggle (did_*_ex_sg.csv).
+
 ## Limits (falsifiers)
 
 - **Rerouting.** Some US→Singapore flow is US firms shipping via
