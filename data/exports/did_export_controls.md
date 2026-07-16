@@ -148,8 +148,8 @@ The headline is robust to dropping Singapore — the estimate barely moves. Dash
 
 - **Rerouting.** Some US→Singapore flow is US firms shipping via
   Singapore fabs, which would understate the true US suppression and
-  contaminate Singapore as a control. The counterfactual basket keeps
-  Singapore; dropping it is a robustness check worth running.
+  contaminate Singapore as a control. Dropping Singapore entirely (§6)
+  barely moves the estimate, so this contamination is not load-bearing.
 - **Allied tightening.** The Netherlands/Japan later adopted partial
   controls, making the control group imperfectly untreated and biasing
   the estimate toward zero — so the true US effect is if anything

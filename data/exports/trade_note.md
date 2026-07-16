@@ -6,7 +6,7 @@ _DRAFT for human review. Nothing here is published until a person approves it._
 
 ## Thesis
 
-China's domestic share of wafer-fab-equipment spending is structurally rising: measured at 22.0% in 2025Q4 (full-coverage), up from 11.5% in 2023Q3. The trajectory is a slow, policy-driven substitution of foreign tools by domestic ones — durable, not a blip. It is a market-SHARE shift, not necessarily a capability parity, and the two should not be conflated.
+China's domestic share of wafer-fab-equipment spending is structurally rising: measured at 22.0% in 2025Q4 (full-coverage), up from 14.6% in 2023Q1. The trajectory is a slow, policy-driven substitution of foreign tools by domestic ones — durable, not a blip. It is a market-SHARE shift, not necessarily a capability parity, and the two should not be conflated.
 
 ## Nowcast vs consensus — the gap you'd trade
 
