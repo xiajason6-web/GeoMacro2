@@ -1,6 +1,6 @@
 # Exposure ladder — rising China WFE indigenization
 
-_Research only (DRAFT — analyst review pending). Business-exposure direction and mechanism, not investment advice: no sizing, entries, or price targets._
+_Research only (reviewed). Business-exposure direction and mechanism, not investment advice: no sizing, entries, or price targets._
 
 | Instrument | Venue | Exposure to rising indigenization | Conf. | Mechanism |
 |---|---|---|---|---|
