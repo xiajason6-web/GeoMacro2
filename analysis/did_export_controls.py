@@ -576,6 +576,36 @@ def build_markdown(did, placebo, p_value, es, cf, its):
     return "\n".join(lines)
 
 
+def write_dashboard_csvs(did, placebo, p_value, es, cf):
+    """Machine-readable exports so the Streamlit dashboard can rebuild these
+    charts natively (its convention: read data, draw in-app, show caveats)."""
+    es.to_csv(OUT_DIR / "did_event_study.csv", index=False)
+    cf.reset_index().to_csv(OUT_DIR / "did_counterfactual.csv", index=False)
+
+    terms = ["US x post_Oct2022", "US x post_Oct2023", "US x post_Dec2024"]
+    coef_rows = [
+        {"term": t, "coef": did[t]["coef"], "pct_effect": did[t]["pct_effect"],
+         "hc1_se": did[t]["hc1_se"], "cluster_se": did[t]["cluster_se"]}
+        for t in terms
+    ]
+    pd.DataFrame(coef_rows).to_csv(OUT_DIR / "did_coefficients.csv", index=False)
+
+    latest = cf.iloc[-1]
+    summary = {
+        "cumulative_pct_effect": did["cumulative_after_Dec2024"]["pct_effect"],
+        "cumulative_log_pts": did["cumulative_after_Dec2024"]["coef"],
+        "placebo_p_value": p_value,
+        "n_origins": len(placebo),
+        "latest_quarter": latest.name,
+        "latest_ratio_actual": latest.ratio_actual,
+        "latest_ratio_counterfactual": latest.ratio_counterfactual,
+        "latest_suppression_pp": latest.suppression_pp,
+        "anchor_quarter": ANCHOR_QUARTER,
+    }
+    pd.DataFrame([summary]).to_csv(OUT_DIR / "did_summary.csv", index=False)
+    print("wrote data/exports/did_{event_study,counterfactual,coefficients,summary}.csv")
+
+
 def main():
     conn = sqlite3.connect(DB_PATH)
     panel = load_panel(conn)
@@ -591,6 +621,7 @@ def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     build_event_study_chart(es)
     build_counterfactual_chart(cf)
+    write_dashboard_csvs(did, placebo, p_value, es, cf)
     md = build_markdown(did, placebo, p_value, es, cf, its)
     (OUT_DIR / "did_export_controls.md").write_text(md)
     print("wrote data/exports/did_export_controls.md")

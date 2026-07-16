@@ -197,6 +197,118 @@ if not bench.empty and ratio_csv.exists():
         hide_index=True, use_container_width=True,
     )
 
+# ---- causal effect of export controls (DiD) --------------------------------------
+
+did_summary_csv = REPO_ROOT / "data" / "exports" / "did_summary.csv"
+did_es_csv = REPO_ROOT / "data" / "exports" / "did_event_study.csv"
+did_cf_csv = REPO_ROOT / "data" / "exports" / "did_counterfactual.csv"
+did_coef_csv = REPO_ROOT / "data" / "exports" / "did_coefficients.csv"
+
+if did_summary_csv.exists() and did_es_csv.exists() and did_cf_csv.exists():
+    s = pd.read_csv(did_summary_csv).iloc[0]
+    es = pd.read_csv(did_es_csv)
+    cf = pd.read_csv(did_cf_csv)
+
+    st.header("Causal effect of export controls (difference-in-differences)")
+    st.caption(
+        "The ratio has no untreated control group, so identification moves to"
+        " the denominator: US-origin imports (hit by unilateral US controls) vs"
+        " allied origins (EU27/Japan/Korea/Singapore — same fabs, same demand"
+        " cycle, not bound by the US rules). Year-month fixed effects absorb the"
+        " fab-capex cycle, so the estimate is the US deviation from the allied"
+        f" path after each control wave. Anchor: {s.anchor_quarter} (pre-control)."
+    )
+
+    m1, m2, m3 = st.columns(3)
+    m1.metric(
+        "US exports vs allied path (all 3 waves)",
+        f"{s.cumulative_pct_effect:.0%}",
+        help="Cumulative treatment effect after Oct-2022 + Oct-2023 + Dec-2024,"
+             " cycle differenced out. Level effect from the DiD coefficients.",
+    )
+    m2.metric(
+        f"US-suppression share of the {s.latest_ratio_actual:.0%} ratio ({s.latest_quarter})",
+        f"{s.latest_suppression_pp:.1f} pp",
+        help="How much of the headline indigenization ratio is US-import"
+             " suppression (a denominator effect of the controls) vs genuine"
+             " domestic substitution. Most of the ratio is substitution.",
+    )
+    m3.metric(
+        "Placebo p-value",
+        f"{s.placebo_p_value:.2f}",
+        help=f"Randomization inference across {int(s.n_origins)} origins — the"
+             " sharpest attainable p is 1/n. The case rests on magnitude and the"
+             " parallel-trends event study, not a significance star.",
+    )
+
+    c1, c2 = st.columns(2)
+    with c1:
+        pre, post = es[es.is_pre], es[~es.is_pre]
+        fige = go.Figure()
+        fige.add_scatter(
+            x=pre.quarter, y=pre.coef, mode="markers", name="pre-baseline",
+            marker=dict(color="#7f7f7f", size=8),
+            error_y=dict(type="data", array=1.96 * pre.se, color="#bbbbbb"),
+        )
+        fige.add_scatter(
+            x=post.quarter, y=post.coef, mode="lines+markers", name="post-wave",
+            line=dict(color="#d62728"),
+            error_y=dict(type="data", array=1.96 * post.se, color="#f4b5b5"),
+        )
+        fige.add_hline(y=0, line_dash="dot", line_color="gray")
+        fige.add_vline(x=str(s.anchor_quarter), line_dash="dash", line_color="green")
+        fige.update_layout(
+            title="Event study: US vs allied (log-point deviation)",
+            yaxis=dict(title="log points"), height=380,
+            legend=dict(orientation="h", y=-0.25), margin=dict(t=40),
+        )
+        st.plotly_chart(fige, use_container_width=True)
+        st.caption(
+            "Flat, near-zero coefficients *before* the green baseline = parallel"
+            " trends (the design's key assumption); the steady decline after is"
+            " the control effect accumulating across the three waves."
+        )
+    with c2:
+        figc = go.Figure()
+        figc.add_scatter(
+            x=cf.quarter, y=cf.ratio_counterfactual, mode="lines",
+            name="Counterfactual (US tracks allies)",
+            line=dict(color="#7f7f7f", dash="dash"),
+        )
+        figc.add_scatter(
+            x=cf.quarter, y=cf.ratio_actual, mode="lines+markers",
+            name="Actual ratio", line=dict(color="#1f77b4"),
+            fill="tonexty", fillcolor="rgba(214,39,40,0.15)",
+        )
+        figc.update_layout(
+            title="Actual vs counterfactual indigenization ratio",
+            yaxis=dict(title="ratio", tickformat=".0%"), height=380,
+            legend=dict(orientation="h", y=-0.25), margin=dict(t=40),
+        )
+        st.plotly_chart(figc, use_container_width=True)
+        st.caption(
+            "Shaded gap = US-import suppression (denominator effect of controls)."
+            " The counterfactual line is domestic substitution — the part that"
+            " would have happened anyway. Substitution does the heavy lifting."
+        )
+
+    if did_coef_csv.exists():
+        with st.expander("DiD coefficients & method"):
+            coef = pd.read_csv(did_coef_csv)
+            coef["level_effect"] = coef.pct_effect.map(lambda v: f"{v:+.1%}")
+            coef["coef"] = coef.coef.map(lambda v: f"{v:+.3f}")
+            coef["hc1_se"] = coef.hc1_se.map(lambda v: f"{v:.3f}")
+            st.dataframe(
+                coef[["term", "coef", "level_effect", "hc1_se"]],
+                hide_index=True, use_container_width=True,
+            )
+            st.caption(
+                "Coefficients are incremental (each adds to the prior wave)."
+                " Full write-up, limits and falsifiers in"
+                " data/exports/did_export_controls.md. Research output, not"
+                " investment advice."
+            )
+
 # ---- exposure ladder + surprise --------------------------------------------------
 
 st.header("Exposure ladder — theme → instruments (research, not advice)")
