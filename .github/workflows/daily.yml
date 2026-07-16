@@ -104,6 +104,7 @@ jobs:
           python review/trade_note.py
           python analysis/chip_vs_equipment.py
           python analysis/vendor_lead.py
+          python analysis/did_export_controls.py
 
       - name: Tests
         id: tests

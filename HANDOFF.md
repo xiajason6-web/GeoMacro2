@@ -177,12 +177,40 @@ Taiwan mirror data (no source), Yole 23% citation (paywalled), TEL filings
 (Japanese IR), ijiwei trade press (JS-gated), a couple vendor 10-K exhibits.
 All parked by CHOICE, tracked in review_queue — none load-bearing.
 
-## HIGHEST-VALUE NEXT BUILD
-Causal identification of the export-control effect: a difference-in-differences
-around the control-wave dates (Oct 2022, Oct 2023, Dec 2024) or double-ML
-controlling for total WFE demand (the cycle), to estimate the TREATMENT EFFECT
-of controls on the ratio — moving from correlation+narrative to a causal
-estimate (Simonian Ch 5 / López de Prado). This is the piece that makes it
-publishable and is the natural headline of a second essay.
+## CAUSAL LAYER — BUILT (was the highest-value next build)
+`analysis/did_export_controls.py` (+ `tests/test_did.py`, wired into the
+nightly analysis block). Difference-in-differences that IDENTIFIES the
+export-control effect. Key design move: the ratio has no untreated control
+group, so identification happens one level down, at the DENOMINATOR —
+US-origin imports (treated by unilateral controls) vs allied origins
+(EU27/JP/KR/SG, same fabs + same cycle, not bound by US rules). Monthly
+origin panel of HS 8486 in USD; TWFE with year-month FE ABSORBING the
+fab-capex cycle (the confounder the vendor-lead null flagged).
+  - Result: US exports ran ~65% below the allied-implied path cumulatively
+    after the Oct-2023 + Dec-2024 waves (b1=-0.29, b2=-0.77 log pts). Oct-2022
+    predates the panel -> folded into baseline -> this is a LOWER bound.
+  - Event study: near-zero pre-trends (<0.08 log pts) then monotone divergence
+    = clean parallel trends. Placebo across origins: US is the single most
+    suppressed; permutation p=0.20 (the sharpest attainable with 5 origins —
+    stated honestly, the payoff is magnitude + counterfactual, not a star).
+  - PAYOFF (the essay headline): counterfactual indigenization ratio rebuilds
+    US imports on the allied growth path from 2023Q3 and recomputes the flagship.
+    Decomposition: by 2025Q4, of the 22.0% ratio, only ~1.6pp is US-import
+    SUPPRESSION; ~20.4pp is genuine domestic SUBSTITUTION. Non-obvious and
+    important: the US decline is dramatic in % but small in ratio terms because
+    the US was already a small, shrinking import share — substitution does the
+    heavy lifting. This SHARPENS Finding #1.
+  - Secondary: ratio-level ITS with cycle control (n=10, underpowered by
+    construction, shown for completeness — the design the DiD improves on).
+  - Outputs: data/exports/did_export_controls.md, did_event_study.html,
+    did_counterfactual.html. OLS is pure numpy (no new deps), all pinned by tests.
 
-## Test suite: 88 passing. Run before committing anything.
+## NEXT CANDIDATES (pick with Jason)
+1. Robustness on the DiD: drop Singapore from control+counterfactual (US->SG
+   rerouting caveat), add EU27 to the balanced event-study panel from 2023Q3,
+   try log-vs-level and a wild-cluster bootstrap. Cheap, hardens the headline.
+2. Write the second essay off the counterfactual decomposition (draft in
+   review/, human-edited, NOT auto-published — same gate as trade_note).
+3. Return-on-ratio regression to quantify the exposure-ladder deltas.
+
+## Test suite: 94 passing (88 + 6 DiD). Run before committing anything.
