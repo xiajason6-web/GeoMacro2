@@ -9,9 +9,8 @@ exposure to instruments with mechanisms and disconfirming conditions. It
 contains no position sizing, no entry/exit, no price targets, no long/short
 instructions. The disclaimer is emitted top and bottom. A PM sizes the trade.
 
-Deterministic assembly (the only LLM content anywhere near this is the
-separately-run red team, cited by reference). How you'd know it broke: it
-prints the output path; each section states its inputs.
+Deterministic assembly — no LLM. How you'd know it broke: it prints the
+output path; each section states its inputs.
 """
 
 import datetime
@@ -25,7 +24,7 @@ for sub in ("analysis",):
 
 import exposure_ladder  # noqa: E402
 import indigenization_ratio as ir  # noqa: E402
-import surprise as surprise_mod  # noqa: E402
+import consensus_gap as gap_mod  # noqa: E402
 
 DB_PATH = REPO_ROOT / "db" / "tracker.sqlite"
 OUT_PATH = REPO_ROOT / "data" / "exports" / "trade_note.md"
@@ -48,7 +47,7 @@ def connect(db_path=DB_PATH):
 
 def measured_picture(conn):
     out = ir.compute_ratio(conn)
-    full = out[(out.coverage_origins == surprise_mod.FULL) & out.ratio.notna()]
+    full = out[(out.coverage_origins == gap_mod.FULL) & out.ratio.notna()]
     if full.empty:
         return None
     latest_q = full.index.max()
@@ -78,7 +77,7 @@ def vendor_panel(conn):
 def render(conn):
     today = datetime.date.today().isoformat()
     mp = measured_picture(conn)
-    sur = surprise_mod.build(conn)
+    sur = gap_mod.build(conn)
     ladder = exposure_ladder.rows_for_output(conn, include_unreviewed=True)
     ladder_reviewed = conn.execute(
         "SELECT COUNT(*) FROM instrument_exposure WHERE human_reviewed = 1"
@@ -106,7 +105,7 @@ def render(conn):
             f" a blip. It is a market-SHARE shift, not necessarily a"
             f" capability parity, and the two should not be conflated."
         )
-    L += ["", "## The surprise (what the market may be mispricing)", ""]
+    L += ["", "## Nowcast vs consensus — the gap you'd trade", ""]
     if sur and sur["rows"]:
         r = sur["rows"][0]
         L.append(
@@ -165,8 +164,8 @@ def render(conn):
         " exports to China (EU27+Japan+US+Korea+Singapore; Taiwan unavailable),"
         " USD-normalized. Every figure traces to an archived filing or trade"
         " release. Full methodology: analysis/methodology.md; the consensus"
-        " reconciliation and the red-team memo (which argues against this very"
-        " thesis) accompany this note.",
+        " reconciliation accompanies this note. The falsifiers above are the"
+        " standing case against this thesis.",
         "",
         f"> {DISCLAIMER}",
     ]

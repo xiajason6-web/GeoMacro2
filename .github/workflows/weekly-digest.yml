@@ -1,4 +1,4 @@
-# Weekly digest draft: red-team memo + digest assembly, committed to the
+# Weekly digest draft: trade note + digest assembly, committed to the
 # repo and opened as a GitHub issue for Jason to review and edit.
 # The system never publishes — the issue IS the review step.
 name: weekly-digest
@@ -31,8 +31,11 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: Red team memo (1 LLM call)
-        run: python review/red_team.py
+      - name: Refresh trade note (deterministic; falsifiers feed the digest)
+        run: |
+          python analysis/exposure_ladder.py
+          python analysis/consensus_gap.py
+          python review/trade_note.py
 
       - name: Assemble digest draft
         run: python review/weekly_digest.py

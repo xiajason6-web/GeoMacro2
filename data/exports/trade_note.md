@@ -1,4 +1,4 @@
-# Research note: China semiconductor-equipment indigenization (2026-07-15)
+# Research note: China semiconductor-equipment indigenization (2026-07-16)
 
 > Research and educational analysis only — NOT investment advice, NOT a recommendation, and NOT an offer to buy or sell any security. No position sizing, entry/exit levels, or price targets are expressed or implied. Exposure directions describe how an instrument's business is affected by the theme, not what any person should do. Do your own diligence.
 
@@ -8,7 +8,7 @@ _DRAFT for human review. Nothing here is published until a person approves it._
 
 China's domestic share of wafer-fab-equipment spending is structurally rising: measured at 22.0% in 2025Q4 (full-coverage), up from 11.5% in 2023Q3. The trajectory is a slow, policy-driven substitution of foreign tools by domestic ones — durable, not a blip. It is a market-SHARE shift, not necessarily a capability parity, and the two should not be conflated.
 
-## The surprise (what the market may be mispricing)
+## Nowcast vs consensus — the gap you'd trade
 
 Consensus drifts to persistence (2025Q4 = 22.0%) between quarterly prints. The nowcast model puts 2026Q1 at 24.8% (+2.7 pp above that baseline), band 23.7%–26.0%. Catalyst: vendor factor 0.85 (panel mean 31.7% in target window vs 37.5% in base; 3 vs 3 signals) -> applied to filled months: -0.56bn. This is an estimate, not measured data.
 
@@ -53,6 +53,6 @@ _(reviewed; business-exposure direction, not a trade call.)_
 
 ## Method and limits
 
-Numerator: six listed Chinese equipment makers' revenue, scaled to disclosed semicap-segment and domestic shares. Denominator: mirror exports to China (EU27+Japan+US+Korea+Singapore; Taiwan unavailable), USD-normalized. Every figure traces to an archived filing or trade release. Full methodology: analysis/methodology.md; the consensus reconciliation and the red-team memo (which argues against this very thesis) accompany this note.
+Numerator: six listed Chinese equipment makers' revenue, scaled to disclosed semicap-segment and domestic shares. Denominator: mirror exports to China (EU27+Japan+US+Korea+Singapore; Taiwan unavailable), USD-normalized. Every figure traces to an archived filing or trade release. Full methodology: analysis/methodology.md; the consensus reconciliation accompanies this note. The falsifiers above are the standing case against this thesis.
 
 > Research and educational analysis only — NOT investment advice, NOT a recommendation, and NOT an offer to buy or sell any security. No position sizing, entry/exit levels, or price targets are expressed or implied. Exposure directions describe how an instrument's business is affected by the theme, not what any person should do. Do your own diligence.

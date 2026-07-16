@@ -7,10 +7,9 @@ database, deterministically:
   (b) the current indigenization series,
   (c) recent events mapped through exposure_links (channel + direction +
       confidence per entity),
-  (d) the latest red-team memo (from review/red_team.py, if present today),
+  (d) the falsifiers from the trade note (the 'argue against yourself' role),
   (e) open review_queue items.
-The only LLM content is the red-team section, which is generated separately
-and clearly attributed. Everything else is queries.
+Deterministic assembly — all sections are queries or file reads.
 
 How you'd know it broke: it prints the output path; each section states its
 row counts, so an empty section is visible, not silent.
@@ -117,16 +116,19 @@ def section_nowcast(conn):
     return lines
 
 
-def section_red_team():
-    today = datetime.date.today().isoformat()
-    path = OUT_DIR / f"red_team_{today}.md"
-    if path.exists():
-        return path.read_text().splitlines()
-    return [
-        "## Red team: the case against",
-        "",
-        "_No red-team memo for today — run review/red_team.py._",
-    ]
+def section_trade_note():
+    """The falsifiers section of the trade note carries the 'argue against
+    yourself' role the red team used to. Surface it if the note exists."""
+    path = OUT_DIR / "trade_note.md"
+    if not path.exists():
+        return ["## Falsifiers", "", "_Run review/trade_note.py._"]
+    text = path.read_text().splitlines()
+    try:
+        start = next(i for i, l in enumerate(text) if "prove this wrong" in l.lower())
+    except StopIteration:
+        return ["## Falsifiers", "", "_No falsifiers section found in trade note._"]
+    end = next((i for i in range(start + 1, len(text)) if text[i].startswith("## ")), len(text))
+    return text[start:end]
 
 
 def section_review_queue(conn):
@@ -161,7 +163,7 @@ def main():
         [""],
         section_nowcast(conn),
         [""],
-        section_red_team(),
+        section_trade_note(),
         [""],
         section_review_queue(conn),
     ):

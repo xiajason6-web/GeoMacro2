@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "analysis"))
 
 import exposure_ladder as el  # noqa: E402
-import surprise as sm  # noqa: E402
+import consensus_gap as sm  # noqa: E402
 
 
 # ---- exposure ladder -----------------------------------------------------------

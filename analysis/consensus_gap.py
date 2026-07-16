@@ -1,4 +1,4 @@
-"""Surprise model: nowcast vs consensus — the delta a trader actually trades.
+"""Nowcast vs consensus (the "consensus gap") — the delta a trader trades.
 
 Traders don't trade the level, they trade the gap between the incoming print
 and what's expected. This reframes the nowcast as a surprise:
@@ -17,7 +17,7 @@ Catalyst = the dominant driver from the nowcast (the vendor-signal factor or
 the largest carry-forward origin), pulled from the stored nowcast drivers.
 
 Deterministic; reads nowcasts + ratio + benchmarks. No LLM, no trade calls.
-Output: data/exports/surprise.md, and a dict the trade note consumes.
+Output: data/exports/consensus_gap.md, and a dict the trade note consumes.
 """
 
 import sqlite3
@@ -30,7 +30,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import indigenization_ratio as ir  # noqa: E402
 
 DB_PATH = REPO_ROOT / "db" / "tracker.sqlite"
-OUT_PATH = REPO_ROOT / "data" / "exports" / "surprise.md"
+OUT_PATH = REPO_ROOT / "data" / "exports" / "consensus_gap.md"
 
 FULL = "+".join(sorted(o for o, _ in ir.IMPORT_SERIES.values()))
 
@@ -104,7 +104,7 @@ def build(conn):
 def render(data):
     b = data["baseline"]
     lines = [
-        "# Surprise model — nowcast vs consensus",
+        "# Nowcast vs consensus (the consensus gap)",
         "",
         f"_Model estimate ({data['made_at']}), not measured data. Consensus"
         f" baseline = persistence: the last fully-measured quarter"

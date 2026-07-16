@@ -230,13 +230,13 @@ if not nc_rows.empty and ratio_csv.exists() and not full.empty:
     nxt = nc_rows.iloc[0]
     surprise_pp = (nxt.ratio_nowcast - baseline) * 100
     st.metric(
-        f"Surprise: {nxt.target_quarter} nowcast vs persistence baseline",
+        f"Nowcast vs consensus — {nxt.target_quarter} vs persistence baseline",
         f"{nxt.ratio_nowcast:.1%}",
         f"{surprise_pp:+.1f} pp vs {baseline:.1%} (last full-coverage quarter)",
     )
     st.caption(
         "Traders trade the delta, not the level. Estimate only; band"
-        f" {nxt.ratio_low:.1%}–{nxt.ratio_high:.1%}. See data/exports/surprise.md."
+        f" {nxt.ratio_low:.1%}–{nxt.ratio_high:.1%}. See data/exports/consensus_gap.md."
     )
 
 # ---- company revenue ------------------------------------------------------------

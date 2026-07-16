@@ -19,7 +19,6 @@ for sub in ("collectors", "analysis", "review", "extraction"):
 
 import exposure_map  # noqa: E402
 import policy_monitor  # noqa: E402
-import red_team  # noqa: E402
 import translate_classify_policy as tcp  # noqa: E402
 
 GOVCN_FIXTURE = Path(__file__).parent / "fixtures" / "govcn_search_ic.json"
@@ -126,26 +125,3 @@ def test_directions_vocabulary_enforced(db):
         )
 
 
-# ---- red team validator ---------------------------------------------------------
-
-def test_red_team_validator():
-    good = {
-        "counter_thesis": "t",
-        "arguments": [{"claim": "c", "evidence": "e"}],
-        "what_would_change_my_mind": "w",
-    }
-    assert red_team.validate(good) == []
-    assert red_team.validate(dict(good, arguments=[])) != []
-    assert red_team.validate(dict(good, arguments=[{"claim": ""}])) != []
-    assert red_team.validate({}) != []
-
-
-def test_red_team_render_contains_all_sections():
-    data = {
-        "counter_thesis": "THESIS_TEXT",
-        "arguments": [{"claim": "CLAIM_A", "evidence": "EVIDENCE_A"}],
-        "what_would_change_my_mind": "MIND_CHANGER",
-    }
-    md = red_team.render_markdown(data)
-    for token in ("THESIS_TEXT", "CLAIM_A", "EVIDENCE_A", "MIND_CHANGER"):
-        assert token in md
