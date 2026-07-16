@@ -186,29 +186,36 @@ US-origin imports (treated by unilateral controls) vs allied origins
 (EU27/JP/KR/SG, same fabs + same cycle, not bound by US rules). Monthly
 origin panel of HS 8486 in USD; TWFE with year-month FE ABSORBING the
 fab-capex cycle (the confounder the vendor-lead null flagged).
-  - Result: US exports ran ~65% below the allied-implied path cumulatively
-    after the Oct-2023 + Dec-2024 waves (b1=-0.29, b2=-0.77 log pts). Oct-2022
-    predates the panel -> folded into baseline -> this is a LOWER bound.
-  - Event study: near-zero pre-trends (<0.08 log pts) then monotone divergence
-    = clean parallel trends. Placebo across origins: US is the single most
-    suppressed; permutation p=0.20 (the sharpest attainable with 5 origins —
-    stated honestly, the payoff is magnitude + counterfactual, not a star).
-  - PAYOFF (the essay headline): counterfactual indigenization ratio rebuilds
-    US imports on the allied growth path from 2023Q3 and recomputes the flagship.
-    Decomposition: by 2025Q4, of the 22.0% ratio, only ~1.6pp is US-import
-    SUPPRESSION; ~20.4pp is genuine domestic SUBSTITUTION. Non-obvious and
-    important: the US decline is dramatic in % but small in ratio terms because
-    the US was already a small, shrinking import share — substitution does the
-    heavy lifting. This SHARPENS Finding #1.
-  - Secondary: ratio-level ITS with cycle control (n=10, underpowered by
+  - PANEL BACKFILLED TO 2021-01 (fx_rates.py SINCE, mirror_trade.py
+    BACKFILL_SINCE/CENSUS_YEARS/COMTRADE_SINCE, e-Stat time_from — all widened;
+    one-time historical pull done, idempotent thereafter). This put ALL THREE
+    waves in-sample with a real pre-treatment window, and as a BONUS filled
+    EU27 back to 2021 so the flagship's 2023Q1/Q2 flipped from reduced-coverage
+    to full (ratios there moved 16.7%->14.6%, 17.4%->13.5% — EU now in denom).
+  - Result: US exports ran ~78% below the allied-implied path cumulatively
+    across all three waves (b0=-0.36 Oct22, b1=-0.39 Oct23 incr, b2=-0.77 Dec24
+    incr; HC1 ses 0.10/0.11/0.15). This is now the FULL measured effect, not a
+    lower bound.
+  - Event study (baseline 2022Q2): FIVE pre-baseline quarters all within +-0.10
+    log pts, then clean monotone divergence — textbook parallel trends. Placebo
+    across origins: US is by far the most suppressed (-1.52 vs all controls near
+    0 or positive; EU27 +1.18); permutation p=0.20 (sharpest attainable with 5
+    origins — payoff is magnitude + counterfactual, not a star).
+  - PAYOFF (essay headline): counterfactual indigenization ratio rebuilds US
+    imports on the allied growth path from the pre-control 2022Q2 anchor. By
+    2025Q4, of the 22.0% ratio only ~2.3pp is US-import SUPPRESSION; ~19.7pp is
+    genuine domestic SUBSTITUTION. Robust to including Oct-2022 (was 1.6pp at 2
+    waves). The US decline is dramatic in % but small in ratio terms because the
+    US was already a small, shrinking import share — substitution does the heavy
+    lifting. SHARPENS Finding #1; not vulnerable to "you skipped Oct-2022".
+  - Secondary: ratio-level ITS with cycle control (n=12 now, underpowered by
     construction, shown for completeness — the design the DiD improves on).
   - Outputs: data/exports/did_export_controls.md, did_event_study.html,
     did_counterfactual.html. OLS is pure numpy (no new deps), all pinned by tests.
 
 ## NEXT CANDIDATES (pick with Jason)
-1. Robustness on the DiD: drop Singapore from control+counterfactual (US->SG
-   rerouting caveat), add EU27 to the balanced event-study panel from 2023Q3,
-   try log-vs-level and a wild-cluster bootstrap. Cheap, hardens the headline.
+1. Further DiD robustness: drop Singapore (US->SG rerouting caveat), add EU27 to
+   the balanced event-study panel (now has 2021+ data), wild-cluster bootstrap.
 2. Write the second essay off the counterfactual decomposition (draft in
    review/, human-edited, NOT auto-published — same gate as trade_note).
 3. Return-on-ratio regression to quantify the exposure-ladder deltas.

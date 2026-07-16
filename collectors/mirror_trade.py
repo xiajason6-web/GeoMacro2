@@ -37,7 +37,7 @@ DB_PATH = REPO_ROOT / "db" / "tracker.sqlite"
 RAW_DIR = REPO_ROOT / "data" / "raw" / "mirror_trade"
 USER_AGENT = "ChinaTechFlowsTracker/0.1 (research; contact: jx3@williams.edu)"
 
-BACKFILL_SINCE = "2023-07"  # three years back from July 2026
+BACKFILL_SINCE = "2021-01"  # widened to give a pre-Oct-2022 pre-treatment window for the DiD
 
 EUROSTAT_SOURCE = {
     "name": "Eurostat Comext",
@@ -72,7 +72,7 @@ ESTAT_API = "https://api.e-stat.go.jp/rest/3.0/app/json/getStatsData"
 #   cat02 encodes month x measure — the VALUE (金額) code for month m is
 #   140 + 30*m (Jan=170 .. Dec=500), unit thousand yen; time = calendar year.
 ESTAT_TABLES = [
-    {"stats_data_id": "0003425293", "time_from": "2023000000"},  # 2021-2025 (we filter >=2023)
+    {"stats_data_id": "0003425293", "time_from": "2021000000"},  # 2021-2025 (full, incl. pre-control)
     {"stats_data_id": "0004049306", "time_from": None},          # 2026
 ]
 ESTAT_CHINA_AREA = "50105"
@@ -91,7 +91,7 @@ CENSUS_SOURCE = {
 }
 CENSUS_API = "https://api.census.gov/data/timeseries/intltrade/exports/hs"
 CENSUS_CHINA = "5700"
-CENSUS_YEARS = ["2023", "2024", "2025", "2026"]
+CENSUS_YEARS = ["2021", "2022", "2023", "2024", "2025", "2026"]
 CENSUS_SERIES = [
     {"product": "8486", "metric": "mirror_exports_us_hs8486_usd"},
     {"product": "8542", "metric": "mirror_exports_us_hs8542_usd"},
@@ -103,7 +103,7 @@ CENSUS_SERIES = [
 COMTRADE_API = "https://comtradeapi.un.org/public/v1/preview/C/M/HS"
 COMTRADE_REPORTERS = [("410", "kr"), ("702", "sg")]
 COMTRADE_PRODUCTS = ["8486", "8542"]
-COMTRADE_SINCE = "2023-01"
+COMTRADE_SINCE = "2021-01"  # widened for the pre-Oct-2022 DiD window
 COMTRADE_SOURCE = {
     "name": "UN Comtrade",
     "url": "https://comtradeplus.un.org",

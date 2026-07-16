@@ -78,13 +78,18 @@ CONTROL_ORIGINS = ["EU27", "Japan", "Korea", "Singapore"]
 # defined across the whole post window.
 COUNTERFACTUAL_BASKET = ["Japan", "Korea", "Singapore"]
 
-# Within-sample control waves. Oct 2022 predates the panel -> baseline.
+# The three control waves, all now in-sample (the panel was backfilled to
+# 2021-01 to give a genuine pre-treatment window before the first wave).
 # post is "this month is on/after the wave took effect".
+WAVE_OCT2022 = "2022-10"
 WAVE_OCT2023 = "2023-10"
 WAVE_DEC2024 = "2024-12"
 
-# Counterfactual anchor: last full quarter before the Oct-2023 wave.
-ANCHOR_QUARTER = "2023Q3"
+# Counterfactual anchor: a clean pre-control quarter (2022Q2 = Apr-Jun 2022,
+# before the Oct-7-2022 rule and its front-running window). Anchoring here
+# captures the FULL control effect across all three waves, not just the last
+# two — the reason the panel was extended back to 2021.
+ANCHOR_QUARTER = "2022Q2"
 
 
 # --------------------------------------------------------------------------
@@ -151,6 +156,7 @@ def load_panel(conn):
     panel = panel[panel.value_usd > 0].copy()
     panel["log_imports"] = np.log(panel.value_usd)
     panel["treated"] = (panel.origin == TREATED).astype(float)
+    panel["post_2022"] = (panel.month >= WAVE_OCT2022).astype(float)
     panel["post_2023"] = (panel.month >= WAVE_OCT2023).astype(float)
     panel["post_2024"] = (panel.month >= WAVE_DEC2024).astype(float)
     return panel.sort_values(["origin", "month"]).reset_index(drop=True)
@@ -162,16 +168,17 @@ def design_twfe(panel):
     an intercept absorbs them."""
     origins, Do = _dummies(panel.origin.tolist())
     months, Dt = _dummies(panel.month.tolist())
+    did0 = (panel.treated * panel.post_2022).values[:, None]
     did1 = (panel.treated * panel.post_2023).values[:, None]
     did2 = (panel.treated * panel.post_2024).values[:, None]
     intercept = np.ones((len(panel), 1))
     # drop first origin dummy and first month dummy as references
-    X = np.hstack([intercept, Do[:, 1:], Dt[:, 1:], did1, did2])
+    X = np.hstack([intercept, Do[:, 1:], Dt[:, 1:], did0, did1, did2])
     names = (
         ["intercept"]
         + [f"origin={o}" for o in origins[1:]]
         + [f"month={m}" for m in months[1:]]
-        + ["US x post_Oct2023", "US x post_Dec2024"]
+        + ["US x post_Oct2022", "US x post_Oct2023", "US x post_Dec2024"]
     )
     return X, names
 
@@ -184,7 +191,8 @@ def run_did(panel):
     clu = cluster_se(X, resid, XtXi, panel.origin.values)
     idx = {n: i for i, n in enumerate(names)}
     out = {}
-    for term in ["US x post_Oct2023", "US x post_Dec2024"]:
+    terms = ["US x post_Oct2022", "US x post_Oct2023", "US x post_Dec2024"]
+    for term in terms:
         i = idx[term]
         out[term] = {
             "coef": beta[i],
@@ -192,8 +200,8 @@ def run_did(panel):
             "cluster_se": clu[i],
             "pct_effect": np.exp(beta[i]) - 1,  # log-point -> % level effect
         }
-    # cumulative post-Dec2024 US effect = beta1 + beta2
-    b = beta[idx["US x post_Oct2023"]] + beta[idx["US x post_Dec2024"]]
+    # cumulative US effect once all three waves are in force = b0 + b1 + b2
+    b = sum(beta[idx[t]] for t in terms)
     out["cumulative_after_Dec2024"] = {
         "coef": b,
         "pct_effect": np.exp(b) - 1,
@@ -214,7 +222,8 @@ def randomization_inference(panel, true_coef, term="cumulative"):
         beta, _, _ = ols(X, p.log_imports.values)
         idx = {n: i for i, n in enumerate(names)}
         if term == "cumulative":
-            e = beta[idx["US x post_Oct2023"]] + beta[idx["US x post_Dec2024"]]
+            e = sum(beta[idx[t]] for t in
+                    ["US x post_Oct2022", "US x post_Oct2023", "US x post_Dec2024"])
         else:
             e = beta[idx[term]]
         effects[placebo] = e
@@ -229,6 +238,10 @@ def event_study(panel, baseline=ANCHOR_QUARTER):
     relative to `baseline`; pre-baseline coefficients test parallel trends."""
     bal = panel[panel.origin.isin([TREATED] + COUNTERFACTUAL_BASKET)].copy()
     bal["quarter"] = bal.month.map(ir.month_to_quarter)
+    # Drop the partial tail (Korea+Singapore end 2025-12) so every retained
+    # quarter has the full balanced panel and no US-only quarter makes the
+    # US x quarter term collinear with the quarter fixed effect.
+    bal = bal[bal.quarter <= "2025Q4"]
     # collapse to quarter (sum months, require the quarter to be complete: 3)
     counts = bal.groupby(["origin", "quarter"]).month.nunique()
     complete = counts[counts == 3].index
@@ -414,6 +427,7 @@ def build_counterfactual_chart(cf):
 
 
 def build_markdown(did, placebo, p_value, es, cf, its):
+    b0 = did["US x post_Oct2022"]
     b1 = did["US x post_Oct2023"]
     b2 = did["US x post_Dec2024"]
     cum = did["cumulative_after_Dec2024"]
@@ -432,26 +446,31 @@ def build_markdown(did, placebo, p_value, es, cf, its):
         "",
         "## 1. The identified treatment effect (TWFE DiD)",
         "",
-        "`log(imports) = origin FE + month FE + b1·(US×post-Oct2023)"
-        " + b2·(US×post-Dec2024)`",
+        "`log(imports) = origin FE + month FE + b0·(US×post-Oct2022)"
+        " + b1·(US×post-Oct2023) + b2·(US×post-Dec2024)`",
         "",
-        "Month fixed effects absorb the common WFE demand cycle, so each",
-        "coefficient is the US deviation from the allied path after a wave.",
+        "Panel backfilled to 2021-01 so all three control waves are in-sample,",
+        "with a genuine pre-treatment window before the first. Month fixed",
+        "effects absorb the common WFE demand cycle, so each coefficient is the",
+        "US deviation from the allied path after a wave (coefficients are",
+        "incremental — each adds to the prior).",
         "",
         "| Treatment term | Effect (log pts) | Level effect | HC1 se | cluster se (5 origins) |",
         "|---|---|---|---|---|",
-        f"| US × post-Oct-2023 | {b1['coef']:+.3f} | {b1['pct_effect']:+.1%} |"
-        f" {b1['hc1_se']:.3f} | {b1['cluster_se']:.3f} |",
+        f"| US × post-Oct-2022 | {b0['coef']:+.3f} | {b0['pct_effect']:+.1%} |"
+        f" {b0['hc1_se']:.3f} | {b0['cluster_se']:.3f} |",
+        f"| US × post-Oct-2023 (incremental) | {b1['coef']:+.3f} |"
+        f" {b1['pct_effect']:+.1%} | {b1['hc1_se']:.3f} | {b1['cluster_se']:.3f} |",
         f"| US × post-Dec-2024 (incremental) | {b2['coef']:+.3f} |"
         f" {b2['pct_effect']:+.1%} | {b2['hc1_se']:.3f} | {b2['cluster_se']:.3f} |",
-        f"| **Cumulative after Dec-2024** | **{cum['coef']:+.3f}** |"
+        f"| **Cumulative, all three waves** | **{cum['coef']:+.3f}** |"
         f" **{cum['pct_effect']:+.1%}** | — | — |",
         "",
         f"US equipment exports to China ran **{abs(cum['pct_effect']):.0%} below**",
-        "the allied-implied path once both within-sample waves were in force —",
-        "after differencing out the demand cycle that hit every origin equally.",
-        "The Oct-2022 wave predates the panel and is folded into the baseline,",
-        "so this is a lower bound on the full control effect.",
+        "the allied-implied path once all three waves were in force — after",
+        "differencing out the demand cycle that hit every origin equally. With",
+        "the panel now reaching a clean pre-Oct-2022 window, this is the FULL",
+        "measured control effect, no longer a lower bound.",
         "",
         "## 2. Parallel trends (event study)",
         "",

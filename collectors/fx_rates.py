@@ -30,7 +30,7 @@ DB_PATH = REPO_ROOT / "db" / "tracker.sqlite"
 RAW_DIR = REPO_ROOT / "data" / "raw" / "fx"
 USER_AGENT = "ChinaTechFlowsTracker/0.1 (research; contact: jx3@williams.edu)"
 
-SINCE = "2023-01"
+SINCE = "2021-01"  # widened for the pre-Oct-2022 DiD pre-treatment window
 ECB_SERIES = {
     "CNY": f"https://data-api.ecb.europa.eu/service/data/EXR/M.CNY.EUR.SP00.A?startPeriod={SINCE}&format=jsondata",
     "USD": f"https://data-api.ecb.europa.eu/service/data/EXR/M.USD.EUR.SP00.A?startPeriod={SINCE}&format=jsondata",

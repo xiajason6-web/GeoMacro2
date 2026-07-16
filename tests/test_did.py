@@ -8,10 +8,13 @@ Two layers:
 2. Full pipeline on a synthetic in-memory DB with a KNOWN planted treatment
    effect. All fx set to 1 so USD == native value. Four origins share an
    identical flat import path of 100/month; the US path is multiplied by
-   exp(-0.2) from Oct-2023 and additionally exp(-0.5) from Dec-2024, so the
-   DiD must recover b1=-0.2, b2=-0.5. Because controls are flat, the allied
-   counterfactual for US is constant, so US suppression is non-negative and
-   the counterfactual ratio never exceeds the actual ratio.
+   exp(-0.3) from Oct-2022, additionally exp(-0.2) from Oct-2023, and
+   additionally exp(-0.5) from Dec-2024, so the DiD must recover the three
+   incremental coefficients. The panel straddles Oct-2022 (starts 2022-01) so
+   the first wave is identified rather than collinear with the US fixed
+   effect. Because controls are flat, the allied counterfactual for US is
+   constant, so US suppression is non-negative and the counterfactual ratio
+   never exceeds the actual ratio.
 """
 
 import math
@@ -27,7 +30,7 @@ sys.path.insert(0, str(ROOT / "analysis"))
 
 import did_export_controls as did  # noqa: E402
 
-MONTHS = [f"{y}-{m:02d}" for y in (2023, 2024, 2025) for m in range(1, 13)]
+MONTHS = [f"{y}-{m:02d}" for y in (2022, 2023, 2024, 2025) for m in range(1, 13)]
 # USD-denominated origins keep the arithmetic transparent (fx=1 anyway).
 ORIGIN_METRIC = {
     "US": "mirror_exports_us_hs8486_usd",
@@ -35,7 +38,7 @@ ORIGIN_METRIC = {
     "Singapore": "mirror_exports_sg_hs8486_usd",
     "Japan": "mirror_exports_jp_hs8486_jpy",
 }
-B1, B2 = -0.2, -0.5
+B0, B1, B2 = -0.3, -0.2, -0.5
 
 
 def test_ols_recovers_planted_coefficients():
@@ -82,6 +85,8 @@ def db():
         for m in MONTHS:
             val = 100.0
             if origin == "US":
+                if m >= did.WAVE_OCT2022:
+                    val *= math.exp(B0)
                 if m >= did.WAVE_OCT2023:
                     val *= math.exp(B1)
                 if m >= did.WAVE_DEC2024:
@@ -108,9 +113,10 @@ def db():
 def test_did_recovers_planted_treatment_effect(db):
     panel = did.load_panel(db)
     out, _, _ = did.run_did(panel)
+    assert out["US x post_Oct2022"]["coef"] == pytest.approx(B0, abs=1e-6)
     assert out["US x post_Oct2023"]["coef"] == pytest.approx(B1, abs=1e-6)
     assert out["US x post_Dec2024"]["coef"] == pytest.approx(B2, abs=1e-6)
-    assert out["cumulative_after_Dec2024"]["coef"] == pytest.approx(B1 + B2, abs=1e-6)
+    assert out["cumulative_after_Dec2024"]["coef"] == pytest.approx(B0 + B1 + B2, abs=1e-6)
 
 
 def test_placebo_ranks_us_most_suppressed(db):
