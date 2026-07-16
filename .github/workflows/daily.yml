@@ -102,6 +102,8 @@ jobs:
           python analysis/exposure_ladder.py
           python analysis/surprise.py
           python review/trade_note.py
+          python analysis/chip_vs_equipment.py
+          python analysis/vendor_lead.py
 
       - name: Tests
         id: tests
