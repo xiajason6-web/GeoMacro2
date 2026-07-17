@@ -369,7 +369,7 @@ if chip_ss_csv.exists():
         " data/exports/chip_self_sufficiency.md."
     )
 
-# ---- chip controls DiD: bite then leak -------------------------------------------
+# ---- chip controls DiD -----------------------------------------------------------
 
 chip_did_es = REPO_ROOT / "data" / "exports" / "did_chip_event_study.csv"
 chip_did_sum = REPO_ROOT / "data" / "exports" / "did_chip_summary.csv"
@@ -379,21 +379,23 @@ if chip_did_es.exists() and chip_did_sum.exists():
     import numpy as _np
     ces["level"] = _np.exp(ces.coef) - 1  # log pts -> % deviation from allied
 
-    st.header("Did the chip controls work? Bite, then leak")
+    st.header("Did the chip controls work?")
     st.caption(
         "The SAME difference-in-differences, run on HS 8542 chips (the A100/H100,"
         " A800/H800, H20 layer). US chip exports to China vs the allied path,"
-        " cycle-differenced. Contrast with the equipment DiD above: tools stuck,"
-        " chips leaked."
+        " cycle-differenced. Contrast with the equipment DiD above: the tool"
+        " controls stuck (−78%, durable); the chip controls did not."
     )
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric("Trough (controls bit)", f"{cs.trough_pct:.0%}",
-              help=f"Deepest US shortfall vs allied path, at {cs.trough_quarter}.")
-    k2.metric("Latest (recovered)", f"{cs.latest_es_pct:.0%}",
-              help="US chip exports bounced back as firms shipped compliant"
+    k1.metric("Trough vs allied path", f"{cs.trough_pct:.0%}",
+              help=f"Deepest US shortfall vs allied path, at {cs.trough_quarter} —"
+                   " the bans genuinely bit.")
+    k2.metric("Latest vs allied path", f"{cs.latest_es_pct:.0%}",
+              help="US chip exports bounced back as NVIDIA shipped compliant"
                    " A800/H800/H20 parts.")
     k3.metric("Net cumulative effect", f"{cs.cumulative_pct_effect:+.0%}",
-              help="Washes toward zero — the bite was undone by re-engineering.")
+              help="Washes toward zero — the initial hit was undone by"
+                   " re-engineering the product.")
     k4.metric("Placebo p", f"{cs.placebo_p_value:.2f}",
               help="US is NOT the most-suppressed origin over the full window —"
                    " no durable identified suppression, unlike equipment.")
@@ -407,18 +409,38 @@ if chip_did_es.exists() and chip_did_sum.exists():
     figv.add_hline(y=0, line_dash="dot", line_color="gray")
     figv.add_vline(x=str(cs.anchor_quarter), line_dash="dash", line_color="green")
     figv.update_layout(
-        title="US chip exports vs allied path — the V (bite then recovery)",
+        title="US chip exports to China vs the allied-implied path",
         yaxis=dict(title="% deviation from allied path", tickformat=".0%"),
         height=380, legend=dict(orientation="h", y=-0.25), margin=dict(t=40),
     )
     st.plotly_chart(figv, use_container_width=True)
+    st.markdown(
+        "**How NVIDIA's product moves trace the curve.** The controls chased a"
+        " moving product line, and each ban was answered with a redesigned,"
+        " rules-compliant chip — so US chip sales to China cratered, then climbed"
+        " back:\n\n"
+        "- **Oct 2022 — A100/H100 cut off.** BIS performance thresholds bar"
+        " NVIDIA's top data-center GPUs; US chip exports to China start falling.\n"
+        "- **Late 2022→2023 — the A800/H800 workaround.** NVIDIA ships"
+        " bandwidth-capped China-only parts. **Oct 2023** BIS bans those too —"
+        " the trough (2023, roughly −47% below the allied path; US chip exports"
+        " to China fell from ~$12bn to ~$5bn a year).\n"
+        "- **2024 — the H20.** A further cut-down Hopper part engineered to clear"
+        " the line sells in volume; exports recover toward the allied path.\n"
+        "- **2025Q1 spike (well above the allied path).** Consistent with"
+        " stockpiling ahead of the **April 2025** H20 license requirement (which"
+        " forced a multi-billion-dollar NVIDIA write-down); exports soften after,"
+        " then partially resume under a mid-2025 revenue-share arrangement.\n\n"
+        "The mechanism is the whole point: a chip is a *design* that can be"
+        " re-spun to the threshold; a lithography tool is not. That is why the"
+        " identical controls are durable at the equipment layer (−78%) and"
+        " porous at the chip layer. Neither, meanwhile, made China self-"
+        "sufficient — chip imports rose on AI demand throughout."
+    )
     st.caption(
-        "The V is the finding: the A100/H100 and A800/H800 bans opened a real"
-        " gap, then US chip sales recovered to near parity via compliant SKUs"
-        " (the H20 saga) — so control durability is LAYER-SPECIFIC (tools can't"
-        " be re-spun; chip products can). Parallel trends fails here, so read it"
-        " as descriptive; the equipment DiD is the identified one."
-        " data/exports/did_chip_controls.md."
+        "Parallel trends fails here, so read the chip layer as descriptive; the"
+        " equipment DiD is the cleanly identified estimate."
+        " Full method and limits in data/exports/did_chip_controls.md."
     )
 
 # ---- exposure ladder + surprise --------------------------------------------------
@@ -462,36 +484,6 @@ if not nc_rows.empty and ratio_csv.exists() and not full.empty:
         "Traders trade the delta, not the level. Estimate only; band"
         f" {nxt.ratio_low:.1%}–{nxt.ratio_high:.1%}. See data/exports/consensus_gap.md."
     )
-
-# ---- company revenue ------------------------------------------------------------
-
-st.header("Quarterly revenue — listed Chinese semicap & foundries")
-rev = load(
-    """
-    SELECT e.name_en AS company, e.supply_chain_layer AS layer, m.period,
-           m.value / 1e9 AS bn_cny,
-           CASE WHEN m.notes LIKE 'DERIVED%' THEN 'derived' ELSE 'extracted' END AS origin
-    FROM metrics m JOIN entities e ON e.id = m.entity_id
-    WHERE m.metric_name = 'quarterly_revenue_cny'
-      AND m.document_id = (
-        SELECT MAX(m2.document_id) FROM metrics m2
-        WHERE m2.entity_id = m.entity_id AND m2.metric_name = m.metric_name
-          AND m2.period = m.period)
-    ORDER BY m.period
-    """
-)
-layer = st.radio("Layer", ["equipment", "foundry"], horizontal=True)
-sub = rev[rev.layer == layer]
-fig2 = go.Figure()
-for company in sorted(sub.company.unique()):
-    cdf = sub[sub.company == company]
-    fig2.add_bar(x=cdf.period, y=cdf.bn_cny, name=company)
-fig2.update_layout(barmode="stack", yaxis_title="bn CNY", height=380, margin=dict(t=20))
-st.plotly_chart(fig2, use_container_width=True)
-st.caption(
-    f"{(sub.origin == 'derived').sum()} of {len(sub)} quarters are derived by"
-    " subtraction from half-year/annual summaries (notes say DERIVED)."
-)
 
 # ---- mirror trade ---------------------------------------------------------------
 
@@ -567,17 +559,6 @@ for _, ev in events.iterrows():
                 mapped[["entity", "direction", "confidence", "channel_description"]],
                 hide_index=True,
             )
-
-# ---- review queue ----------------------------------------------------------------
-
-st.header("Open review queue")
-queue = load(
-    "SELECT id, item_type, reason FROM review_queue WHERE status = 'open' ORDER BY id DESC"
-)
-if queue.empty:
-    st.success("Queue is empty.")
-else:
-    st.dataframe(queue, hide_index=True, use_container_width=True)
 
 st.caption(
     "Pipeline: collectors → validated extraction → SQLite → deterministic"
