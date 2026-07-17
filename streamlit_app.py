@@ -320,6 +320,55 @@ if (exports_dir / "did_summary.csv").exists() and (exports_dir / "did_event_stud
                 " investment advice."
             )
 
+# ---- chip layer vs equipment layer (self-sufficiency) ----------------------------
+
+chip_ss_csv = REPO_ROOT / "data" / "exports" / "chip_self_sufficiency.csv"
+if chip_ss_csv.exists():
+    css = pd.read_csv(chip_ss_csv)
+    st.header("Two layers of self-sufficiency: tools vs frontier chips")
+    st.caption(
+        "The debate treats 'chip self-sufficiency' as one number. It's at least"
+        " two. The equipment ratio (the tools) has a clean domestic numerator;"
+        " the chip layer (where AI accelerators live) is proxied by SMIC + Hua"
+        " Hong foundry output vs HS 8542 chip imports — DIRECTIONAL only (see"
+        " limits). The national IC-output series (NBS) is geo-blocked from here."
+    )
+    figl = go.Figure()
+    figl.add_scatter(
+        x=css.quarter, y=css.equipment_ratio, mode="lines+markers",
+        name="Equipment ratio (tools — identified)", line=dict(color="#1f77b4"),
+    )
+    figl.add_scatter(
+        x=css.quarter, y=css.chip_domestic_share, mode="lines+markers",
+        name="Chip domestic share (frontier — proxy)",
+        line=dict(color="#d62728", dash="dash"),
+    )
+    figl.update_layout(
+        yaxis=dict(title="share / ratio", tickformat=".0%", range=[0, 0.3]),
+        legend=dict(orientation="h", y=-0.25), height=380, margin=dict(t=20),
+    )
+    st.plotly_chart(figl, use_container_width=True)
+    if len(css) >= 2:
+        first, last = css.iloc[0], css.iloc[-1]
+        d1, d2, d3 = st.columns(3)
+        d1.metric("Domestic logic output (proxy)",
+                  f"+{last.domestic_logic_idx - 100:.0f}%",
+                  help=f"SMIC+Hua Hong revenue growth, {first.quarter}→{last.quarter}.")
+        d2.metric("Chip imports (same window)",
+                  f"+{last.chip_imports_idx - 100:.0f}%",
+                  help="Imports rose too — demand outran substitution.")
+        d3.metric("Chip share vs equipment ratio",
+                  f"{last.chip_domestic_share:.0%} vs {last.equipment_ratio:.0%}",
+                  help="Tools localize faster than the frontier chips they make.")
+    st.caption(
+        "Read: domestic logic output roughly doubled, but chip imports rose with"
+        " AI/electronics demand, so the chip share barely moved while the"
+        " equipment ratio surged — China localizes the factory faster than the"
+        " frontier product. Proxy limits (foundry revenue includes non-China"
+        " sales; excludes memory/IDM; imports include re-export) are in"
+        " data/exports/chip_self_sufficiency.md."
+    )
+
 # ---- exposure ladder + surprise --------------------------------------------------
 
 st.header("Exposure ladder — theme → instruments (research, not advice)")

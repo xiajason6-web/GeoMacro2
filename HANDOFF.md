@@ -213,11 +213,37 @@ fab-capex cycle (the confounder the vendor-lead null flagged).
   - Outputs: data/exports/did_export_controls.md, did_event_study.html,
     did_counterfactual.html. OLS is pure numpy (no new deps), all pinned by tests.
 
+## CHIP-LAYER SELF-SUFFICIENCY — BUILT (the frontier / "Jensen" layer)
+`analysis/chip_self_sufficiency.py` (+ test, dashboard section, nightly).
+The equipment ratio has a clean domestic numerator; the CHIP layer doesn't —
+the clean national series (NBS 集成电路产量) is GEO-BLOCKED from US IPs (403),
+recorded by new stub `collectors/nbs_ic_output.py` in review_queue (mirrors the
+GACC/customs pattern; NOT in nightly to avoid spam). CXMT/YMTC unlisted.
+  - Interim PROXY: domestic logic output = SMIC + Hua Hong quarterly revenue
+    (USD) vs HS 8542 chip imports. DIRECTIONAL ONLY (numerator includes
+    non-China foundry sales + excludes memory/IDM; HS8542 includes re-export +
+    demand). Trend + contrast-with-equipment are the robust parts, not the level.
+  - Finding (directly answers the Dwarkesh/Jensen debate): 2023Q1->2025Q4
+    domestic logic output +113% BUT chip imports +48% too, so the chip domestic
+    share crept only +3.2pp (8.2%->11.4%) while the equipment ratio surged +7.5pp
+    (14.6%->22.0%). TOOLS LOCALIZE; FRONTIER LOGIC LAGS — China localizes the
+    factory faster than the frontier product. AI/electronics demand outran
+    substitution at the chip layer.
+  - Outputs: data/exports/chip_self_sufficiency.{md,csv}; dashboard "Two layers
+    of self-sufficiency" contrasts equipment ratio vs chip share.
+  - HIGHEST-VALUE follow-on: the export-control DiD needs no domestic numerator
+    (it's US-vs-allied on the import side), so it can run on HS 8542 AS-IS to
+    measure the causal effect of the CHIP controls (H20/A800 bans) on US chip
+    exports to China — directly Jensen's layer, same identified method. Just
+    parameterize did_export_controls.py by HS product.
+
 ## NEXT CANDIDATES (pick with Jason)
-1. Further DiD robustness: drop Singapore (US->SG rerouting caveat), add EU27 to
-   the balanced event-study panel (now has 2021+ data), wild-cluster bootstrap.
-2. Write the second essay off the counterfactual decomposition (draft in
+1. Chip-layer DiD (above) — parameterize did_export_controls.py by HS 8486/8542.
+2. Further equipment-DiD robustness: add EU27 to the event-study panel (now has
+   2021+ data), wild-cluster bootstrap. (Drop-Singapore already shipped.)
+3. Write the second essay off the counterfactual decomposition (draft in
    review/, human-edited, NOT auto-published — same gate as trade_note).
-3. Return-on-ratio regression to quantify the exposure-ladder deltas.
+4. If NBS ever un-blocks (or via manual PDF ingest): real chip self-sufficiency
+   ratio + its own DiD, demand-adjusted.
 
 ## Test suite: 94 passing (88 + 6 DiD). Run before committing anything.

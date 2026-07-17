@@ -103,6 +103,7 @@ jobs:
           python analysis/consensus_gap.py
           python review/trade_note.py
           python analysis/chip_vs_equipment.py
+          python analysis/chip_self_sufficiency.py
           python analysis/vendor_lead.py
           python analysis/did_export_controls.py
 
