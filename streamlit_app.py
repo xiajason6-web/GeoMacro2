@@ -369,6 +369,58 @@ if chip_ss_csv.exists():
         " data/exports/chip_self_sufficiency.md."
     )
 
+# ---- chip controls DiD: bite then leak -------------------------------------------
+
+chip_did_es = REPO_ROOT / "data" / "exports" / "did_chip_event_study.csv"
+chip_did_sum = REPO_ROOT / "data" / "exports" / "did_chip_summary.csv"
+if chip_did_es.exists() and chip_did_sum.exists():
+    ces = pd.read_csv(chip_did_es)
+    cs = pd.read_csv(chip_did_sum).iloc[0]
+    import numpy as _np
+    ces["level"] = _np.exp(ces.coef) - 1  # log pts -> % deviation from allied
+
+    st.header("Did the chip controls work? Bite, then leak")
+    st.caption(
+        "The SAME difference-in-differences, run on HS 8542 chips (the A100/H100,"
+        " A800/H800, H20 layer). US chip exports to China vs the allied path,"
+        " cycle-differenced. Contrast with the equipment DiD above: tools stuck,"
+        " chips leaked."
+    )
+    k1, k2, k3, k4 = st.columns(4)
+    k1.metric("Trough (controls bit)", f"{cs.trough_pct:.0%}",
+              help=f"Deepest US shortfall vs allied path, at {cs.trough_quarter}.")
+    k2.metric("Latest (recovered)", f"{cs.latest_es_pct:.0%}",
+              help="US chip exports bounced back as firms shipped compliant"
+                   " A800/H800/H20 parts.")
+    k3.metric("Net cumulative effect", f"{cs.cumulative_pct_effect:+.0%}",
+              help="Washes toward zero — the bite was undone by re-engineering.")
+    k4.metric("Placebo p", f"{cs.placebo_p_value:.2f}",
+              help="US is NOT the most-suppressed origin over the full window —"
+                   " no durable identified suppression, unlike equipment.")
+
+    figv = go.Figure()
+    pre, post = ces[ces.is_pre], ces[~ces.is_pre]
+    figv.add_scatter(x=pre.quarter, y=pre.level, mode="markers", name="pre-baseline",
+                     marker=dict(color="#7f7f7f", size=8))
+    figv.add_scatter(x=post.quarter, y=post.level, mode="lines+markers",
+                     name="US vs allied (post)", line=dict(color="#d62728"))
+    figv.add_hline(y=0, line_dash="dot", line_color="gray")
+    figv.add_vline(x=str(cs.anchor_quarter), line_dash="dash", line_color="green")
+    figv.update_layout(
+        title="US chip exports vs allied path — the V (bite then recovery)",
+        yaxis=dict(title="% deviation from allied path", tickformat=".0%"),
+        height=380, legend=dict(orientation="h", y=-0.25), margin=dict(t=40),
+    )
+    st.plotly_chart(figv, use_container_width=True)
+    st.caption(
+        "The V is the finding: the A100/H100 and A800/H800 bans opened a real"
+        " gap, then US chip sales recovered to near parity via compliant SKUs"
+        " (the H20 saga) — so control durability is LAYER-SPECIFIC (tools can't"
+        " be re-spun; chip products can). Parallel trends fails here, so read it"
+        " as descriptive; the equipment DiD is the identified one."
+        " data/exports/did_chip_controls.md."
+    )
+
 # ---- exposure ladder + surprise --------------------------------------------------
 
 st.header("Exposure ladder — theme → instruments (research, not advice)")

@@ -231,18 +231,34 @@ GACC/customs pattern; NOT in nightly to avoid spam). CXMT/YMTC unlisted.
     substitution at the chip layer.
   - Outputs: data/exports/chip_self_sufficiency.{md,csv}; dashboard "Two layers
     of self-sufficiency" contrasts equipment ratio vs chip share.
-  - HIGHEST-VALUE follow-on: the export-control DiD needs no domestic numerator
-    (it's US-vs-allied on the import side), so it can run on HS 8542 AS-IS to
-    measure the causal effect of the CHIP controls (H20/A800 bans) on US chip
-    exports to China — directly Jensen's layer, same identified method. Just
-    parameterize did_export_controls.py by HS product.
+## CHIP-LAYER DiD — BUILT (`analysis/did_chip_controls.py`, + test, dashboard)
+The export-control DiD run on HS 8542 (chips) — Jensen's layer. Identifies off
+the denominator (US vs allied chip exports), so no domestic numerator needed;
+REUSES the audited did_export_controls machinery unchanged (load_panel now takes
+a `series=` arg). THE RESULT IS THE OPPOSITE OF EQUIPMENT and that contrast is
+the payoff:
+  - Equipment: durable −78%, clean pre-trends. Chips: a V — US chip exports fell
+    ~−47% below the allied path at the 2023Q2 trough (A100/H100 + A800/H800 bit),
+    then RECOVERED to ~−13% by 2025 as firms shipped compliant parts
+    (A800->H800->H20). Net cumulative ~+15%, placebo p=0.80, pre-trend 0.53 →
+    parallel trends FAILS. Read the failed identification as the finding: the
+    chip channel was re-engineered around.
+  - Takeaway: control durability is LAYER-SPECIFIC — sticks at the tool
+    chokepoint (can't re-spin a litho tool), leaks at the chip-product layer
+    (fast design iteration). Both debate camps get a precisely-bounded point;
+    neither layer's controls made China self-sufficient (imports rose on demand).
+  - Honest: HS8542 is ALL ICs (uncontrolled chips dilute + aid the recovery);
+    parallel trends fails so it's DESCRIPTIVE, not clean-causal (equipment DiD is
+    the identified one). Outputs: did_chip_controls.md + did_chip_*.csv; dashboard
+    "Did the chip controls work? Bite, then leak" (V-shape event study).
 
 ## NEXT CANDIDATES (pick with Jason)
-1. Chip-layer DiD (above) — parameterize did_export_controls.py by HS 8486/8542.
+1. Isolate the controlled GPU subset (product-level data) to sharpen the chip
+   DiD beyond aggregate HS 8542 — would make the V a clean causal estimate.
 2. Further equipment-DiD robustness: add EU27 to the event-study panel (now has
    2021+ data), wild-cluster bootstrap. (Drop-Singapore already shipped.)
-3. Write the second essay off the counterfactual decomposition (draft in
-   review/, human-edited, NOT auto-published — same gate as trade_note).
+3. Write the second essay off the two-layer story (equipment durable vs chip
+   leaky) — draft in review/, human-edited, NOT auto-published (trade_note gate).
 4. If NBS ever un-blocks (or via manual PDF ingest): real chip self-sufficiency
    ratio + its own DiD, demand-adjusted.
 

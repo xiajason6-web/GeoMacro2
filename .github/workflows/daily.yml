@@ -106,6 +106,7 @@ jobs:
           python analysis/chip_self_sufficiency.py
           python analysis/vendor_lead.py
           python analysis/did_export_controls.py
+          python analysis/did_chip_controls.py
 
       - name: Tests
         id: tests

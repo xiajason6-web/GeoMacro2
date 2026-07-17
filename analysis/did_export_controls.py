@@ -137,16 +137,18 @@ def _dummies(labels):
 # --------------------------------------------------------------------------
 # Panel construction
 # --------------------------------------------------------------------------
-def load_panel(conn, exclude=()):
-    """Monthly origin panel of HS 8486 imports to China, converted to USD
-    through fx_rates (the same chokepoint the flagship ratio uses). `exclude`
-    drops origins from the control group entirely — used for the ex-Singapore
-    robustness run (the US->Singapore rerouting caveat)."""
+def load_panel(conn, exclude=(), series=None):
+    """Monthly origin panel of imports to China, converted to USD through
+    fx_rates (the same chokepoint the flagship ratio uses). `exclude` drops
+    origins from the control group entirely (ex-Singapore rerouting robustness).
+    `series` selects the HS product's mirror-export metrics — defaults to HS
+    8486 equipment; pass a chip series to run the same DiD on HS 8542."""
+    series = ir.IMPORT_SERIES if series is None else series
     df = ir.load_metrics(conn)
     fx = ir.load_fx(conn)
-    imp = df[df.metric_name.isin(ir.IMPORT_SERIES)].copy()
-    imp["origin"] = imp.metric_name.map(lambda m: ir.IMPORT_SERIES[m][0])
-    imp["currency"] = imp.metric_name.map(lambda m: ir.IMPORT_SERIES[m][1])
+    imp = df[df.metric_name.isin(series)].copy()
+    imp["origin"] = imp.metric_name.map(lambda m: series[m][0])
+    imp["currency"] = imp.metric_name.map(lambda m: series[m][1])
     imp, dropped = ir.to_usd(imp, fx)
     if len(dropped):
         print(f"WARNING: {len(dropped)} import rows lacked an FX rate — excluded")
