@@ -15,4 +15,6 @@
 
 Expected sign is NEGATIVE: foreign vendors losing China share as the domestic ratio rises. A negative contemporaneous number is consistent with substitution; a negative LEAD number (vendor moves first) is what would make it tradeable — but that claim needs 8+ quarters, not 5.
 
+Observed sign is POSITIVE, not negative — a real finding in itself: over this short window both series rise and fall with China's fab-capex CYCLE (up-cycle = foreign vendors AND domestic makers both grow), which swamps the slower substitution trend. Reading substitution off raw co-movement fails at this horizon; it needs more quarters or explicit cycle-adjustment (e.g. controlling for total WFE demand).
+
 Status: too few quarters to conclude.
