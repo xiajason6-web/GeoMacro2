@@ -562,33 +562,38 @@ def build_markdown(did, placebo, p_value, es, cf, its, robustness=None):
             "the step signs are indicative; the DiD in §1 is the identified",
             "estimate.",
         ]
-    if robustness is not None:
-        did_x, cf_x = robustness
-        cum_x = did_x["cumulative_after_Dec2024"]
-        lat_x = cf_x.iloc[-1]
+    if robustness:
+        lat = cf.iloc[-1]
+        header = "| | Full (5 origins) | " + " | ".join(lbl for lbl, _, _ in robustness) + " |"
+        sep = "|" + "---|" * (len(robustness) + 2)
+        coef_row = f"| Cumulative US effect (log pts) | {cum['coef']:+.3f} | " + \
+            " | ".join(f"{d['cumulative_after_Dec2024']['coef']:+.3f}" for _, d, _ in robustness) + " |"
+        pct_row = f"| Cumulative level effect | {cum['pct_effect']:+.1%} | " + \
+            " | ".join(f"{d['cumulative_after_Dec2024']['pct_effect']:+.1%}" for _, d, _ in robustness) + " |"
+        supp_row = f"| Suppression at {lat.name} (pp) | {lat.suppression_pp:+.1f} | " + \
+            " | ".join(f"{c.iloc[-1].suppression_pp:+.1f}" for _, _, c in robustness) + " |"
         lines += [
             "",
-            "## 6. Robustness — drop Singapore (rerouting caveat)",
+            "## 6. Robustness — control-group variants",
             "",
-            "Re-run with Singapore removed from BOTH the control group and the",
-            "counterfactual basket, since some US→Singapore flow is US firms",
-            "shipping via Singapore fabs (which would contaminate Singapore as a",
-            "control). The actual ratio is unchanged; only the control group and",
-            "the US counterfactual path move.",
+            "The actual ratio is unchanged in every variant; only the control",
+            "group and the US counterfactual path move.",
+            "- **Drop Singapore**: some US→Singapore flow is US firms shipping via",
+            "  Singapore fabs, which would contaminate Singapore as a control.",
+            "- **Clean controls (Korea+Singapore)**: EU27 and Japan became",
+            "  partially treated from mid-2023 (NL DUV licensing Sept 2023; Japan",
+            "  METI July 2023), which attenuates the estimate toward zero. Korea",
+            "  and Singapore imposed no equivalent controls — the cleanest group.",
             "",
-            "| | Full (5 origins) | Ex-Singapore |",
-            "|---|---|---|",
-            f"| Cumulative US effect (log pts) | {cum['coef']:+.3f} |"
-            f" {cum_x['coef']:+.3f} |",
-            f"| Cumulative level effect | {cum['pct_effect']:+.1%} |"
-            f" {cum_x['pct_effect']:+.1%} |",
-            f"| Suppression at {lat_x.name} (pp) | {cf.iloc[-1].suppression_pp:+.1f} |"
-            f" {lat_x.suppression_pp:+.1f} |",
+            header, sep, coef_row, pct_row, supp_row,
             "",
-            "The headline is robust to dropping Singapore — the estimate "
-            + ("barely moves" if abs(cum_x["coef"] - cum["coef"]) < 0.15
-               else "shifts but keeps its sign and order of magnitude")
-            + ". Dashboard exposes this as a toggle (did_*_ex_sg.csv).",
+            "The headline is robust across variants — every cumulative estimate",
+            "is large and negative (about −72% to −78%). The clean-control",
+            "(Korea+Singapore) estimate lands close to the full panel, so the",
+            "theoretical worry that EU/Japan contamination (partial controls from",
+            "mid-2023) attenuates the estimate is not large enough to change the",
+            "conclusion either way at five origins. Dashboard exposes these as a",
+            "toggle.",
         ]
     lines += [
         "",
@@ -676,11 +681,21 @@ def main():
     )
     write_dashboard_csvs(did_x, placebo_x, p_x, es_x, cf_x, suffix="_ex_sg")
 
+    # Clean-control variant: EU27 and Japan became PARTIALLY TREATED from
+    # mid-2023 (NL DUV licensing Sept 2023; Japan METI 23-item rule July 2023),
+    # which attenuates the estimate toward zero. Korea + Singapore imposed no
+    # equivalent controls, so they are the cleanest untreated control group.
+    did_c, placebo_c, p_c, es_c, cf_c = analyze(
+        conn, exclude=["EU27", "Japan"], basket=["Korea", "Singapore"]
+    )
+    write_dashboard_csvs(did_c, placebo_c, p_c, es_c, cf_c, suffix="_clean")
+
     its = ratio_its(conn)
     conn.close()
 
     md = build_markdown(did, placebo, p_value, es, cf, its,
-                        robustness=(did_x, cf_x))
+                        robustness=[("Drop Singapore (rerouting)", did_x, cf_x),
+                                    ("Clean controls (Korea+Singapore)", did_c, cf_c)])
     (OUT_DIR / "did_export_controls.md").write_text(md)
     print("wrote data/exports/did_export_controls.md")
     print("=" * 78)

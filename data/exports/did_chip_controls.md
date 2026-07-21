@@ -16,10 +16,15 @@ trough (2023Q2) — the A100/H100 and A800/H800 bans genuinely bit — then
 
 **Read the failed identification as the finding.** Unlike equipment
 (clean pre-trends, durable −78%), the chip DiD does NOT hold parallel
-trends and washes out to ~zero — because the treated channel was
-RE-ENGINEERED around: after each ban, US firms shipped compliant parts
-(A800 → H800 → H20), so aggregate US chip sales to China bounced back to
-near parity. Controls bite hardest where the product can't be re-spun.
+trends and washes out to ~zero: the US-origin series fell then recovered.
+IMPORTANT attribution caveat — the recovery is mostly UNRESTRICTED
+lower-end US chips plus the semiconductor cycle, NOT NVIDIA's compliant
+GPUs. Those China parts (A100/H100→A800/H800→H20) are fabbed by TSMC in
+TAIWAN, so they are not US-origin exports and barely appear in this
+US→China series. The broader lesson still holds as industry logic — a
+chip is a design that can be re-spun under a performance threshold, a
+lithography tool cannot — so controls bite hardest where the product
+can't iterate.
 
 ## Event-study coefficients (the V-shape)
 
@@ -30,8 +35,9 @@ near parity. Controls bite hardest where the product can't be re-spun.
 | US × post-Dec-2024 (incr.) | +0.300 | +34.9% | 0.071 |
 
 The initial ban is a sharp negative (the bite); the later terms are
-positive (the recovery via compliant SKUs) — which is exactly why the
-cumulative nets out and a single number would mislead.
+positive (the recovery) — which is why the cumulative nets out and a
+single number would mislead. The recovery is unrestricted chips + cycle,
+not the controlled GPU flow (which is Taiwan-origin, off-panel).
 
 ## US chip exports vs the allied path ($bn/qtr — the V)
 
@@ -55,27 +61,29 @@ cumulative nets out and a single number would mislead.
 
 ## What this settles in the export-controls debate
 
-- **Control durability is LAYER-SPECIFIC.** Equipment controls stuck
-  (−78%, clean, durable — you can't redesign a lithography tool to be
-  compliant). Chip controls bit then leaked (re-spun into H20-class
-  parts). Effectiveness lives at the chokepoint that can't iterate: the
-  tools, not the chip products.
-- **Both camps get something, precisely bounded.** The 'controls are
-  porous' view (Huang) holds AT THE CHIP LAYER — sales recovered. The
-  'controls work' view holds AT THE TOOL LAYER — the durable −78%.
+- **Control durability is LAYER-SPECIFIC (industry logic).** A chip is a
+  design that can be re-spun under a threshold (H100→A800/H800→H20); a
+  lithography tool has no compliant version. So controls are durable at
+  the tool layer (−78%, clean) and porous at the chip layer — effective
+  where the product can't iterate. NOTE: this is an industry fact, not
+  something THIS US-origin trade series cleanly identifies (see caveat).
+- **Both camps get something.** The 'controls are porous' view (Huang)
+  holds at the chip layer; the 'controls work' view holds at the tool
+  layer (the durable −78%).
 - **Neither made China self-sufficient.** chip_self_sufficiency.py shows
-  chip imports rose on demand throughout. Controls suppress US SALES
-  (durably for tools, transiently for chips) far more than they lift
-  China's self-reliance.
+  chip imports rose on demand throughout.
 
-## Limits
+## Limits (read the chip layer as descriptive)
 
+- **Origin blind spot — decisive here.** TAIWAN, the largest chip
+  supplier to China and where NVIDIA's China GPUs are fabbed, is an
+  unobserved origin (no machine-readable source). The controlled-GPU
+  flow is therefore largely OUTSIDE this panel — the recovery shown here
+  is unrestricted US chips + cycle, not the compliant-GPU 'leak'.
 - **HS 8542 is ALL ICs**, not just controlled GPUs — uncontrolled chips
-  dilute the treatment and, being demand-driven, help the recovery.
-  Isolating the GPU subset needs product-level data this pipeline lacks.
-- **Parallel trends fails here**, so this is DESCRIPTIVE, not a clean
-  causal estimate — the equipment DiD is the identified one. The V-shape
-  itself, though, is robust and economically legible (the H20 saga).
+  dilute the treatment and drive much of the recovery.
+- **Parallel trends fails**, so this is DESCRIPTIVE, not a clean causal
+  estimate — the equipment DiD is the identified one.
 - **Five origins** → placebo p floor 0.20.
 
 _Research output — finding → mechanism → exposed entities → confidence →

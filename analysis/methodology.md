@@ -70,8 +70,9 @@ belongs in the digest, not in the number.
 | Bias | Direction on ratio | Planned fix |
 |---|---|---|
 | ~~Korea/Singapore missing~~ **FIXED v2** via UN Comtrade; Taiwan remains missing (no machine-readable source) | Taiwan gap: ratio overstated a few pp | revisit TW MOF portal with dedicated effort |
-| Mirror data measures exports FOB at partner border, not arrivals CIF China | slightly understates imports | acceptable; note in publication |
-| HS 8486 includes flat-panel-display tools | mixed, small | acceptable at HS4; HS6 split later if needed |
+| Mirror data measures exports FOB at partner border, not arrivals CIF China | understates imports low-single-digit % (air-freighted tools) | acceptable; note in publication |
+| HS 8486 includes flat-panel-display tools (subheading 8486.30) | **inflates the denominator → ratio is a LOWER BOUND on true localization** (magnitude possibly ~10-25% at HS4, not "small") | **track HS6, exclude 8486.30 — the recommended next data task (v3)** |
+| Entrepôt / transshipment (Hong Kong, Singapore) scrambles country-of-origin | totals ~fine; **by-origin breakdown is the fragile part** (touches the DiD and the Singapore control) | flag; Korea+Singapore-only DiD variant added as a check |
 | Domestic revenue counted in CNY of sale vs imports at customs value | small | acceptable |
 
 ## Comparability rules for readers
@@ -95,3 +96,31 @@ belongs in the digest, not in the number.
 
 Every number in the output CSV traces to a `metrics` row, which traces to a
 `documents` row, which points at an archived raw file and its source URL.
+
+## External assumption audit (2026-07)
+
+Empirical assumptions were tested against outside sources (SEMI, CSIS, analyst
+notes, official rule texts). Design choices (3-month coverage rule, USD
+aggregation, fixed effects) are methodology, not researchable. Verdicts, with
+the DIRECTION each bias pushes a conclusion:
+
+| Assumption | Verdict | Direction / note |
+|---|---|---|
+| Mirror trade ≈ China imports | Partly founded | Totals ~fine; **by-origin attribution fragile** (HK/SG transshipment) |
+| HS 8486 = wafer-fab equipment | **Questionable** | Includes flat-panel tools → **flagship ratio is a lower bound** (fix: HS6, drop 8486.30) |
+| HS 8542 = chip layer | Founded | Re-export inflation confirmed (already caveated) |
+| 5 origins + Taiwan immaterial | Founded for tools; **not for chips** | Taiwan is a top-2 chip supplier → chip denominator undercounts; decisive for the chip DiD |
+| 6 toolmakers = domestic WFE | Partly founded | Misses SMEE (litho, unlisted) + SiCarrier + metrology/implant → understates breadth, zeroes the hardest category |
+| SMIC+Hua Hong = domestic logic | Partly founded | ~85% China customers, but mature-node; excludes memory (CXMT/YMTC) |
+| Chinese filings reliable | Partly founded | Top-line for megacaps OK; segment/geography splits lowest-confidence |
+| Allies = untreated control | **Partly founded** | Clean only through ~June 2023; NL (Sept 2023) + Japan (July 2023) partially treated after → **US effect biased toward zero (−78% is a lower bound)**; KR+SG stay clean |
+| US wave dates (Oct22/Oct23/Dec24) | Founded | Correct major BIS action dates |
+| 2022Q2 clean anchor | Partly founded | Front-running around waves inflates pre-treatment levels |
+| Chip V = NVIDIA compliant re-spins | **Overstated** | NVIDIA GPUs are Taiwan-fabbed → barely in US-origin HS8542; the recovery is unrestricted chips + cycle. Narrative corrected in did_chip_controls.py |
+| "WFE demand flat ~$12-14bn/qtr" | Partly founded | Rose to a 2024 record then fell in 2025; domestic ~doubling confirmed |
+| Benchmarks (Bernstein/UBS/CSIS) + Big Fund | Founded | Bernstein ~21%, Yole ~23%, 20-35% by scope; Big Fund Phase III ¥344bn |
+
+Net: headline conclusions survive; the equipment −78% is a conservative lower
+bound; the flagship ratio is a lower bound on true localization; the chip-layer
+mechanism was corrected (Taiwan-origin blind spot). Highest-value follow-on:
+re-collect equipment imports at HS6 and drop 8486.30 (v3 methodology revision).

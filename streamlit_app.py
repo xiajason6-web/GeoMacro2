@@ -209,10 +209,15 @@ if (exports_dir / "did_summary.csv").exists() and (exports_dir / "did_event_stud
     variants = {"Full allied control (EU27+JP+KR+SG)": ""}
     if (exports_dir / "did_summary_ex_sg.csv").exists():
         variants["Drop Singapore (rerouting robustness)"] = "_ex_sg"
+    if (exports_dir / "did_summary_clean.csv").exists():
+        variants["Clean controls (Korea+Singapore only)"] = "_clean"
     choice = st.radio(
         "Control group", list(variants), horizontal=True,
-        help="Robustness check: does the estimate survive removing Singapore,"
-             " where some 'exports' are US firms rerouting via Singapore fabs?",
+        help="Robustness checks. Drop-Singapore: some 'exports' are US firms"
+             " rerouting via Singapore fabs. Clean controls: EU27 and Japan"
+             " adopted their own China controls from mid-2023 (partially"
+             " treated), so Korea+Singapore are the cleanest untreated group."
+             " The estimate stays large and negative across all three.",
     )
     sfx = variants[choice]
 
@@ -415,19 +420,23 @@ if chip_did_es.exists() and chip_did_sum.exists():
     )
     st.plotly_chart(figv, use_container_width=True)
     st.markdown(
-        "**Why the chip line recovers but the tool line doesn't: a chip can be"
-        " re-spun; a lithography tool cannot.** A GPU is a *design* — when a ban"
-        " sets a performance threshold, NVIDIA re-spins a compliant part (H100 →"
-        " A800/H800 → H20) and sales climb back, which is the recovery in this"
-        " curve. Wafer-fab equipment has no compliant version to ship: an EUV or"
-        " advanced etch tool either clears the customer or it doesn't. So the"
-        " identical controls are durable at the equipment layer (−78%) and porous"
-        " at the chip layer — control bites where the product can't iterate."
+        "**Why controls stick for tools but not for chips: a chip is a design"
+        " that can be re-spun; a lithography tool cannot.** When a ban sets a"
+        " performance threshold, a GPU can be redesigned just under the line"
+        " (H100 → A800/H800 → H20); wafer-fab equipment has no compliant version"
+        " — an EUV or advanced-etch tool either clears the customer or it"
+        " doesn't. That is why the identical controls are durable at the"
+        " equipment layer (−78%) and porous at the chip layer."
     )
-    st.caption(
-        "Parallel trends fails here, so read the chip layer as descriptive; the"
+    st.warning(
+        "**Attribution caveat on this curve.** NVIDIA's China GPUs are fabbed in"
+        " **Taiwan**, so they are *not* US-origin exports and barely appear in"
+        " this US→China series — and Taiwan itself is an unobserved origin here."
+        " The recovery shown is driven mostly by *unrestricted* lower-end US"
+        " chips and the semiconductor cycle, **not** the compliant-GPU 'leak',"
+        " which lives in Taiwan-origin data this panel can't see. Parallel"
+        " trends also fails, so read the chip layer as descriptive — the"
         " equipment DiD is the cleanly identified estimate."
-        " Full method and limits in data/exports/did_chip_controls.md."
     )
 
 # ---- exposure ladder + surprise --------------------------------------------------

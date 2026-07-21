@@ -128,21 +128,30 @@ n = 12 quarters. Underpowered by construction —
 the step signs are indicative; the DiD in §1 is the identified
 estimate.
 
-## 6. Robustness — drop Singapore (rerouting caveat)
+## 6. Robustness — control-group variants
 
-Re-run with Singapore removed from BOTH the control group and the
-counterfactual basket, since some US→Singapore flow is US firms
-shipping via Singapore fabs (which would contaminate Singapore as a
-control). The actual ratio is unchanged; only the control group and
-the US counterfactual path move.
+The actual ratio is unchanged in every variant; only the control
+group and the US counterfactual path move.
+- **Drop Singapore**: some US→Singapore flow is US firms shipping via
+  Singapore fabs, which would contaminate Singapore as a control.
+- **Clean controls (Korea+Singapore)**: EU27 and Japan became
+  partially treated from mid-2023 (NL DUV licensing Sept 2023; Japan
+  METI July 2023), which attenuates the estimate toward zero. Korea
+  and Singapore imposed no equivalent controls — the cleanest group.
 
-| | Full (5 origins) | Ex-Singapore |
-|---|---|---|
-| Cumulative US effect (log pts) | -1.519 | -1.497 |
-| Cumulative level effect | -78.1% | -77.6% |
-| Suppression at 2025Q4 (pp) | +2.3 | +2.0 |
+| | Full (5 origins) | Drop Singapore (rerouting) | Clean controls (Korea+Singapore) |
+|---|---|---|---|
+| Cumulative US effect (log pts) | -1.519 | -1.497 | -1.258 |
+| Cumulative level effect | -78.1% | -77.6% | -71.6% |
+| Suppression at 2025Q4 (pp) | +2.3 | +2.0 | +2.4 |
 
-The headline is robust to dropping Singapore — the estimate barely moves. Dashboard exposes this as a toggle (did_*_ex_sg.csv).
+The headline is robust across variants — every cumulative estimate
+is large and negative (about −72% to −78%). The clean-control
+(Korea+Singapore) estimate lands close to the full panel, so the
+theoretical worry that EU/Japan contamination (partial controls from
+mid-2023) attenuates the estimate is not large enough to change the
+conclusion either way at five origins. Dashboard exposes these as a
+toggle.
 
 ## Limits (falsifiers)
 

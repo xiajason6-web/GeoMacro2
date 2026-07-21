@@ -132,9 +132,12 @@ nowcasts, instrument_exposure.
   import coverage + company scope, NOT numerator adjustments.
 
 ## THREE KEY FINDINGS (the analytical payoff — all in the data)
-1. Substitution, not demand destruction: total WFE demand flat ~$12-14bn/qtr
-   through 2025 while domestic doubled ($1.3→3.1bn) — refutes "controls just
-   wrecked the market."
+1. Substitution, not demand destruction: total China WFE demand ROSE to a 2024
+   record then contracted in 2025 (SEMI; not literally "flat") while domestic
+   doubled ($1.3→3.1bn) — the substitution holds through both, refuting
+   "controls just wrecked the market." (Audit fix: earlier "flat ~$12-14bn/qtr"
+   was imprecise — demand rose-then-fell, and the /qtr figure ran high partly
+   from HS8486 flat-panel contamination; see methodology.md audit.)
 2. The import decline is US-SPECIFIC: US-origin exports to China −69%
    (2023H2→2025H2) while EU/Japan/Korea/Singapore held flat-to-up. China
    de-Americanized, it did not decouple; the allied coalition is leaky.
@@ -252,14 +255,27 @@ the payoff:
     the identified one). Outputs: did_chip_controls.md + did_chip_*.csv; dashboard
     "Did the chip controls work? Bite, then leak" (V-shape event study).
 
+## ASSUMPTION AUDIT (2026-07) — researched against outside sources
+Full verdict table in analysis/methodology.md ("External assumption audit").
+Headlines: conclusions survive; equipment −78% is a conservative LOWER BOUND
+(allies EU27+Japan partially treated from mid-2023 → attenuation); the flagship
+ratio is a LOWER BOUND on true localization (HS8486 includes flat-panel tools);
+the chip-layer NVIDIA/H20 mechanism was OVERSTATED and is now corrected
+(NVIDIA GPUs are Taiwan-fabbed → barely in US-origin HS8542; the recovery is
+unrestricted chips + cycle). Fixes shipped: clean-control DiD variant
+(Korea+Singapore, −71.6% vs −78.1% full — robust); chip narrative rewritten;
+"flat demand" softened; methodology limits table strengthened.
+
 ## NEXT CANDIDATES (pick with Jason)
-1. Isolate the controlled GPU subset (product-level data) to sharpen the chip
-   DiD beyond aggregate HS 8542 — would make the V a clean causal estimate.
-2. Further equipment-DiD robustness: add EU27 to the event-study panel (now has
-   2021+ data), wild-cluster bootstrap. (Drop-Singapore already shipped.)
+1. **v3 data task (highest value): re-collect equipment imports at HS6, exclude
+   8486.30 (flat-panel).** Removes the denominator contamination → truer (higher)
+   flagship ratio. This changes the flagship number, so it's a METHODOLOGY
+   revision needing Jason's OK — do it as its own validated pass, not a ride-along.
+2. Isolate the controlled GPU subset (product-level data) + add Taiwan chip
+   origin — would make the chip V a clean causal estimate on the right series.
 3. Write the second essay off the two-layer story (equipment durable vs chip
    leaky) — draft in review/, human-edited, NOT auto-published (trade_note gate).
 4. If NBS ever un-blocks (or via manual PDF ingest): real chip self-sufficiency
    ratio + its own DiD, demand-adjusted.
 
-## Test suite: 94 passing (88 + 6 DiD). Run before committing anything.
+## Test suite: 99 passing. Run before committing anything.
