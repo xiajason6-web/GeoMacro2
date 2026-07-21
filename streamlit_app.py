@@ -1,562 +1,260 @@
-"""Read-only dashboard over db/tracker.sqlite.
+"""Single-panel research note over db/tracker.sqlite outputs.
 
-What this does: renders the indigenization series, its components, company
-revenue, the events-and-exposure view, and the open review queue — straight
-from the SQLite file in the repo. Nothing here writes to the database, and
-every caveat that the analysis layer prints is shown on screen too.
+Structured like an equity-research report: one central thesis, evidence that
+builds to it, risks, and what to watch — not a multi-panel dashboard. Reads
+top-to-bottom. Every number traces to an archived source document; nothing
+here writes to the database.
 
 Run locally:   .venv/bin/streamlit run streamlit_app.py
 Deployed:      Streamlit Community Cloud pointed at this file.
 """
 
-import sqlite3
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 import streamlit as st
 
 REPO_ROOT = Path(__file__).resolve().parent
-DB_PATH = REPO_ROOT / "db" / "tracker.sqlite"
+EXPORTS = REPO_ROOT / "data" / "exports"
 
-st.set_page_config(page_title="China Tech Flows", layout="wide")
+st.set_page_config(page_title="China Semiconductor Indigenization — Research Note",
+                   layout="centered")
 
 
 @st.cache_data(ttl=3600)
-def load(query):
-    conn = sqlite3.connect(DB_PATH)
-    df = pd.read_sql_query(query, conn)
-    conn.close()
-    return df
+def csv(name):
+    p = EXPORTS / name
+    return pd.read_csv(p) if p.exists() else pd.DataFrame()
 
 
-st.title("China Tech Flows — semiconductor indigenization tracker")
+ratio = csv("indigenization_ratio.csv")
+ratio_full = ratio[ratio.get("ratio").notna() & (ratio.get("missing_origins").fillna("") == "Taiwan")] \
+    if not ratio.empty else ratio
+did = csv("did_summary.csv")
+cf = csv("did_counterfactual.csv")
+layers = csv("chip_self_sufficiency.csv")
+ches = csv("did_chip_event_study.csv")
+chs = csv("did_chip_summary.csv")
+
+d = did.iloc[0] if not did.empty else None
+
+PLOT = dict(height=360, margin=dict(t=44, r=10, b=10, l=10),
+            legend=dict(orientation="h", y=-0.22))
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Masthead + thesis
+# ─────────────────────────────────────────────────────────────────────────────
+st.title("China Semiconductor Indigenization")
+st.subheader("Substitution, not sanctions — and why the scoreboard is wrong")
 st.caption(
-    "Research analysis only: transmission mechanisms and exposure, not"
-    " investment advice. Every number traces to an archived source document."
+    "Thematic research · 2026-07-21 · finding → mechanism → exposed entities →"
+    " confidence → sources. **Not investment advice** — no buy/sell/target."
 )
 
-# ---- indigenization series ----------------------------------------------------
-
-ratio_csv = REPO_ROOT / "data" / "exports" / "indigenization_ratio.csv"
-if ratio_csv.exists():
-    ratio = pd.read_csv(ratio_csv).dropna(subset=["ratio"])
-    st.header("Indigenization ratio (working series)")
-    st.warning(
-        "Methodology v2 (USD): numerator = domestic semicap revenue (segment-"
-        " and region-adjusted from filings); denominator = mirror imports from"
-        " EU27, Japan, US, Korea, Singapore (Taiwan unavailable). Quarters"
-        " with reduced origin coverage are marked. See analysis/methodology.md."
-    )
-    # A quarter is fully covered when the only missing origin is Taiwan
-    # (which has no machine-readable source). Reduced-coverage quarters
-    # understate imports -> overstate the ratio, so they must not headline.
-    full = ratio[ratio.missing_origins.fillna("") == "Taiwan"]
-    reduced = ratio[ratio.missing_origins.fillna("") != "Taiwan"]
-
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        fig = go.Figure()
-        fig.add_bar(x=ratio.quarter, y=ratio.domestic_semicap_usd / 1e9, name="Domestic semicap revenue (bn USD)")
-        fig.add_bar(x=ratio.quarter, y=ratio.imports_usd / 1e9, name="Equipment imports (bn USD)")
-        fig.add_scatter(
-            x=full.quarter, y=full.ratio, name="Ratio (full coverage)",
-            yaxis="y2", mode="lines+markers",
-        )
-        if not reduced.empty:
-            fig.add_scatter(
-                x=reduced.quarter, y=reduced.ratio,
-                name="Ratio (PARTIAL coverage — overstated)",
-                yaxis="y2", mode="markers",
-                marker=dict(symbol="circle-open", size=13, color="#d62728"),
-                text=reduced.missing_origins,
-                hovertemplate="%{x}: %{y:.1%}<br>missing: %{text}<extra></extra>",
-            )
-        fig.update_layout(
-            barmode="group",
-            yaxis=dict(title="bn USD"),
-            yaxis2=dict(title="ratio", overlaying="y", side="right", range=[0, 0.6]),
-            legend=dict(orientation="h", y=-0.25),
-            height=420,
-            margin=dict(t=20),
-        )
-        st.plotly_chart(fig, use_container_width=True)
-    with col2:
-        # Headline the latest FULLY-covered quarter, never a partial one.
-        headline = full.iloc[-1]
-        first = full.iloc[0]
-        st.metric(
-            f"Latest full-coverage quarter ({headline.quarter})",
-            f"{headline.ratio:.1%}",
-            f"{headline.ratio - first.ratio:+.1%} vs {first.quarter}",
-        )
-        if not reduced.empty:
-            newest = reduced.iloc[-1]
-            st.caption(
-                f"⚠️ {newest.quarter} reads {newest.ratio:.1%} but is missing"
-                f" {newest.missing_origins} on the imports side — overstated,"
-                " not comparable. The nowcast below completes it."
-            )
-        st.dataframe(
-            ratio[["quarter", "ratio", "coverage_origins", "n_estimated"]].assign(
-                ratio=lambda d: d.ratio.map("{:.1%}".format)
-            ),
-            hide_index=True,
-            use_container_width=True,
-        )
-
-# ---- nowcast (estimate — subordinate styling by design) --------------------------
-
-nowcasts = load(
-    "SELECT target_quarter, ratio_nowcast, ratio_low, ratio_high, made_at, drivers"
-    " FROM nowcasts WHERE made_at = (SELECT MAX(made_at) FROM nowcasts)"
-    " ORDER BY target_quarter"
-)
-if not nowcasts.empty and ratio_csv.exists():
-    st.header("Nowcast — model estimate, not measured data")
+if d is not None:
     st.info(
-        f"NOWCAST produced {nowcasts.made_at.iloc[0]}: fills unpublished months"
-        " by carry-forward scaled by the vendor China-revenue signal, and"
-        " extrapolates unreported revenue. Scenario band, not a confidence"
-        " interval. The measured series above is the record; this is a bridge."
-    )
-    fign = go.Figure()
-    fign.add_scatter(
-        x=ratio.quarter, y=ratio.ratio, mode="lines+markers",
-        name="Measured (v2)", line=dict(color="#1f77b4"),
-    )
-    fign.add_scatter(
-        x=nowcasts.target_quarter, y=nowcasts.ratio_nowcast, mode="markers",
-        name="NOWCAST (estimate)",
-        marker=dict(symbol="diamond-open", size=14, color="#999999"),
-        error_y=dict(
-            type="data", symmetric=False,
-            array=nowcasts.ratio_high - nowcasts.ratio_nowcast,
-            arrayminus=nowcasts.ratio_nowcast - nowcasts.ratio_low,
-        ),
-    )
-    fign.update_layout(
-        yaxis=dict(title="ratio", range=[0, 0.5], tickformat=".0%"),
-        legend=dict(orientation="h", y=-0.25), height=380, margin=dict(t=20),
-    )
-    st.plotly_chart(fign, use_container_width=True)
-    for _, nc in nowcasts.iterrows():
-        with st.expander(
-            f"{nc.target_quarter}: {nc.ratio_nowcast:.1%}"
-            f" [{nc.ratio_low:.1%} – {nc.ratio_high:.1%}] — drivers"
-        ):
-            st.text(nc.drivers)
-
-# ---- consensus reconciliation ----------------------------------------------------
-
-st.header("vs published estimates (consensus reconciliation)")
-bench = load(
-    "SELECT source, period, value, numerator_scope, method_notes, source_url"
-    " FROM benchmarks ORDER BY period, source"
-)
-if not bench.empty and ratio_csv.exists():
-    # Split the same way as the headline chart: only full-coverage quarters
-    # are comparable to the benchmarks. Plotting the partial 2026Q1 (36.4%,
-    # missing Korea+Singapore imports) here would show us as a false outlier
-    # above every consensus estimate.
-    b_full = ratio[ratio.missing_origins.fillna("") == "Taiwan"]
-    b_reduced = ratio[ratio.missing_origins.fillna("") != "Taiwan"]
-    figb = go.Figure()
-    figb.add_scatter(
-        x=b_full.quarter, y=b_full.ratio, mode="lines+markers",
-        name="This tracker (v2, full coverage)",
-    )
-    if not b_reduced.empty:
-        figb.add_scatter(
-            x=b_reduced.quarter, y=b_reduced.ratio, mode="markers",
-            name="This tracker (PARTIAL — not comparable)",
-            marker=dict(symbol="circle-open", size=13, color="#d62728"),
-            text=b_reduced.missing_origins,
-            hovertemplate="%{x}: %{y:.1%}<br>missing imports: %{text}<extra></extra>",
-        )
-    for source, grp in bench.groupby("source"):
-        figb.add_scatter(
-            x=[f"{p.rstrip('E')}Q4" for p in grp.period], y=grp.value / 100,
-            mode="markers", name=source, marker=dict(size=13, symbol="diamond"),
-            text=grp.numerator_scope,
-            hovertemplate="%{x}: %{y:.0%}<br>scope: %{text}",
-        )
-    figb.update_layout(
-        yaxis=dict(title="ratio", range=[0, 0.5], tickformat=".0%"),
-        legend=dict(orientation="h", y=-0.25), height=400, margin=dict(t=20),
-    )
-    st.plotly_chart(figb, use_container_width=True)
-    st.caption(
-        "Benchmark scopes differ from ours and from each other — the gap"
-        " decomposition (numerator scope, import coverage, currency, company"
-        " scope) is in data/exports/reconciliation.md; every benchmark row"
-        " cites an archived source page."
-    )
-    st.dataframe(
-        bench[["source", "period", "value", "numerator_scope"]],
-        hide_index=True, use_container_width=True,
+        "**Thesis.** China's localization of chip-making tools is real and"
+        " durable, but it is mostly **self-driven, not sanctions-driven**: US"
+        f" export controls explain only ~{d.latest_suppression_pp:.1f}pp of the"
+        f" {d.latest_ratio_actual:.0%} domestic share. Control effectiveness is"
+        " **layer-specific** — durable where the product can't be redesigned"
+        " around a rule (lithography tools; US exports"
+        f" {d.cumulative_pct_effect:.0%} and staying down), porous where it can"
+        " (chips; US sales bit, then recovered via compliant parts). The"
+        " decisive variable is therefore one un-respinnable chokepoint —"
+        " **domestic advanced lithography** — and the aggregate self-sufficiency"
+        " ratio that dominates the debate is the wrong gauge for it."
     )
 
-# ---- causal effect of export controls (DiD) --------------------------------------
-
-exports_dir = REPO_ROOT / "data" / "exports"
-if (exports_dir / "did_summary.csv").exists() and (exports_dir / "did_event_study.csv").exists():
-    st.header("Causal effect of export controls (difference-in-differences)")
-
-    # Robustness toggle: the ex-Singapore variant drops Singapore from both the
-    # control group and the counterfactual basket (US->Singapore rerouting
-    # caveat). Falls back to the full variant if the variant CSVs aren't present.
-    variants = {"Full allied control (EU27+JP+KR+SG)": ""}
-    if (exports_dir / "did_summary_ex_sg.csv").exists():
-        variants["Drop Singapore (rerouting robustness)"] = "_ex_sg"
-    if (exports_dir / "did_summary_clean.csv").exists():
-        variants["Clean controls (Korea+Singapore only)"] = "_clean"
-    choice = st.radio(
-        "Control group", list(variants), horizontal=True,
-        help="Robustness checks. Drop-Singapore: some 'exports' are US firms"
-             " rerouting via Singapore fabs. Clean controls: EU27 and Japan"
-             " adopted their own China controls from mid-2023 (partially"
-             " treated), so Korea+Singapore are the cleanest untreated group."
-             " The estimate stays large and negative across all three.",
-    )
-    sfx = variants[choice]
-
-    s = pd.read_csv(exports_dir / f"did_summary{sfx}.csv").iloc[0]
-    es = pd.read_csv(exports_dir / f"did_event_study{sfx}.csv")
-    cf = pd.read_csv(exports_dir / f"did_counterfactual{sfx}.csv")
-    did_coef_csv = exports_dir / f"did_coefficients{sfx}.csv"
-
-    st.caption(
-        "The ratio has no untreated control group, so identification moves to"
-        " the denominator: US-origin imports (hit by unilateral US controls) vs"
-        " allied origins (same fabs, same demand cycle, not bound by the US"
-        " rules). Year-month fixed effects absorb the fab-capex cycle, so the"
-        " estimate is the US deviation from the allied path after each control"
-        f" wave. Anchor: {s.anchor_quarter} (pre-control)."
-    )
-
-    m1, m2, m3 = st.columns(3)
-    m1.metric(
-        "US exports vs allied path (all 3 waves)",
-        f"{s.cumulative_pct_effect:.0%}",
-        help="Cumulative treatment effect after Oct-2022 + Oct-2023 + Dec-2024,"
-             " cycle differenced out. Level effect from the DiD coefficients.",
-    )
-    m2.metric(
-        f"US-suppression share of the {s.latest_ratio_actual:.0%} ratio ({s.latest_quarter})",
-        f"{s.latest_suppression_pp:.1f} pp",
-        help="How much of the headline indigenization ratio is US-import"
-             " suppression (a denominator effect of the controls) vs genuine"
-             " domestic substitution. Most of the ratio is substitution.",
-    )
-    m3.metric(
-        "Placebo p-value",
-        f"{s.placebo_p_value:.2f}",
-        help=f"Randomization inference across {int(s.n_origins)} origins — the"
-             " sharpest attainable p is 1/n. The case rests on magnitude and the"
-             " parallel-trends event study, not a significance star.",
-    )
-
-    c1, c2 = st.columns(2)
-    with c1:
-        pre, post = es[es.is_pre], es[~es.is_pre]
-        fige = go.Figure()
-        fige.add_scatter(
-            x=pre.quarter, y=pre.coef, mode="markers", name="pre-baseline",
-            marker=dict(color="#7f7f7f", size=8),
-            error_y=dict(type="data", array=1.96 * pre.se, color="#bbbbbb"),
-        )
-        fige.add_scatter(
-            x=post.quarter, y=post.coef, mode="lines+markers", name="post-wave",
-            line=dict(color="#d62728"),
-            error_y=dict(type="data", array=1.96 * post.se, color="#f4b5b5"),
-        )
-        fige.add_hline(y=0, line_dash="dot", line_color="gray")
-        fige.add_vline(x=str(s.anchor_quarter), line_dash="dash", line_color="green")
-        fige.update_layout(
-            title="Event study: US vs allied (log-point deviation)",
-            yaxis=dict(title="log points"), height=380,
-            legend=dict(orientation="h", y=-0.25), margin=dict(t=40),
-        )
-        st.plotly_chart(fige, use_container_width=True)
-        st.caption(
-            "Flat, near-zero coefficients *before* the green baseline = parallel"
-            " trends (the design's key assumption); the steady decline after is"
-            " the control effect accumulating across the three waves."
-        )
-    with c2:
-        figc = go.Figure()
-        figc.add_scatter(
-            x=cf.quarter, y=cf.ratio_counterfactual, mode="lines",
-            name="Counterfactual (US tracks allies)",
-            line=dict(color="#7f7f7f", dash="dash"),
-        )
-        figc.add_scatter(
-            x=cf.quarter, y=cf.ratio_actual, mode="lines+markers",
-            name="Actual ratio", line=dict(color="#1f77b4"),
-            fill="tonexty", fillcolor="rgba(214,39,40,0.15)",
-        )
-        figc.update_layout(
-            title="Actual vs counterfactual indigenization ratio",
-            yaxis=dict(title="ratio", tickformat=".0%"), height=380,
-            legend=dict(orientation="h", y=-0.25), margin=dict(t=40),
-        )
-        st.plotly_chart(figc, use_container_width=True)
-        st.caption(
-            "Shaded gap = US-import suppression (denominator effect of controls)."
-            " The counterfactual line is domestic substitution — the part that"
-            " would have happened anyway. Substitution does the heavy lifting."
-        )
-
-    if did_coef_csv.exists():
-        with st.expander("DiD coefficients & method"):
-            coef = pd.read_csv(did_coef_csv)
-            coef["level_effect"] = coef.pct_effect.map(lambda v: f"{v:+.1%}")
-            coef["coef"] = coef.coef.map(lambda v: f"{v:+.3f}")
-            coef["hc1_se"] = coef.hc1_se.map(lambda v: f"{v:.3f}")
-            st.dataframe(
-                coef[["term", "coef", "level_effect", "hc1_se"]],
-                hide_index=True, use_container_width=True,
-            )
-            st.caption(
-                "Coefficients are incremental (each adds to the prior wave)."
-                " Full write-up, limits and falsifiers in"
-                " data/exports/did_export_controls.md. Research output, not"
-                " investment advice."
-            )
-
-# ---- chip layer vs equipment layer (self-sufficiency) ----------------------------
-
-chip_ss_csv = REPO_ROOT / "data" / "exports" / "chip_self_sufficiency.csv"
-if chip_ss_csv.exists():
-    css = pd.read_csv(chip_ss_csv)
-    st.header("Two layers of self-sufficiency: tools vs frontier chips")
-    st.caption(
-        "The debate treats 'chip self-sufficiency' as one number. It's at least"
-        " two. The equipment ratio (the tools) has a clean domestic numerator;"
-        " the chip layer (where AI accelerators live) is proxied by SMIC + Hua"
-        " Hong foundry output vs HS 8542 chip imports — DIRECTIONAL only (see"
-        " limits). The national IC-output series (NBS) is geo-blocked from here."
-    )
-    figl = go.Figure()
-    figl.add_scatter(
-        x=css.quarter, y=css.equipment_ratio, mode="lines+markers",
-        name="Equipment ratio (tools — identified)", line=dict(color="#1f77b4"),
-    )
-    figl.add_scatter(
-        x=css.quarter, y=css.chip_domestic_share, mode="lines+markers",
-        name="Chip domestic share (frontier — proxy)",
-        line=dict(color="#d62728", dash="dash"),
-    )
-    figl.update_layout(
-        yaxis=dict(title="share / ratio", tickformat=".0%", range=[0, 0.3]),
-        legend=dict(orientation="h", y=-0.25), height=380, margin=dict(t=20),
-    )
-    st.plotly_chart(figl, use_container_width=True)
-    if len(css) >= 2:
-        first, last = css.iloc[0], css.iloc[-1]
-        d1, d2, d3 = st.columns(3)
-        d1.metric("Domestic logic output (proxy)",
-                  f"+{last.domestic_logic_idx - 100:.0f}%",
-                  help=f"SMIC+Hua Hong revenue growth, {first.quarter}→{last.quarter}.")
-        d2.metric("Chip imports (same window)",
-                  f"+{last.chip_imports_idx - 100:.0f}%",
-                  help="Imports rose too — demand outran substitution.")
-        d3.metric("Chip share vs equipment ratio",
-                  f"{last.chip_domestic_share:.0%} vs {last.equipment_ratio:.0%}",
-                  help="Tools localize faster than the frontier chips they make.")
-    st.caption(
-        "Read: domestic logic output roughly doubled, but chip imports rose with"
-        " AI/electronics demand, so the chip share barely moved while the"
-        " equipment ratio surged — China localizes the factory faster than the"
-        " frontier product. Proxy limits (foundry revenue includes non-China"
-        " sales; excludes memory/IDM; imports include re-export) are in"
-        " data/exports/chip_self_sufficiency.md."
-    )
-
-# ---- chip controls DiD -----------------------------------------------------------
-
-chip_did_es = REPO_ROOT / "data" / "exports" / "did_chip_event_study.csv"
-chip_did_sum = REPO_ROOT / "data" / "exports" / "did_chip_summary.csv"
-if chip_did_es.exists() and chip_did_sum.exists():
-    ces = pd.read_csv(chip_did_es)
-    cs = pd.read_csv(chip_did_sum).iloc[0]
-    import numpy as _np
-    ces["level"] = _np.exp(ces.coef) - 1  # log pts -> % deviation from allied
-
-    st.header("Did the chip controls work?")
-    st.caption(
-        "The SAME difference-in-differences, run on HS 8542 chips (the A100/H100,"
-        " A800/H800, H20 layer). US chip exports to China vs the allied path,"
-        " cycle-differenced. Contrast with the equipment DiD above: the tool"
-        " controls stuck (−78%, durable); the chip controls did not."
-    )
-    k1, k2, k3, k4 = st.columns(4)
-    k1.metric("Trough vs allied path", f"{cs.trough_pct:.0%}",
-              help=f"Deepest US shortfall vs allied path, at {cs.trough_quarter} —"
-                   " the bans genuinely bit.")
-    k2.metric("Latest vs allied path", f"{cs.latest_es_pct:.0%}",
-              help="US chip exports bounced back as NVIDIA shipped compliant"
-                   " A800/H800/H20 parts.")
-    k3.metric("Net cumulative effect", f"{cs.cumulative_pct_effect:+.0%}",
-              help="Washes toward zero — the initial hit was undone by"
-                   " re-engineering the product.")
-    k4.metric("Placebo p", f"{cs.placebo_p_value:.2f}",
-              help="US is NOT the most-suppressed origin over the full window —"
-                   " no durable identified suppression, unlike equipment.")
-
-    figv = go.Figure()
-    pre, post = ces[ces.is_pre], ces[~ces.is_pre]
-    figv.add_scatter(x=pre.quarter, y=pre.level, mode="markers", name="pre-baseline",
-                     marker=dict(color="#7f7f7f", size=8))
-    figv.add_scatter(x=post.quarter, y=post.level, mode="lines+markers",
-                     name="US vs allied (post)", line=dict(color="#d62728"))
-    figv.add_hline(y=0, line_dash="dot", line_color="gray")
-    figv.add_vline(x=str(cs.anchor_quarter), line_dash="dash", line_color="green")
-    figv.update_layout(
-        title="US chip exports to China vs the allied-implied path",
-        yaxis=dict(title="% deviation from allied path", tickformat=".0%"),
-        height=380, legend=dict(orientation="h", y=-0.25), margin=dict(t=40),
-    )
-    st.plotly_chart(figv, use_container_width=True)
+# ─────────────────────────────────────────────────────────────────────────────
+# Summary — our variant view
+# ─────────────────────────────────────────────────────────────────────────────
+st.markdown("### Summary — where we differ from consensus")
+if d is not None:
     st.markdown(
-        "**Why controls stick for tools but not for chips: a chip is a design"
-        " that can be re-spun; a lithography tool cannot.** When a ban sets a"
-        " performance threshold, a GPU can be redesigned just under the line"
-        " (H100 → A800/H800 → H20); wafer-fab equipment has no compliant version"
-        " — an EUV or advanced-etch tool either clears the customer or it"
-        " doesn't. That is why the identical controls are durable at the"
-        " equipment layer (−78%) and porous at the chip layer."
-    )
-    st.warning(
-        "**Attribution caveat on this curve.** NVIDIA's China GPUs are fabbed in"
-        " **Taiwan**, so they are *not* US-origin exports and barely appear in"
-        " this US→China series — and Taiwan itself is an unobserved origin here."
-        " The recovery shown is driven mostly by *unrestricted* lower-end US"
-        " chips and the semiconductor cycle, **not** the compliant-GPU 'leak',"
-        " which lives in Taiwan-origin data this panel can't see. Parallel"
-        " trends also fails, so read the chip layer as descriptive — the"
-        " equipment DiD is the cleanly identified estimate."
-    )
-
-# ---- exposure ladder + surprise --------------------------------------------------
-
-st.header("Exposure ladder — theme → instruments (research, not advice)")
-st.caption(
-    "How each liquid instrument's business is exposed to rising indigenization"
-    " — direction and mechanism only. No sizing, entries, or targets. Full"
-    " reasoning and falsifiers in data/exports/trade_note.md."
-)
-ladder = load(
-    "SELECT instrument, venue, exposure_sign, confidence, mechanism"
-    " FROM instrument_exposure WHERE human_reviewed = 1"
-    " ORDER BY CASE exposure_sign WHEN 'benefit' THEN 0 WHEN 'harm' THEN 1"
-    " WHEN 'mixed' THEN 2 ELSE 3 END,"
-    " CASE confidence WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END"
-)
-pending_ladder = load(
-    "SELECT COUNT(*) AS n FROM instrument_exposure WHERE human_reviewed = 0"
-).n[0]
-if not ladder.empty:
-    st.dataframe(ladder, hide_index=True, use_container_width=True)
-if pending_ladder:
-    st.caption(f"{pending_ladder} instrument rows pending human review are not shown.")
-
-nc_rows = load(
-    "SELECT target_quarter, ratio_nowcast, ratio_low, ratio_high FROM nowcasts"
-    " WHERE made_at = (SELECT MAX(made_at) FROM nowcasts) ORDER BY target_quarter"
-)
-if not nc_rows.empty and ratio_csv.exists() and not full.empty:
-    base_q = full.index.max() if hasattr(full, "index") else None
-    baseline = float(full.iloc[-1].ratio)
-    nxt = nc_rows.iloc[0]
-    surprise_pp = (nxt.ratio_nowcast - baseline) * 100
-    st.metric(
-        f"Nowcast vs consensus — {nxt.target_quarter} vs persistence baseline",
-        f"{nxt.ratio_nowcast:.1%}",
-        f"{surprise_pp:+.1f} pp vs {baseline:.1%} (last full-coverage quarter)",
-    )
-    st.caption(
-        "Traders trade the delta, not the level. Estimate only; band"
-        f" {nxt.ratio_low:.1%}–{nxt.ratio_high:.1%}. See data/exports/consensus_gap.md."
+        "- **Consensus** (Bernstein ~21%, and the headlines) reads a rising"
+        " self-sufficiency ratio as proof that controls are either working or"
+        " backfiring. We find the ratio is mostly **autonomous substitution**"
+        " that would be happening regardless.\n"
+        "- **We can split the number.** Of the"
+        f" {d.latest_ratio_actual:.0%} domestic share,"
+        f" ~{d.latest_suppression_pp:.1f}pp is US-import *suppression* and"
+        f" ~{d.latest_ratio_counterfactual:.0%} is genuine domestic"
+        " *substitution*. Nobody else publishes a counterfactual.\n"
+        "- **The US-specific import collapse is real**"
+        f" ({d.cumulative_pct_effect:.0%}, cycle-adjusted) — but the allied"
+        " coalition is leaky and the US channel is nearly exhausted.\n"
+        "- **At the chip layer the same controls barely stick** — US sales bit,"
+        " then recovered as firms shipped export-compliant redesigns.\n"
+        "- **Net:** the controls are a durable tax on US toolmakers, a temporary"
+        " speed bump on Chinese compute, and near-irrelevant to the ratio"
+        " everyone watches."
     )
 
-# ---- mirror trade ---------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
+# 1 — The phenomenon
+# ─────────────────────────────────────────────────────────────────────────────
+st.markdown("### 1 · The phenomenon: domestic share is rising")
+if not ratio_full.empty:
+    f1 = go.Figure()
+    f1.add_scatter(x=ratio_full.quarter, y=ratio_full.ratio, mode="lines+markers",
+                   line=dict(color="#1f77b4"), name="Domestic WFE share")
+    f1.update_layout(title="China wafer-fab-equipment: domestic share of spending",
+                     yaxis=dict(tickformat=".0%", title="ratio"), **PLOT)
+    st.plotly_chart(f1, use_container_width=True)
+    first, last = ratio_full.iloc[0], ratio_full.iloc[-1]
+    st.markdown(
+        f"Domestic toolmakers' share rose from **{first.ratio:.0%}**"
+        f" ({first.quarter}) to **{last.ratio:.0%}** ({last.quarter}) — a slow,"
+        " policy-driven substitution of foreign tools by domestic ones. But a"
+        " rising ratio has three possible causes — domestic tools winning"
+        " sockets, foreign supply being blocked, or the capex cycle — and the"
+        " debate conflates them. The rest of this note separates them."
+    )
 
-st.header("China imports (mirror data)")
-hs = st.radio(
-    "Series", ["HS 8486 — chipmaking equipment", "HS 8542 — integrated circuits"],
-    horizontal=True,
-)
-code = "8486" if "8486" in hs else "8542"
-imports = load(
-    f"""
-    SELECT m.metric_name, m.period, m.value FROM metrics m
-    JOIN entities e ON e.id = m.entity_id AND e.name_en = 'China'
-    WHERE m.metric_name IN ('mirror_exports_eu27_hs{code}_eur',
-                            'mirror_exports_jp_hs{code}_jpy',
-                            'mirror_exports_us_hs{code}_usd',
-                            'mirror_exports_kr_hs{code}_usd',
-                            'mirror_exports_sg_hs{code}_usd')
-      AND m.document_id = (
-        SELECT MAX(m2.document_id) FROM metrics m2
-        WHERE m2.entity_id = m.entity_id AND m2.metric_name = m.metric_name
-          AND m2.period = m.period)
-    ORDER BY m.period
-    """
-)
-labels = {
-    f"mirror_exports_eu27_hs{code}_eur": "EU27 (EUR)",
-    f"mirror_exports_jp_hs{code}_jpy": "Japan (JPY)",
-    f"mirror_exports_us_hs{code}_usd": "US (USD)",
-    f"mirror_exports_kr_hs{code}_usd": "Korea (USD)",
-    f"mirror_exports_sg_hs{code}_usd": "Singapore (USD)",
-}
-fig3 = go.Figure()
-for metric, label in labels.items():
-    mdf = imports[imports.metric_name == metric]
-    fig3.add_scatter(x=mdf.period, y=mdf.value, name=label, mode="lines")
-fig3.update_layout(
-    yaxis_title="monthly value (native currency)", height=380, margin=dict(t=20)
-)
-st.plotly_chart(fig3, use_container_width=True)
-st.caption("Native currencies shown; the ratio converts via ECB monthly rates.")
+# ─────────────────────────────────────────────────────────────────────────────
+# 2 — It's substitution, not sanctions
+# ─────────────────────────────────────────────────────────────────────────────
+st.markdown("### 2 · It's substitution, not sanctions")
+if not cf.empty and d is not None:
+    f2 = go.Figure()
+    f2.add_scatter(x=cf.quarter, y=cf.ratio_counterfactual, mode="lines",
+                   name="Counterfactual (US tracks allies)",
+                   line=dict(color="#7f7f7f", dash="dash"))
+    f2.add_scatter(x=cf.quarter, y=cf.ratio_actual, mode="lines+markers",
+                   name="Actual ratio", line=dict(color="#1f77b4"),
+                   fill="tonexty", fillcolor="rgba(214,39,40,0.15)")
+    f2.update_layout(title="Actual vs counterfactual — the shaded gap is the controls",
+                     yaxis=dict(tickformat=".0%", title="ratio"), **PLOT)
+    st.plotly_chart(f2, use_container_width=True)
+    st.markdown(
+        "We estimate the causal effect of the export controls with a"
+        " difference-in-differences that uses allied equipment exporters"
+        " (EU/Japan/Korea/Singapore) as the counterfactual for what US exports"
+        " would have done, differencing out the fab-capex cycle. **Absent the"
+        f" controls, the ratio would be ~{d.latest_ratio_counterfactual:.0%}"
+        f" instead of {d.latest_ratio_actual:.0%}** — the controls added"
+        f" ~{d.latest_suppression_pp:.1f}pp; the other"
+        f" ~{d.latest_ratio_counterfactual:.0%} is domestic substitution riding"
+        " the capex cycle and the state Big Fund (¥344bn Phase III). The US"
+        f" decline is dramatic in percentage terms ({d.cumulative_pct_effect:.0%})"
+        " but small in ratio terms, because the US was already a small and"
+        " shrinking share of China's tool imports. **Substitution does the"
+        " heavy lifting.**"
+    )
 
-# ---- events and exposure ---------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
+# 3 — Two layers, opposite outcomes
+# ─────────────────────────────────────────────────────────────────────────────
+st.markdown("### 3 · Two layers, opposite outcomes")
+if not layers.empty:
+    f3 = go.Figure()
+    f3.add_scatter(x=layers.quarter, y=layers.equipment_ratio, mode="lines+markers",
+                   name="Tools — domestic share (identified)", line=dict(color="#1f77b4"))
+    f3.add_scatter(x=layers.quarter, y=layers.chip_domestic_share, mode="lines+markers",
+                   name="Frontier chips — domestic share (proxy)",
+                   line=dict(color="#d62728", dash="dash"))
+    f3.update_layout(title="Tools localize; frontier chips lag",
+                     yaxis=dict(tickformat=".0%", title="share", range=[0, 0.3]), **PLOT)
+    st.plotly_chart(f3, use_container_width=True)
 
-st.header("Recent events → exposure")
-events = load(
-    """
-    SELECT ev.event_date, ev.category, ev.actor,
-           COALESCE(NULLIF(ev.summary_en, 'PENDING_TRANSLATION'), ev.summary_zh) AS summary
-    FROM events ev ORDER BY ev.event_date DESC LIMIT 25
-    """
-)
-links = load(
-    """
-    SELECT x.event_category, e.name_en AS entity, x.direction, x.confidence,
-           x.channel_description
-    FROM exposure_links x JOIN entities e ON e.id = x.entity_id
-    WHERE x.human_reviewed = 1
-    """
-)
-pending_links = load(
-    "SELECT COUNT(*) AS n FROM exposure_links WHERE human_reviewed = 0"
-).n[0]
-if pending_links:
-    st.caption(f"{pending_links} exposure links pending human review are not shown.")
-for _, ev in events.iterrows():
-    with st.expander(f"{ev.event_date} · [{ev.category}] {ev.summary[:110]}"):
-        mapped = links[links.event_category == ev.category]
-        if mapped.empty:
-            st.write("No transmission mapping for this category yet.")
-        else:
-            st.dataframe(
-                mapped[["entity", "direction", "confidence", "channel_description"]],
-                hide_index=True,
-            )
+if not ches.empty and not chs.empty:
+    c = chs.iloc[0]
+    ches = ches.copy()
+    ches["level"] = np.exp(ches.coef) - 1
+    pre, post = ches[ches.is_pre], ches[~ches.is_pre]
+    f4 = go.Figure()
+    f4.add_scatter(x=pre.quarter, y=pre.level, mode="markers", name="pre-baseline",
+                   marker=dict(color="#7f7f7f", size=8))
+    f4.add_scatter(x=post.quarter, y=post.level, mode="lines+markers",
+                   name="US chip exports vs allied path", line=dict(color="#d62728"))
+    f4.add_hline(y=0, line_dash="dot", line_color="gray")
+    f4.update_layout(title="Chip controls: they bit, then leaked",
+                     yaxis=dict(tickformat=".0%", title="% deviation from allied path"),
+                     **PLOT)
+    st.plotly_chart(f4, use_container_width=True)
 
+st.markdown(
+    "China is localizing the **factory faster than the frontier product it"
+    " makes**: domestic logic output roughly doubled, yet chip imports rose"
+    " *faster* on AI demand, so the chip share barely moved while the equipment"
+    " ratio surged. And the controls themselves behave **oppositely** across the"
+    " two layers — durable for tools, transient for chips. The reason is"
+    " mechanical: **a chip is a design that can be re-spun just under a"
+    " performance threshold (H100 → A800/H800 → H20); a lithography tool has no"
+    " compliant version.** Control bites where the product can't iterate."
+)
+st.warning(
+    "**Read the chip layer as descriptive, not identified.** NVIDIA's China"
+    " GPUs are fabbed in Taiwan, so they are not US-origin exports and barely"
+    " appear in this US→China series; the recovery shown is mostly *unrestricted*"
+    " lower-end US chips plus the cycle. Parallel trends also fails here — the"
+    " equipment DiD in §2 is the cleanly identified estimate."
+)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 4 — The worldview
+# ─────────────────────────────────────────────────────────────────────────────
+st.markdown("### 4 · The worldview this builds to")
+st.markdown(
+    "- **Both debate camps overweight the controls.** The self-sufficiency"
+    " ratio is mostly cycle plus slow structural drift; the controls move it a"
+    " couple of points. \"Controls are choking China\" and \"controls backfired"
+    " and accelerated indigenization\" both mis-attribute an autonomous trend.\n"
+    "- **Control durability is layer-specific**, so leverage lives at the one"
+    " chokepoint that can't be re-spun: the tools, not the chips.\n"
+    "- **The whole contest reduces to a single race — domestic advanced"
+    " lithography.** Crack it and the ceiling lifts: China could then make its"
+    " own frontier chips and the chip controls become moot too. Fail, and the"
+    " tool controls remain the binding constraint regardless of how many GPUs"
+    " leak through.\n"
+    "- **The aggregate ratio is the wrong scoreboard.** The strategically"
+    " meaningful metric is frontier-node yield and domestic-EUV progress —"
+    " which almost nobody tracks. That gap is the opportunity."
+)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 5 — Risks to the thesis
+# ─────────────────────────────────────────────────────────────────────────────
+st.markdown("### 5 · Risks to the thesis (audited against outside sources)")
+st.markdown(
+    "- **Measurement.** The import code (HS 8486) includes flat-panel-display"
+    " tools, so the denominator is inflated and the true localization ratio is"
+    " *higher* than shown — the level here is a lower bound.\n"
+    "- **Identification.** Allies (Netherlands, Japan) adopted their own China"
+    " controls from mid-2023, partially contaminating the control group; this"
+    " biases the US effect toward zero, so the −78% is a *conservative* lower"
+    " bound. It is robust across control-group variants (about −72% to −78%).\n"
+    "- **Chip layer.** US-origin-only and Taiwan-blind, so it is descriptive,"
+    " not identified (see §3 caveat).\n"
+    "- **Small N.** Five supplier origins cap statistical significance; the case"
+    " rests on effect *magnitude* and clean pre-trends, not a p-value."
+)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 6 — What to watch
+# ─────────────────────────────────────────────────────────────────────────────
+st.markdown("### 6 · What to watch")
+st.markdown(
+    "- **Allied-origin equipment imports** — the next substitution battleground."
+    " The US channel is nearly exhausted (~$0.4bn/qtr and falling), so the next"
+    " leg must displace Japanese/European/Korean tools.\n"
+    "- **Domestic advanced lithography** (SMEE, Huawei-linked SiCarrier) — the"
+    " ceiling variable; the single most consequential place a surprise could"
+    " land.\n"
+    "- **Coalition cohesion** — whether the allied leak widens or closes decides"
+    " the ceiling more than US resolve does.\n"
+    "- **Policy-headline reaction function** — a new control wave should move the"
+    " ratio only ~1–2pp on this model; a materially larger jump is the"
+    " information-rich surprise."
+)
+
+st.divider()
 st.caption(
     "Pipeline: collectors → validated extraction → SQLite → deterministic"
-    " analysis → drafts for human review. github.com/xiajason6-web/GeoMacro2"
+    " analysis. Full method, limits and the external assumption audit in"
+    " analysis/methodology.md · github.com/xiajason6-web/GeoMacro2 · research,"
+    " not investment advice."
 )
