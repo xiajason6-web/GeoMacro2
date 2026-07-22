@@ -1,4 +1,4 @@
-# Research note: China semiconductor-equipment indigenization (2026-07-21)
+# Research note: China semiconductor-equipment indigenization (2026-07-22)
 
 > Research and educational analysis only — NOT investment advice, NOT a recommendation, and NOT an offer to buy or sell any security. No position sizing, entry/exit levels, or price targets are expressed or implied. Exposure directions describe how an instrument's business is affected by the theme, not what any person should do. Do your own diligence.
 
