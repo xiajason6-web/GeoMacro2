@@ -107,6 +107,7 @@ jobs:
           python analysis/vendor_lead.py
           python analysis/did_export_controls.py
           python analysis/did_chip_controls.py
+          python analysis/calls.py
 
       - name: Tests
         id: tests

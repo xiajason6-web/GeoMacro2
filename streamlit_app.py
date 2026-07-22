@@ -336,6 +336,42 @@ catalysts = pd.DataFrame([
 ])
 st.dataframe(catalysts, hide_index=True, use_container_width=True)
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 9 — Track record (public calls ledger)
+# ─────────────────────────────────────────────────────────────────────────────
+st.markdown("### 9 · Track record — public calls ledger")
+import json as _json
+_ledger = REPO_ROOT / "calls" / "ledger.json"
+if _ledger.exists():
+    doc = _json.loads(_ledger.read_text())
+    calls = doc.get("calls", [])
+    resolved = [c for c in calls if c.get("status") == "resolved"]
+    briers = [(float(c["p"]) - (1.0 if c["outcome"] == "YES" else 0.0)) ** 2
+              for c in resolved]
+    brier = (sum(briers) / len(briers)) if briers else None
+    st.caption(
+        f"{len(calls)} calls · {sum(1 for c in calls if c.get('status') == 'open')}"
+        f" open · {len(resolved)} resolved"
+        + (f" · Brier {brier:.3f}" if brier is not None else " · Brier pending")
+        + ". Append-only and git-timestamped; a call carries the model"
+        " probability at the time it was made, and auto-grades against this"
+        " repo's own data. Never edited after commit."
+    )
+    tbl = pd.DataFrame([{
+        "Made": c["made"],
+        "Call": c["claim"],
+        "P": f"{float(c['p']):.0%}",
+        "Status": ("● " + c.get("outcome", "") if c.get("status") == "resolved"
+                   else "○ open"),
+    } for c in calls])
+    st.dataframe(tbl, hide_index=True, use_container_width=True)
+    st.caption(
+        "Falsifiable by construction — each call resolves from the tracker's own"
+        " committed exports (ratio, imports, chip share), not from a later"
+        " opinion. This is the audition asset: a timestamped, self-grading"
+        " record, in the spirit of the Iran model's calls ledger."
+    )
+
 st.divider()
 st.caption(
     "**Disclosures.** Research output for informational purposes only — not"

@@ -1,0 +1,57 @@
+{
+  "rules": "Append-only, git-timestamped public track record. Each call carries the model probability AT TIME OF CALL and explicit criteria checkable from this repo's committed exports. NEVER edit or delete a resolved call; a correction is a NEW call. Auto-graded by analysis/calls.py in every nightly run; Brier reported over resolved calls. A quarter grades only once it is full-coverage in the exports.",
+  "criteria_types": {
+    "ratio_gte": "full-coverage indigenization ratio for {quarter} >= {threshold}",
+    "ratio_lte": "full-coverage indigenization ratio for {quarter} <= {threshold}",
+    "us_equip_lte": "US-origin HS 8486 exports to China in {quarter} <= {threshold_bn} USD bn (did_counterfactual.us_actual_usd)",
+    "chip_share_lte": "frontier-chip domestic share proxy for {quarter} <= {threshold} (chip_self_sufficiency.chip_domestic_share)",
+    "domestic_yoy_up": "domestic semicap revenue in {quarter} > same quarter prior year"
+  },
+  "calls": [
+    {
+      "id": "2026-07-21-ratio-2026q2-gte-20",
+      "made": "2026-07-21",
+      "claim": "Full-coverage domestic WFE share is >= 20% in 2026Q2",
+      "p": 0.62,
+      "criteria": {"type": "ratio_gte", "quarter": "2026Q2", "threshold": 0.20},
+      "comparison": "Base case: substitution grind continues from 22.0% (2025Q4); measured level is a lower bound (HS8486 flat-panel contamination).",
+      "status": "open"
+    },
+    {
+      "id": "2026-07-21-ratio-2026q4-gte-24",
+      "made": "2026-07-21",
+      "claim": "Full-coverage domestic WFE share reaches >= 24% by 2026Q4",
+      "p": 0.50,
+      "criteria": {"type": "ratio_gte", "quarter": "2026Q4", "threshold": 0.24},
+      "comparison": "~+2pp/yr structural drift would land here; coin-flip on the pace. Bernstein's path implies faster (~24-25%).",
+      "status": "open"
+    },
+    {
+      "id": "2026-07-21-us-equip-2026q4-lte-0p5",
+      "made": "2026-07-21",
+      "claim": "US-origin equipment exports to China stay <= $0.5bn in 2026Q4 (channel exhausted by controls)",
+      "p": 0.72,
+      "criteria": {"type": "us_equip_lte", "quarter": "2026Q4", "threshold_bn": 0.5},
+      "comparison": "US already ~$0.4bn/qtr and falling; near-total controls. Tests the 'diminishing US lever' thesis.",
+      "status": "open"
+    },
+    {
+      "id": "2026-07-21-chip-share-2026q4-lte-15",
+      "made": "2026-07-21",
+      "claim": "Frontier-chip domestic share (proxy) stays <= 15% in 2026Q4 (chips lag tools)",
+      "p": 0.72,
+      "criteria": {"type": "chip_share_lte", "quarter": "2026Q4", "threshold": 0.15},
+      "comparison": "AI-demand pull keeps chip imports rising faster than domestic logic output; the two-layer divergence persists.",
+      "status": "open"
+    },
+    {
+      "id": "2026-07-21-domestic-yoy-2026q2-up",
+      "made": "2026-07-21",
+      "claim": "Domestic semicap revenue (6 listed makers) grows YoY in 2026Q2 vs 2025Q2",
+      "p": 0.82,
+      "criteria": {"type": "domestic_yoy_up", "quarter": "2026Q2"},
+      "comparison": "High conviction: substitution momentum + Big Fund III (Yen344bn). The autonomous-substitution engine.",
+      "status": "open"
+    }
+  ]
+}
