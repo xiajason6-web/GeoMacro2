@@ -1,0 +1,5 @@
+ticker,name,latest_china_pct,latest_quarter,peak_china_pct,erosion_pp,n_obs,driver,driver_note,exposure_sign,confidence
+AMAT,Applied Materials,27.0,2026Q2,35.0,8.0,6,structural substitution,Etch/deposition/CMP localize first (Naura/AMEC/Piotech/Hwatsing) — the cleanest structural erosion.,harm,high
+LRCX,Lam Research,34.18,2026Q1,42.87,8.689999999999998,5,structural substitution,Etch/deposition plus NAND-heavy China exposure; loses the most-localized categories first.,harm,high
+KLAC,KLA,24.3,2026Q1,39.5,15.2,5,control-denial (not clean),Metrology/inspection localizes slowest; KLA's China fall is more export-control denial than domestic substitution — not a pure indigenization play.,mixed,medium
+ASML,ASML,19.0,2026Q1,19.0,0.0,1,normalization (mixed),"EUV already embargoed; DUV China revenue normalizing from the 2023-24 stockpiling peak toward ~20% — cyclical/normalization, not fresh substitution.",harm,medium

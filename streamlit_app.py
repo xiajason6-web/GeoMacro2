@@ -338,6 +338,39 @@ if not exp.empty:
     )
 
 # ─────────────────────────────────────────────────────────────────────────────
+# 7b — The edge (P vs Q)
+# ─────────────────────────────────────────────────────────────────────────────
+valpha = csv("vendor_alpha.csv")
+if not valpha.empty:
+    st.markdown("### 7b · The edge — where we differ from the price (P vs Q)")
+    st.caption(
+        "Consensus/priced (Q) isn't observable on free data, so it enters as a"
+        " stated assumption: **the market prices China-revenue swings as"
+        " cyclical.** Our DiD says a chunk of the tool-share loss is"
+        " **structural**. The edge is that gap — largest where the category"
+        " localizes first."
+    )
+    va_view = valpha.copy()
+    va_view["Vendor"] = va_view["name"] + " (" + va_view.ticker + ")"
+    va_view["China %"] = va_view.apply(
+        lambda r: f"{r.latest_china_pct:.0f}% (was {r.peak_china_pct:.0f}%)", axis=1)
+    va_view["Erosion"] = va_view.erosion_pp.map(lambda v: f"−{v:.0f}pp")
+    va_view = va_view.rename(columns={"driver": "Driver", "confidence": "Conf"})
+    st.dataframe(va_view[["Vendor", "China %", "Erosion", "Driver", "Conf"]],
+                 hide_index=True, use_container_width=True)
+    st.markdown(
+        "- **The alpha is the structural names** (AMAT, LRCX): they lose the"
+        " first-to-localize categories (etch/deposition/CMP). A market reading"
+        " that erosion as cyclical under-prices a *permanent* share loss.\n"
+        "- **KLA is not a clean play** — its steeper China fall is more"
+        " export-control *denial* than domestic substitution.\n"
+        "- **Expression is cycle-neutral** (long domestic / short foreign, beta"
+        " hedged): the vendor-lead null showed the capex cycle dominates at short"
+        " horizons, so only the structural residual is edge. Confidence is modest"
+        " at this n — and the calls ledger (§9) scores whether it plays out."
+    )
+
+# ─────────────────────────────────────────────────────────────────────────────
 # 8 — Catalyst calendar
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("### 8 · Catalyst calendar")
