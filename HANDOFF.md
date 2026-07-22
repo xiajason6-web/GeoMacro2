@@ -289,11 +289,11 @@ this session:
   Cycle-neutral expression; modest confidence at this n. Note §7b.
 
 ## STILL NEEDED for full ER readiness (pick with Jason)
-1. **Backtest + point-in-time vintage discipline** — Iran keys partitions by
-   pull-date so the backtest can't peek. We have git-timestamped nightly commits
-   (a proxy) but no harness. Needed before any signal earns trust; also hardens
-   the calls-ledger grading. Could reconstruct point-in-time from git history of
-   data/exports.
+1. ~~Backtest + point-in-time vintage discipline~~ **BUILT** (`analysis/backtest.py`,
+   `make`-free). Reconstructs vintages from git history (no-lookahead by
+   construction); revision analysis (reduced-coverage prints revise up to -4pp,
+   full-coverage stable) + nowcast backtest (resolves as quarters complete). CI
+   checkout now fetch-depth 0. n still tiny — the harness accrues.
 2. **v3 data task: re-collect equipment imports at HS6, exclude 8486.30
    (flat-panel).** Removes denominator contamination → truer (higher) flagship
    ratio. Changes the flagship number → METHODOLOGY revision needing Jason's OK;
