@@ -431,6 +431,14 @@ if _ledger.exists():
         " opinion. This is the audition asset: a timestamped, self-grading"
         " record, in the spirit of the Iran model's calls ledger."
     )
+    st.caption(
+        "**Point-in-time discipline.** Vintages are reconstructed from git"
+        " history (each nightly commit = the data as it stood that day), so"
+        " backtests can't peek ahead. Measured so far: reduced-coverage prints"
+        " have revised up to ~4pp as imports backfilled, while full-coverage"
+        " quarters stayed stable — which is why only full-coverage quarters are"
+        " headlined. Harness in analysis/backtest.py; detail in backtest.md."
+    )
 
 st.divider()
 st.caption(

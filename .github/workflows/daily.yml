@@ -27,6 +27,8 @@ jobs:
       ESTAT_APP_ID: ${{ secrets.ESTAT_APP_ID }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so analysis/backtest.py can walk vintages
 
       - uses: actions/setup-python@v5
         with:
@@ -109,6 +111,7 @@ jobs:
           python analysis/did_chip_controls.py
           python analysis/vendor_alpha.py
           python analysis/scenarios.py
+          python analysis/backtest.py
           python analysis/calls.py
 
       - name: Tests
