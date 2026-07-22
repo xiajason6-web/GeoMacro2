@@ -267,6 +267,33 @@ st.markdown(
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
+# 5b — Scenarios (probabilistic, self-monitoring)
+# ─────────────────────────────────────────────────────────────────────────────
+import json as _json2
+_scen = EXPORTS / "scenarios.json"
+if _scen.exists():
+    ev = _json2.loads(_scen.read_text())
+    live = next((s for s in ev["scenarios"] if s["id"] == ev.get("live_consistent_id")), None)
+    st.markdown("### 5b · Scenarios (probabilistic, self-monitoring)")
+    if live:
+        st.caption(
+            "House-judgment probabilities (not fitted — n is small). Each"
+            " scenario's conditions are checked against the tracker's own latest"
+            f" data, so the set grades itself. **Current data is most consistent"
+            f" with \"{live['name']}\"** ({live['conditions_hit']}/"
+            f"{live['conditions_judged']} conditions met)."
+        )
+    stbl = pd.DataFrame([{
+        "Scenario": s["name"] + (" ◀ live" if s["id"] == ev.get("live_consistent_id") else ""),
+        "Prob": f"{s['probability']:.0%}",
+        "Live fit": (f"{s['conditions_hit']}/{s['conditions_judged']}"
+                     if s["conditions_judged"] else "—"),
+        "Thesis": s["thesis"],
+    } for s in ev["scenarios"]])
+    st.dataframe(stbl, hide_index=True, use_container_width=True)
+    st.caption("Full triggers and exposure per scenario in data/exports/scenarios.md.")
+
+# ─────────────────────────────────────────────────────────────────────────────
 # 6 — Risks
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("### 6 · Risks to the thesis (audited against outside sources)")

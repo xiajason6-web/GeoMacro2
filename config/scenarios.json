@@ -1,0 +1,52 @@
+{
+  "_doc": "Probabilistic scenarios for China WFE indigenization. Probabilities are house judgment (stated as such, not fitted) and sum to 1.0. Each scenario carries machine-checkable `consistent_if` conditions evaluated against the tracker's own latest exports, so the scenario set SELF-MONITORS: analysis/scenarios.py flags which scenario current data is most consistent with, and the note shows it. Edit probabilities here (auditable, git-timestamped); never fit them at this n.",
+  "as_of": "2026-07-21",
+  "metrics": {
+    "ratio_latest": "latest full-coverage indigenization ratio",
+    "domestic_yoy_pct": "domestic semicap revenue, latest full quarter vs same quarter prior year (%)",
+    "chip_share_latest": "latest frontier-chip domestic share (proxy)",
+    "us_equip_latest_bn": "latest-quarter US-origin HS8486 exports to China ($bn)"
+  },
+  "scenarios": [
+    {
+      "id": "base_grind",
+      "name": "Base — the grind",
+      "probability": 0.55,
+      "thesis": "Autonomous substitution continues ~+2pp/yr; the ratio drifts into the mid-20s by end-2026. The US channel stays exhausted, allied displacement begins, and frontier chips keep lagging tools. Controls remain near-irrelevant to the aggregate number.",
+      "confirming": "Ratio holds a 22-28% band; domestic semicap revenue grows YoY; chip share stays <16%.",
+      "falsifying": "A >5pp single-quarter jump (discontinuity), or domestic revenue turning YoY-negative.",
+      "consistent_if": [
+        {"metric": "ratio_latest", "op": "between", "value": [0.20, 0.28]},
+        {"metric": "domestic_yoy_pct", "op": "gte", "value": 0},
+        {"metric": "chip_share_latest", "op": "lte", "value": 0.16}
+      ],
+      "exposed": "Cycle-neutral long domestic winners (Naura/AMEC/ACM) vs short foreign losers (AMAT/LRCX); the base case for the exposure ladder."
+    },
+    {
+      "id": "accelerate_ceiling_lifts",
+      "name": "Accelerate — the ceiling lifts",
+      "probability": 0.25,
+      "thesis": "A credible domestic advanced-lithography milestone (SMEE / Huawei-linked SiCarrier) relieves the one un-respinnable chokepoint. Substitution accelerates, foreign vendors lose China faster than the cycle explains, and the ratio pushes >27% — the chip controls start to look moot.",
+      "confirming": "Ratio >27%; domestic revenue YoY >20%; foreign-vendor China-% falling faster than total China WFE demand.",
+      "falsifying": "Litho remains stuck at mature-node DUV; no domestic EUV/immersion progress.",
+      "consistent_if": [
+        {"metric": "ratio_latest", "op": "gte", "value": 0.27},
+        {"metric": "domestic_yoy_pct", "op": "gte", "value": 20}
+      ],
+      "exposed": "Amplifies the base trade; adds litho-adjacent (Kingsemi de-bottlenecks) and pressures ASML China DUV harder."
+    },
+    {
+      "id": "stall_chokepoint_binds",
+      "name": "Stall — the chokepoint binds",
+      "probability": 0.20,
+      "thesis": "The lithography chokepoint holds; a capex-cycle downturn hits capital-starved domestic makers harder than incumbents; allied controls tighten and force reliance shifts. The ratio stalls below ~22% and the substitution story pauses.",
+      "confirming": "Ratio flat-to-down; domestic revenue YoY-negative; allied (NL/Japan) controls tighten materially.",
+      "falsifying": "Domestic revenue keeps compounding through a cycle trough.",
+      "consistent_if": [
+        {"metric": "ratio_latest", "op": "lte", "value": 0.21},
+        {"metric": "domestic_yoy_pct", "op": "lte", "value": 0}
+      ],
+      "exposed": "Unwinds the cycle-neutral trade; foreign incumbents (AMAT/LRCX/KLA) recover China share; the theme goes dormant."
+    }
+  ]
+}

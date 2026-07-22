@@ -1,0 +1,51 @@
+{
+  "as_of": "2026-07-21",
+  "metrics": {
+    "ratio_latest": 0.2203833841158563,
+    "domestic_yoy_pct": 29.126884695293114,
+    "chip_share_latest": 0.1135261032849855,
+    "us_equip_latest_bn": 0.314496621
+  },
+  "scenarios": [
+    {
+      "id": "base_grind",
+      "name": "Base \u2014 the grind",
+      "probability": 0.55,
+      "thesis": "Autonomous substitution continues ~+2pp/yr; the ratio drifts into the mid-20s by end-2026. The US channel stays exhausted, allied displacement begins, and frontier chips keep lagging tools. Controls remain near-irrelevant to the aggregate number.",
+      "confirming": "Ratio holds a 22-28% band; domestic semicap revenue grows YoY; chip share stays <16%.",
+      "falsifying": "A >5pp single-quarter jump (discontinuity), or domestic revenue turning YoY-negative.",
+      "exposed": "Cycle-neutral long domestic winners (Naura/AMEC/ACM) vs short foreign losers (AMAT/LRCX); the base case for the exposure ladder.",
+      "conditions_hit": 3,
+      "conditions_judged": 3,
+      "conditions_total": 3,
+      "fully_consistent": true
+    },
+    {
+      "id": "accelerate_ceiling_lifts",
+      "name": "Accelerate \u2014 the ceiling lifts",
+      "probability": 0.25,
+      "thesis": "A credible domestic advanced-lithography milestone (SMEE / Huawei-linked SiCarrier) relieves the one un-respinnable chokepoint. Substitution accelerates, foreign vendors lose China faster than the cycle explains, and the ratio pushes >27% \u2014 the chip controls start to look moot.",
+      "confirming": "Ratio >27%; domestic revenue YoY >20%; foreign-vendor China-% falling faster than total China WFE demand.",
+      "falsifying": "Litho remains stuck at mature-node DUV; no domestic EUV/immersion progress.",
+      "exposed": "Amplifies the base trade; adds litho-adjacent (Kingsemi de-bottlenecks) and pressures ASML China DUV harder.",
+      "conditions_hit": 1,
+      "conditions_judged": 2,
+      "conditions_total": 2,
+      "fully_consistent": false
+    },
+    {
+      "id": "stall_chokepoint_binds",
+      "name": "Stall \u2014 the chokepoint binds",
+      "probability": 0.2,
+      "thesis": "The lithography chokepoint holds; a capex-cycle downturn hits capital-starved domestic makers harder than incumbents; allied controls tighten and force reliance shifts. The ratio stalls below ~22% and the substitution story pauses.",
+      "confirming": "Ratio flat-to-down; domestic revenue YoY-negative; allied (NL/Japan) controls tighten materially.",
+      "falsifying": "Domestic revenue keeps compounding through a cycle trough.",
+      "exposed": "Unwinds the cycle-neutral trade; foreign incumbents (AMAT/LRCX/KLA) recover China share; the theme goes dormant.",
+      "conditions_hit": 0,
+      "conditions_judged": 2,
+      "conditions_total": 2,
+      "fully_consistent": false
+    }
+  ],
+  "live_consistent_id": "base_grind"
+}
