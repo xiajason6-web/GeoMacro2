@@ -7,11 +7,11 @@ USD, full five-origin coverage).
 
 | Variant (one change vs v2) | Annual ratio | Effect vs v2 |
 |---|---|---|
-| Numerator = total company revenue (v1 scope) | 19.4% | +0.7% |
+| Numerator = total company revenue (v1 scope) | 20.5% | +1.8% |
 | Denominator without Korea+Singapore (v1 coverage) | 26.4% | +7.7% |
 | CNY instead of USD as common unit | 18.7% | -0.0% |
 | Numerator = Naura+AMEC+ACM only (UBS scope) | 15.7% | -3.0% |
-| Both v1 choices together (old-style measure) | 27.3% | +8.6% |
+| Both v1 choices together (old-style measure) | 28.7% | +10.0% |
 
 ## Published benchmarks vs this tracker
 
@@ -23,8 +23,8 @@ USD, full five-origin coverage).
 
 Residual gaps after the comparable variant reflect definitional
 differences we cannot compute from filings alone: the benchmark's
-market model vs our mirror-trade denominator (HS 8486 includes
-flat-panel tools and parts; Taiwan origin missing), revenue timing
-vs shipment/installed-base counting, and service/parts inclusion.
+market model vs our mirror-trade denominator (HS 8486 is measured clean
+of flat-panel tools — 8486.30 ~0% — but includes parts; Taiwan origin
+missing), revenue timing vs shipment/installed-base counting.
 Method notes per benchmark are in the `benchmarks` table with the
 archived source page.

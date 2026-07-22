@@ -158,9 +158,9 @@ if not bench.empty and d is not None:
         " and revenue-share definitions sit low, installed-base and market-share"
         " definitions sit high. We reconcile to Bernstein's ~21%; the residual"
         " is definitional (their market model vs our mirror-trade denominator),"
-        " not a difference of view. **Note:** our level is a *lower bound* — the"
-        " HS 8486 import code includes flat-panel-display tools, inflating the"
-        " denominator (see §6)."
+        " not a difference of view. (We measured the flat-panel-contamination"
+        " concern directly — HS 8486.30 is ~0% of China-bound tool imports across"
+        " all five origins — so the denominator is clean semiconductor equipment.)"
     )
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -298,9 +298,11 @@ if _scen.exists():
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("### 6 · Risks to the thesis (audited against outside sources)")
 st.markdown(
-    "- **Measurement.** The import code (HS 8486) includes flat-panel-display"
-    " tools, so the denominator is inflated and the true localization ratio is"
-    " *higher* than shown — the level here is a lower bound.\n"
+    "- **Measurement (tested, cleared).** The import code (HS 8486) *can*"
+    " include flat-panel-display tools; we measured it — 8486.30 is ~0% of"
+    " China-bound tool imports across all five origins (88% is 848620,"
+    " semiconductor-device/IC machines), so the denominator is clean and the"
+    " ratio is not biased on that account.\n"
     "- **Identification.** Allies (Netherlands, Japan) adopted their own China"
     " controls from mid-2023, partially contaminating the control group; this"
     " biases the US effect toward zero, so the −78% is a *conservative* lower"

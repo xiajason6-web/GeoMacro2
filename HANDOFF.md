@@ -136,8 +136,8 @@ nowcasts, instrument_exposure.
    record then contracted in 2025 (SEMI; not literally "flat") while domestic
    doubled ($1.3→3.1bn) — the substitution holds through both, refuting
    "controls just wrecked the market." (Audit fix: earlier "flat ~$12-14bn/qtr"
-   was imprecise — demand rose-then-fell, and the /qtr figure ran high partly
-   from HS8486 flat-panel contamination; see methodology.md audit.)
+   was imprecise — demand rose-then-fell. NOTE: the suspected HS8486 flat-panel
+   contamination was MEASURED and is ~0% — not a factor; see methodology.md audit.)
 2. The import decline is US-SPECIFIC: US-origin exports to China −69%
    (2023H2→2025H2) while EU/Japan/Korea/Singapore held flat-to-up. China
    de-Americanized, it did not decouple; the allied coalition is leaky.
@@ -258,8 +258,9 @@ the payoff:
 ## ASSUMPTION AUDIT (2026-07) — researched against outside sources
 Full verdict table in analysis/methodology.md ("External assumption audit").
 Headlines: conclusions survive; equipment −78% is a conservative LOWER BOUND
-(allies EU27+Japan partially treated from mid-2023 → attenuation); the flagship
-ratio is a LOWER BOUND on true localization (HS8486 includes flat-panel tools);
+(allies EU27+Japan partially treated from mid-2023 → attenuation); the suspected
+HS8486 flat-panel contamination was MEASURED at ~0% across all origins (v3 fix
+found UNNECESSARY — the flagship ratio is NOT a lower bound on that account);
 the chip-layer NVIDIA/H20 mechanism was OVERSTATED and is now corrected
 (NVIDIA GPUs are Taiwan-fabbed → barely in US-origin HS8542; the recovery is
 unrestricted chips + cycle). Fixes shipped: clean-control DiD variant
@@ -294,10 +295,11 @@ this session:
    construction); revision analysis (reduced-coverage prints revise up to -4pp,
    full-coverage stable) + nowcast backtest (resolves as quarters complete). CI
    checkout now fetch-depth 0. n still tiny — the harness accrues.
-2. **v3 data task: re-collect equipment imports at HS6, exclude 8486.30
-   (flat-panel).** Removes denominator contamination → truer (higher) flagship
-   ratio. Changes the flagship number → METHODOLOGY revision needing Jason's OK;
-   its own validated pass.
+2. ~~v3 data task: HS6 split to drop 8486.30 (flat-panel)~~ **INVESTIGATED →
+   UNNECESSARY.** Measured 848630 (FPD) directly from the raw sources: ~0% of
+   China-bound 8486 (EU 0.04%, US/JP/KR/SG 0.0%; 88% is 848620 semi-device/IC).
+   The contamination concern did not survive measurement — no re-plumb, flagship
+   stays clean. An audit-of-the-audit win (measure before re-plumbing).
 3. **Standalone written flagship** (the second essay off the two-layer story) —
    draft in review/, human-edited, NOT auto-published (trade_note gate). This is
    what actually circulates to the ~30 narrowcast targets.

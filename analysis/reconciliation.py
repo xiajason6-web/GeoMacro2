@@ -146,9 +146,9 @@ def build_markdown(variants, benchmarks, year):
         "",
         "Residual gaps after the comparable variant reflect definitional",
         "differences we cannot compute from filings alone: the benchmark's",
-        "market model vs our mirror-trade denominator (HS 8486 includes",
-        "flat-panel tools and parts; Taiwan origin missing), revenue timing",
-        "vs shipment/installed-base counting, and service/parts inclusion.",
+        "market model vs our mirror-trade denominator (HS 8486 is measured clean",
+        "of flat-panel tools — 8486.30 ~0% — but includes parts; Taiwan origin",
+        "missing), revenue timing vs shipment/installed-base counting.",
         "Method notes per benchmark are in the `benchmarks` table with the",
         "archived source page.",
     ]

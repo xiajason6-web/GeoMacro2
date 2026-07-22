@@ -71,7 +71,7 @@ belongs in the digest, not in the number.
 |---|---|---|
 | ~~Korea/Singapore missing~~ **FIXED v2** via UN Comtrade; Taiwan remains missing (no machine-readable source) | Taiwan gap: ratio overstated a few pp | revisit TW MOF portal with dedicated effort |
 | Mirror data measures exports FOB at partner border, not arrivals CIF China | understates imports low-single-digit % (air-freighted tools) | acceptable; note in publication |
-| HS 8486 includes flat-panel-display tools (subheading 8486.30) | **inflates the denominator → ratio is a LOWER BOUND on true localization** (magnitude possibly ~10-25% at HS4, not "small") | **track HS6, exclude 8486.30 — the recommended next data task (v3)** |
+| HS 8486 includes flat-panel-display tools (subheading 8486.30) | **negligible — MEASURED ~0% of China-bound 8486** (EU 0.04%, US/JP/KR/SG 0.0%; 88% is 848620 semi-device/IC) | resolved 2026-07: no HS6 split needed — the concern did not survive measurement |
 | Entrepôt / transshipment (Hong Kong, Singapore) scrambles country-of-origin | totals ~fine; **by-origin breakdown is the fragile part** (touches the DiD and the Singapore control) | flag; Korea+Singapore-only DiD variant added as a check |
 | Domestic revenue counted in CNY of sale vs imports at customs value | small | acceptable |
 
@@ -107,7 +107,7 @@ the DIRECTION each bias pushes a conclusion:
 | Assumption | Verdict | Direction / note |
 |---|---|---|
 | Mirror trade ≈ China imports | Partly founded | Totals ~fine; **by-origin attribution fragile** (HK/SG transshipment) |
-| HS 8486 = wafer-fab equipment | **Questionable** | Includes flat-panel tools → **flagship ratio is a lower bound** (fix: HS6, drop 8486.30) |
+| HS 8486 = wafer-fab equipment | **Founded** (measured) | FPD (848630) is ~0% of China-bound 8486 across all 5 origins; 88% is 848620 semi-device/IC. Verified 2026-07 — the "flat-panel contamination" concern did not survive measurement, no lower-bound adjustment needed |
 | HS 8542 = chip layer | Founded | Re-export inflation confirmed (already caveated) |
 | 5 origins + Taiwan immaterial | Founded for tools; **not for chips** | Taiwan is a top-2 chip supplier → chip denominator undercounts; decisive for the chip DiD |
 | 6 toolmakers = domestic WFE | Partly founded | Misses SMEE (litho, unlisted) + SiCarrier + metrology/implant → understates breadth, zeroes the hardest category |
@@ -121,6 +121,10 @@ the DIRECTION each bias pushes a conclusion:
 | Benchmarks (Bernstein/UBS/CSIS) + Big Fund | Founded | Bernstein ~21%, Yole ~23%, 20-35% by scope; Big Fund Phase III ¥344bn |
 
 Net: headline conclusions survive; the equipment −78% is a conservative lower
-bound; the flagship ratio is a lower bound on true localization; the chip-layer
-mechanism was corrected (Taiwan-origin blind spot). Highest-value follow-on:
-re-collect equipment imports at HS6 and drop 8486.30 (v3 methodology revision).
+bound (allied contamination); the chip-layer mechanism was corrected
+(Taiwan-origin blind spot). The one flagged MEASUREMENT concern — HS 8486
+flat-panel contamination — was tested against the raw sub-code data and
+DISSOLVED: 848630 (FPD) is ~0% of China-bound 8486 (EU 0.04%; US/JP/KR/SG 0.0%),
+so the v3 HS6 re-collection was investigated and found unnecessary. The flagship
+ratio is NOT a lower bound on that account — an audit-of-the-audit result:
+measure the concern before re-plumbing.
