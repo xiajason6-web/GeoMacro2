@@ -266,16 +266,43 @@ unrestricted chips + cycle). Fixes shipped: clean-control DiD variant
 (Korea+Singapore, −71.6% vs −78.1% full — robust); chip narrative rewritten;
 "flat demand" softened; methodology limits table strengthened.
 
-## NEXT CANDIDATES (pick with Jason)
-1. **v3 data task (highest value): re-collect equipment imports at HS6, exclude
-   8486.30 (flat-panel).** Removes the denominator contamination → truer (higher)
-   flagship ratio. This changes the flagship number, so it's a METHODOLOGY
-   revision needing Jason's OK — do it as its own validated pass, not a ride-along.
-2. Isolate the controlled GPU subset (product-level data) + add Taiwan chip
-   origin — would make the chip V a clean causal estimate on the right series.
-3. Write the second essay off the two-layer story (equipment durable vs chip
-   leaky) — draft in review/, human-edited, NOT auto-published (trade_note gate).
-4. If NBS ever un-blocks (or via manual PDF ingest): real chip self-sufficiency
-   ratio + its own DiD, demand-adjusted.
+## EQUITY-RESEARCH BUILDOUT (goal: better than Eurasia, on par with BCA)
+Benchmarked against Jason's Iran escalation model (P vs Q + calls ledger). Built
+this session:
+- **Research note restructure** — streamlit_app.py is now ONE single-column
+  equity-research note (thesis → summary → evidence → worldview → risks →
+  exposed entities → edge → catalysts → track record → disclosures), not a
+  multi-panel dashboard. Exhibits numbered, source lines, disclosures block.
+- **Public calls ledger** (`calls/ledger.json`, `analysis/calls.py`) — the
+  credibility layer. Append-only, git-timestamped, 5 seed calls, auto-graded vs
+  the repo's own exports, Brier-scored. Mirrors the Iran ledger. JSON not YAML
+  (no new dep). Wired into nightly; note §9.
+- **Probabilistic scenarios** (`config/scenarios.json`, `analysis/scenarios.py`)
+  — Base grind 55% / Accelerate 25% / Stall 20%, each with confirming+falsifying
+  triggers and machine-checkable `consistent_if` conditions → SELF-MONITORS
+  (currently flags Base, 3/3). Beats Eurasia's qualitative scenarios. Note §5b.
+- **Alpha layer / P vs Q** (`analysis/vendor_alpha.py`) — THE piece that makes
+  it equity research. Realized foreign-vendor China erosion vs DiD-identified
+  structural substitution; classifies AMAT/LRCX = structural (the alpha), KLA =
+  control-denial (not clean), ASML = normalization. Q is a STATED assumption
+  (market prices erosion as cyclical; consensus unobservable on free data).
+  Cycle-neutral expression; modest confidence at this n. Note §7b.
 
-## Test suite: 99 passing. Run before committing anything.
+## STILL NEEDED for full ER readiness (pick with Jason)
+1. **Backtest + point-in-time vintage discipline** — Iran keys partitions by
+   pull-date so the backtest can't peek. We have git-timestamped nightly commits
+   (a proxy) but no harness. Needed before any signal earns trust; also hardens
+   the calls-ledger grading. Could reconstruct point-in-time from git history of
+   data/exports.
+2. **v3 data task: re-collect equipment imports at HS6, exclude 8486.30
+   (flat-panel).** Removes denominator contamination → truer (higher) flagship
+   ratio. Changes the flagship number → METHODOLOGY revision needing Jason's OK;
+   its own validated pass.
+3. **Standalone written flagship** (the second essay off the two-layer story) —
+   draft in review/, human-edited, NOT auto-published (trade_note gate). This is
+   what actually circulates to the ~30 narrowcast targets.
+4. Isolate the controlled GPU subset (product-level data) + Taiwan chip origin —
+   makes the chip V a clean causal estimate on the right series.
+5. Distribution plan (narrowcast, not code).
+
+## Test suite: 110 passing. Run before committing anything.
