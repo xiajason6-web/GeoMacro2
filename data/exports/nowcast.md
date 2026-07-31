@@ -1,6 +1,6 @@
 # NOWCAST — model estimate, NOT measured data
 
-_Produced 2026-07-30; nowcast model nc-1.0.0. Last fully-measured quarter: 2025Q4._
+_Produced 2026-07-31; nowcast model nc-1.0.0. Last fully-measured quarter: 2025Q4._
 
 ## 2026Q1: **24.8%** (band 23.7% – 26.0%)
 
@@ -13,7 +13,7 @@ Drivers:
 - vendor factor 0.85 (panel mean 31.7% in target window vs 37.5% in base; 3 vs 3 signals) -> applied to filled months: -0.56bn
 - revenue: measured/derived for 6 companies (6 with ESTIMATED share-year flags)
 
-## 2026Q2: **31.2%** (band 26.1% – 36.8%)
+## 2026Q2: **31.3%** (band 26.1% – 36.8%)
 
 Drivers:
 - EU27: 2/3 months observed ($0.35bn); 1 filled at carry-forward $0.46bn/mo

@@ -1,12 +1,12 @@
 # Nowcast vs consensus (the consensus gap)
 
-_Model estimate (2026-07-30), not measured data. Consensus baseline = persistence: the last fully-measured quarter (2025Q4 = 22.0%), what the market assumes absent a new print. Surprise = nowcast − baseline._
+_Model estimate (2026-07-31), not measured data. Consensus baseline = persistence: the last fully-measured quarter (2025Q4 = 22.0%), what the market assumes absent a new print. Surprise = nowcast − baseline._
 
 | Quarter | Nowcast | Band | vs persistence | Read |
 |---|---|---|---|---|
 | 2026Q1 | 24.8% | 23.7%–26.0% | +2.7 pp | 2.7 pp above the no-change baseline |
-| 2026Q2 | 31.2% | 26.1%–36.8% | +9.2 pp | 9.2 pp above the no-change baseline |
-| 2026Q3 | 33.0% | 27.1%–39.6% | +10.9 pp | 10.9 pp above the no-change baseline |
+| 2026Q2 | 31.3% | 26.1%–36.8% | +9.3 pp | 9.3 pp above the no-change baseline |
+| 2026Q3 | 33.0% | 27.1%–39.6% | +11.0 pp | 11.0 pp above the no-change baseline |
 
 Catalyst per quarter (why the nowcast diverges from persistence):
 
