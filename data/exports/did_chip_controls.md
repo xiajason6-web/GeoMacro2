@@ -12,7 +12,7 @@ The chip layer's story is a SHAPE, not a single coefficient. US chip
 exports to China fell to **-47%** below the allied path at the
 trough (2023Q2) — the A100/H100 and A800/H800 bans genuinely bit — then
 **recovered to -13%** by the latest quarter. Net cumulative effect
- **+14%**, placebo p = **0.80** (US is NOT the most-suppressed origin), pre-trend 0.53 log pts.
+ **+15%**, placebo p = **0.80** (US is NOT the most-suppressed origin), pre-trend 0.53 log pts.
 
 **Read the failed identification as the finding.** Unlike equipment
 (clean pre-trends, durable −78%), the chip DiD does NOT hold parallel
@@ -32,7 +32,7 @@ can't iterate.
 |---|---|---|---|
 | US × post-Oct-2022 (A100/H100) | -0.464 | -37.1% | 0.084 |
 | US × post-Oct-2023 (A800/H800, incr.) | +0.303 | +35.4% | 0.080 |
-| US × post-Dec-2024 (incr.) | +0.296 | +34.4% | 0.070 |
+| US × post-Dec-2024 (incr.) | +0.302 | +35.3% | 0.070 |
 
 The initial ban is a sharp negative (the bite); the later terms are
 positive (the recovery) — which is why the cumulative nets out and a
