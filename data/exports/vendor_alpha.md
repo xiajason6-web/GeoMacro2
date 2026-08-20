@@ -4,7 +4,7 @@ _Where our identified view differs from what the price implies. Q (consensus / p
 
 | Vendor | Latest China % | Peak | Erosion (pp) | Driver | Exposure | Conf | n |
 |---|---|---|---|---|---|---|---|
-| Applied Materials (AMAT) | 27% (2026Q2) | 35% | +8 | structural substitution | harm | high | 6 |
+| Applied Materials (AMAT) | 28% (2026Q3) | 35% | +7 | structural substitution | harm | high | 7 |
 | Lam Research (LRCX) | 34% (2026Q2) | 43% | +9 | structural substitution | harm | high | 6 |
 | KLA (KLAC) | 24% (2026Q1) | 40% | +15 | control-denial (not clean) | mixed | medium | 5 |
 | ASML (ASML) | 19% (2026Q1) | 19% | +0 | normalization (mixed) | harm | medium | 1 |

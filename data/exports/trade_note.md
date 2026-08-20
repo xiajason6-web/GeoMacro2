@@ -1,4 +1,4 @@
-# Research note: China semiconductor-equipment indigenization (2026-08-19)
+# Research note: China semiconductor-equipment indigenization (2026-08-20)
 
 > Research and educational analysis only — NOT investment advice, NOT a recommendation, and NOT an offer to buy or sell any security. No position sizing, entry/exit levels, or price targets are expressed or implied. Exposure directions describe how an instrument's business is affected by the theme, not what any person should do. Do your own diligence.
 
@@ -37,7 +37,7 @@ _(reviewed; business-exposure direction, not a trade call.)_
 ## Leading indicators to watch (this pipeline updates them)
 
 - ASML China revenue: 19% (as of 2026Q1) — leads Chinese prints by weeks
-- Applied Materials China revenue: 27% (as of 2026-04) — leads Chinese prints by weeks
+- Applied Materials China revenue: 28% (as of 2026-07) — leads Chinese prints by weeks
 - KLA China revenue: 24% (as of 2026-03) — leads Chinese prints by weeks
 - Lam Research China revenue: 34% (as of 2026-06) — leads Chinese prints by weeks
 - Next Chinese quarterly filings (cninfo) — extend the measured numerator

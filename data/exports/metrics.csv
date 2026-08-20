@@ -16,6 +16,7 @@ Lam Research,china_revenue_pct,2026-03,34.18,pct,,0.95,https://www.sec.gov/Archi
 KLA,china_revenue_pct,2026-03,24.3,pct,,0.99,https://www.sec.gov/Archives/edgar/data/319201/000031920126000016/klac-20260331.htm,2026-07-13T15:19:31Z
 Applied Materials,china_revenue_pct,2026-04,27.0,pct,,0.99,https://www.sec.gov/Archives/edgar/data/6951/000162828026037227/amat-20260426.htm,2026-07-13T15:19:17Z
 Lam Research,china_revenue_pct,2026-06,34.0,pct,,0.85,https://www.sec.gov/Archives/edgar/data/707549/000070754926000037/lrcx-20260628.htm,2026-08-07T22:47:53Z
+Applied Materials,china_revenue_pct,2026-07,28.0,pct,,0.99,https://www.sec.gov/Archives/edgar/data/6951/000162828026058235/amat-20260726.htm,2026-08-20T22:36:52Z
 ASML,china_revenue_pct,2026Q1,19.0,pct,,0.95,https://ourbrand.asml.com/asset/d7b914e6-fdd1-4262-b805-d80f3efcb39a/2026_04_15_Presentation-Investor-Relations-Q1-2026.pdf,2026-07-09T16:01:00Z
 Naura,domestic_revenue_share_pct,2023,98.12,pct,,0.75,https://static.cninfo.com.cn/finalpage/2024-04-30/1219908921.PDF,2026-07-11T03:58:48Z
 AMEC,domestic_revenue_share_pct,2023,92.03,pct,,0.95,https://static.cninfo.com.cn/finalpage/2024-03-19/1219329946.PDF,2026-07-12T06:58:02Z
@@ -270,6 +271,7 @@ SMIC,h1_revenue_cny,2025H1,32348049000.0,CNY,CNY,0.95,https://static.cninfo.com.
 Hua Hong,h1_revenue_cny,2025H1,8017656907.53,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2025-08-29/1224609532.PDF,2026-07-09T17:57:54Z
 AMEC,h1_revenue_cny,2026H1,6691287327.67,CNY,CNY,0.99,https://static.cninfo.com.cn/finalpage/2026-08-20/1225482915.PDF,2026-08-19T22:34:10Z
 ACM Shanghai,h1_revenue_cny,2026H1,3718097074.64,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2026-08-08/1225464418.PDF,2026-08-07T22:47:41Z
+Piotech,h1_revenue_cny,2026H1,2912864261.46,CNY,CNY,0.95,https://static.cninfo.com.cn/finalpage/2026-08-21/1225486670.PDF,2026-08-20T22:36:41Z
 China,mirror_exports_de_hs8486_eur,2021-01,44955545.0,EUR,EUR,1.0,https://ec.europa.eu/eurostat/api/comext/dissemination/statistics/1.0/data/DS-045409?format=JSON&freq=M&reporter=DE&partner=CN&product=8486&flow=2&indicators=VALUE_IN_EUROS&sinceTimePeriod=2021-01,2026-08-14T22:31:42Z
 China,mirror_exports_de_hs8486_eur,2021-02,38673242.0,EUR,EUR,1.0,https://ec.europa.eu/eurostat/api/comext/dissemination/statistics/1.0/data/DS-045409?format=JSON&freq=M&reporter=DE&partner=CN&product=8486&flow=2&indicators=VALUE_IN_EUROS&sinceTimePeriod=2021-01,2026-08-14T22:31:42Z
 China,mirror_exports_de_hs8486_eur,2021-03,55597441.0,EUR,EUR,1.0,https://ec.europa.eu/eurostat/api/comext/dissemination/statistics/1.0/data/DS-045409?format=JSON&freq=M&reporter=DE&partner=CN&product=8486&flow=2&indicators=VALUE_IN_EUROS&sinceTimePeriod=2021-01,2026-08-14T22:31:42Z
