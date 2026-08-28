@@ -18,8 +18,8 @@ incremental — each adds to the prior).
 
 | Treatment term | Effect (log pts) | Level effect | HC1 se | cluster se (5 origins) |
 |---|---|---|---|---|
-| US × post-Oct-2022 | -0.360 | -30.2% | 0.095 | 0.216 |
-| US × post-Oct-2023 (incremental) | -0.390 | -32.3% | 0.112 | 0.107 |
+| US × post-Oct-2022 | -0.360 | -30.2% | 0.095 | 0.217 |
+| US × post-Oct-2023 (incremental) | -0.390 | -32.3% | 0.113 | 0.107 |
 | US × post-Dec-2024 (incremental) | -0.789 | -54.6% | 0.146 | 0.067 |
 | **Cumulative, all three waves** | **-1.539** | **-78.5%** | — | — |
 
