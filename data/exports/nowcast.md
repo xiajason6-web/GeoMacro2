@@ -1,6 +1,6 @@
 # NOWCAST — model estimate, NOT measured data
 
-_Produced 2026-09-15; nowcast model nc-1.0.0. Last fully-measured quarter: 2025Q4._
+_Produced 2026-09-16; nowcast model nc-1.0.0. Last fully-measured quarter: 2025Q4._
 
 ## 2026Q1: **24.8%** (band 23.7% – 26.0%)
 
@@ -24,10 +24,10 @@ Drivers:
 - vendor factor 0.76 (panel mean 26.1% in target window vs 34.6% in base; 4 vs 6 signals) -> applied to filled months: -0.89bn
 - revenue: EXTRAPOLATED — same quarter last year x per-company trailing YoY growth (median g=1.35, 6 companies), CNY->USD at 0.148
 
-## 2026Q3: **31.5%** (band 26.0% – 37.6%)
+## 2026Q3: **30.2%** (band 25.2% – 35.5%)
 
 Drivers:
-- EU27: 0/3 months observed ($0.00bn); 3 filled at carry-forward $0.35bn/mo
+- EU27: 1/3 months observed ($0.87bn); 2 filled at carry-forward $0.35bn/mo
 - Japan: 1/3 months observed ($1.28bn); 2 filled at carry-forward $0.79bn/mo
 - Korea: 0/3 months observed ($0.00bn); 3 filled at carry-forward $0.33bn/mo
 - Singapore: 0/3 months observed ($0.00bn); 3 filled at carry-forward $0.88bn/mo
