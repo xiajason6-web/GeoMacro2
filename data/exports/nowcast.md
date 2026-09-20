@@ -1,6 +1,6 @@
 # NOWCAST — model estimate, NOT measured data
 
-_Produced 2026-09-19; nowcast model nc-1.0.0. Last fully-measured quarter: 2025Q4._
+_Produced 2026-09-20; nowcast model nc-1.0.0. Last fully-measured quarter: 2025Q4._
 
 ## 2026Q1: **24.8%** (band 24.1% – 25.5%)
 
