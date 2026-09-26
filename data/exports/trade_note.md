@@ -1,4 +1,4 @@
-# Research note: China semiconductor-equipment indigenization (2026-09-25)
+# Research note: China semiconductor-equipment indigenization (2026-09-26)
 
 > Research and educational analysis only — NOT investment advice, NOT a recommendation, and NOT an offer to buy or sell any security. No position sizing, entry/exit levels, or price targets are expressed or implied. Exposure directions describe how an instrument's business is affected by the theme, not what any person should do. Do your own diligence.
 
@@ -10,7 +10,7 @@ China's domestic share of wafer-fab-equipment spending is structurally rising: m
 
 ## Nowcast vs consensus — the gap you'd trade
 
-Consensus drifts to persistence (2025Q4 = 22.0%) between quarterly prints. The nowcast model puts 2026Q1 at 24.8% (+2.7 pp above that baseline), band 24.1%–25.5%. Catalyst: vendor factor 0.85 (panel mean 31.7% in target window vs 37.5% in base; 3 vs 3 signals) -> applied to filled months: -0.29bn. This is an estimate, not measured data.
+Consensus drifts to persistence (2025Q4 = 22.0%) between quarterly prints. The nowcast model puts 2026Q1 at 23.7% (+1.7 pp above that baseline), band 23.4%–24.1%. Catalyst: vendor factor 0.85 (panel mean 31.7% in target window vs 37.5% in base; 3 vs 3 signals) -> applied to filled months: -0.15bn. This is an estimate, not measured data.
 
 ## Mechanism
 

@@ -32,7 +32,7 @@ can't iterate.
 |---|---|---|---|
 | US × post-Oct-2022 (A100/H100) | -0.464 | -37.1% | 0.084 |
 | US × post-Oct-2023 (A800/H800, incr.) | +0.303 | +35.4% | 0.080 |
-| US × post-Dec-2024 (incr.) | +0.299 | +34.9% | 0.070 |
+| US × post-Dec-2024 (incr.) | +0.298 | +34.7% | 0.070 |
 
 The initial ban is a sharp negative (the bite); the later terms are
 positive (the recovery) — which is why the cumulative nets out and a
