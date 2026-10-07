@@ -18,10 +18,10 @@ incremental — each adds to the prior).
 
 | Treatment term | Effect (log pts) | Level effect | HC1 se | cluster se (5 origins) |
 |---|---|---|---|---|
-| US × post-Oct-2022 | -0.360 | -30.2% | 0.095 | 0.217 |
-| US × post-Oct-2023 (incremental) | -0.390 | -32.3% | 0.113 | 0.107 |
-| US × post-Dec-2024 (incremental) | -0.856 | -57.5% | 0.147 | 0.070 |
-| **Cumulative, all three waves** | **-1.606** | **-79.9%** | — | — |
+| US × post-Oct-2022 | -0.360 | -30.2% | 0.095 | 0.216 |
+| US × post-Oct-2023 (incremental) | -0.390 | -32.3% | 0.112 | 0.107 |
+| US × post-Dec-2024 (incremental) | -0.872 | -58.2% | 0.145 | 0.073 |
+| **Cumulative, all three waves** | **-1.622** | **-80.3%** | — | — |
 
 US equipment exports to China ran **80% below**
 the allied-implied path once all three waves were in force — after
@@ -67,9 +67,9 @@ effect against that placebo distribution.
 
 | Placebo-treated origin | Cumulative effect (log pts) |
 |---|---|
-| US ← actual | -1.606 |
+| US ← actual | -1.622 |
 | Korea | -0.307 |
-| Japan | +0.226 |
+| Japan | +0.265 |
 | Singapore | +0.589 |
 | EU27 | +1.160 |
 
@@ -141,8 +141,8 @@ group and the US counterfactual path move.
 
 | | Full (5 origins) | Drop Singapore (rerouting) | Clean controls (Korea+Singapore) |
 |---|---|---|---|
-| Cumulative US effect (log pts) | -1.606 | -1.557 | -1.397 |
-| Cumulative level effect | -79.9% | -78.9% | -75.3% |
+| Cumulative US effect (log pts) | -1.622 | -1.574 | -1.397 |
+| Cumulative level effect | -80.3% | -79.3% | -75.3% |
 | Suppression at 2025Q4 (pp) | +2.3 | +2.0 | +2.4 |
 
 The headline is robust across variants — every cumulative estimate
