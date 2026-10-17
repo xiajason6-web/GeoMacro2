@@ -20,10 +20,10 @@ incremental — each adds to the prior).
 |---|---|---|---|---|
 | US × post-Oct-2022 | -0.360 | -30.2% | 0.095 | 0.216 |
 | US × post-Oct-2023 (incremental) | -0.390 | -32.3% | 0.112 | 0.107 |
-| US × post-Dec-2024 (incremental) | -0.872 | -58.2% | 0.145 | 0.073 |
-| **Cumulative, all three waves** | **-1.622** | **-80.3%** | — | — |
+| US × post-Dec-2024 (incremental) | -0.886 | -58.8% | 0.145 | 0.065 |
+| **Cumulative, all three waves** | **-1.636** | **-80.5%** | — | — |
 
-US equipment exports to China ran **80% below**
+US equipment exports to China ran **81% below**
 the allied-implied path once all three waves were in force — after
 differencing out the demand cycle that hit every origin equally. With
 the panel now reaching a clean pre-Oct-2022 window, this is the FULL
@@ -67,11 +67,11 @@ effect against that placebo distribution.
 
 | Placebo-treated origin | Cumulative effect (log pts) |
 |---|---|
-| US ← actual | -1.622 |
+| US ← actual | -1.636 |
 | Korea | -0.307 |
-| Japan | +0.265 |
+| Japan | +0.240 |
 | Singapore | +0.589 |
-| EU27 | +1.160 |
+| EU27 | +1.188 |
 
 Permutation p-value: **0.20** (share of origins that fell at
 least as much as the US). With five origins the sharpest attainable p
@@ -141,8 +141,8 @@ group and the US counterfactual path move.
 
 | | Full (5 origins) | Drop Singapore (rerouting) | Clean controls (Korea+Singapore) |
 |---|---|---|---|
-| Cumulative US effect (log pts) | -1.622 | -1.574 | -1.397 |
-| Cumulative level effect | -80.3% | -79.3% | -75.3% |
+| Cumulative US effect (log pts) | -1.636 | -1.590 | -1.397 |
+| Cumulative level effect | -80.5% | -79.6% | -75.3% |
 | Suppression at 2025Q4 (pp) | +2.3 | +2.0 | +2.4 |
 
 The headline is robust across variants — every cumulative estimate
