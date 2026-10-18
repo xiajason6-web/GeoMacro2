@@ -6,19 +6,19 @@ _Vintages are reconstructed from git history — the state of the flagship ratio
 
 | Quarter | Vintages | First print | Latest | Revision (pp) | Coverage change |
 |---|---|---|---|---|---|
-| 2023Q1 | 9 | 16.7% | 14.6% | -2.1 | yes |
-| 2023Q2 | 9 | 17.4% | 13.5% | -4.0 | yes |
-| 2023Q3 | 9 | 11.5% | 11.5% | +0.0 |  |
-| 2023Q4 | 9 | 12.0% | 12.0% | +0.0 |  |
-| 2024Q1 | 9 | 9.8% | 9.8% | +0.0 |  |
-| 2024Q2 | 9 | 11.9% | 11.9% | +0.0 |  |
-| 2024Q3 | 9 | 13.4% | 13.4% | +0.0 |  |
-| 2024Q4 | 9 | 18.6% | 18.6% | +0.0 |  |
-| 2025Q1 | 9 | 17.4% | 17.4% | +0.0 |  |
-| 2025Q2 | 9 | 16.0% | 16.0% | -0.0 |  |
-| 2025Q3 | 9 | 18.7% | 18.7% | +0.0 |  |
-| 2025Q4 | 9 | 22.0% | 22.0% | +0.0 |  |
-| 2026Q1 | 9 | 36.4% | 25.9% | -10.5 | yes |
+| 2023Q1 | 10 | 16.7% | 14.6% | -2.1 | yes |
+| 2023Q2 | 10 | 17.4% | 13.5% | -4.0 | yes |
+| 2023Q3 | 10 | 11.5% | 11.5% | +0.0 |  |
+| 2023Q4 | 10 | 12.0% | 12.0% | +0.0 |  |
+| 2024Q1 | 10 | 9.8% | 9.8% | +0.0 |  |
+| 2024Q2 | 10 | 11.9% | 11.9% | +0.0 |  |
+| 2024Q3 | 10 | 13.4% | 13.4% | +0.0 |  |
+| 2024Q4 | 10 | 18.6% | 18.6% | +0.0 |  |
+| 2025Q1 | 10 | 17.4% | 17.4% | +0.0 |  |
+| 2025Q2 | 10 | 16.0% | 16.0% | -0.0 |  |
+| 2025Q3 | 10 | 18.7% | 18.7% | +0.0 |  |
+| 2025Q4 | 10 | 22.0% | 22.0% | +0.0 |  |
+| 2026Q1 | 10 | 36.4% | 25.9% | -10.5 | yes |
 
 Across 13 quarters seen in >1 vintage, the mean absolute revision from first print to latest is **1.3pp**.
 The largest revisions coincide with COVERAGE changes (e.g. 2026Q1: 36.4% → 25.9%, -10.5pp, when EU27/Korea/Singapore backfilled) — the clearest reason not to over-trust a reduced-coverage print. Full-coverage quarters have been stable so far.
