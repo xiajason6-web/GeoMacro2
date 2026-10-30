@@ -6,7 +6,7 @@ _Where our identified view differs from what the price implies. Q (consensus / p
 |---|---|---|---|---|---|---|---|
 | Applied Materials (AMAT) | 28% (2026Q3) | 35% | +7 | structural substitution | harm | high | 7 |
 | Lam Research (LRCX) | 35% (2026Q3) | 43% | +8 | structural substitution | harm | high | 7 |
-| KLA (KLAC) | 24% (2026Q1) | 40% | +15 | control-denial (not clean) | mixed | medium | 5 |
+| KLA (KLAC) | 34% (2026Q3) | 40% | +5 | control-denial (not clean) | mixed | medium | 6 |
 | ASML (ASML) | 19% (2026Q1) | 19% | +0 | normalization (mixed) | harm | medium | 1 |
 
 ## The divergence, per driver
